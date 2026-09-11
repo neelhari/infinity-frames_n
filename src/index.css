@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-maroon-primary: #6B1518;
+    --color-maroon-dark: #4B0F11;
+    --color-maroon-hover: #831A1D;
+    --color-maroon-light: #F8F0F0;
+    --color-gold-accent: #D3923A;
+    --color-gold-light: #F4E4CE;
+  }
+
+  html, body {
+    scroll-behavior: smooth;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    overflow-x: clip;
+    max-width: 100vw;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #1a1a1a;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, .font-serif-brand {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f8f8f8;
+}
+::-webkit-scrollbar-thumb {
+  background: #6B1518;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4B0F11;
+}
+
+.hide-scroll::-webkit-scrollbar {
+  display: none !important;
+}
+.hide-scroll {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+  display: flex;
+  width: max-content;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Custom utility classes */
+.bg-maroon-primary {
+  background-color: #6B1518;
+}
+.bg-maroon-dark {
+  background-color: #4B0F11;
+}
+.bg-maroon-hover:hover {
+  background-color: #831A1D;
+}
+.bg-maroon-light {
+  background-color: #F8F0F0;
+}
+.text-maroon-primary {
+  color: #6B1518;
+}
+.text-maroon-dark {
+  color: #4B0F11;
+}
+.border-maroon-primary {
+  border-color: #6B1518;
+}
+.border-gold-accent {
+  border-color: #D3923A;
+}
+.text-gold-accent {
+  color: #D3923A;
+}
+.bg-gold-accent {
+  background-color: #D3923A;
+}
+
+/* Animations */
+@keyframes pulse-subtle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s infinite ease-in-out;
+}
+
+@keyframes float-badge {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-float {
+  animation: float-badge 4s infinite ease-in-out;
+}
+
+/* Splash Screen Animations */
+@keyframes draw-monogram {
+  0% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.animate-draw-monogram {
+  opacity: 0;
+  animation: draw-monogram 0.8s ease-out forwards;
+}
+
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  opacity: 0;
+  animation: fade-in-up 0.8s ease-out forwards;
+}
+.delay-500 { animation-delay: 500ms; }
+.delay-1000 { animation-delay: 1000ms; }
+
+@keyframes silk-wave {
+  0% { transform: scale(1) translate(0, 0); opacity: 0; }
+  30% { opacity: 0.15; }
+  100% { transform: scale(1.05) translate(-1%, 1%); opacity: 0; }
+}
+.animate-silk-wave {
+  animation: silk-wave 3s ease-in-out forwards;
+}
+
+@keyframes fade-out-splash {
+  0% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+.animate-fade-out-splash {
+  animation: fade-out-splash 0.6s ease-out forwards;
+}
