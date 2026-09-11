@@ -1,9 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, ShoppingBag, Star, Sparkles, Zap, Wand2 } from 'lucide-react';
+import { Heart, ShoppingBag, Star, Sparkles, Zap } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
-import { BRAND } from '../config/brand';
 
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
@@ -30,7 +29,7 @@ export default function ProductCard({ product }) {
   return (
     <div
       onClick={handleCardClick}
-      className="group bg-white rounded-2xl p-2.5 sm:p-3 border border-gray-200 hover:border-[#D4AF37] shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full cursor-pointer relative"
+      className="group bg-white rounded-2xl p-2.5 sm:p-3 border border-gray-200 hover:border-[#D4AF37] shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full cursor-pointer relative"
     >
       {/* Image Box */}
       <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-gray-100">
@@ -52,7 +51,7 @@ export default function ProductCard({ product }) {
             e.stopPropagation();
             toggleWishlist(product);
           }}
-          className={`absolute top-2 right-2 w-7.5 h-7.5 bg-white/90 backdrop-blur-xs rounded-full flex items-center justify-center z-10 shadow-sm transition-transform hover:scale-110 ${
+          className={`absolute top-2 right-2 w-7.5 h-7.5 bg-white/90 backdrop-blur-xs rounded-full flex items-center justify-center z-10 shadow-xs transition-transform hover:scale-110 ${
             isLiked ? 'text-rose-500' : 'text-gray-500 hover:text-rose-500'
           }`}
           title="Save to Wishlist"
@@ -86,7 +85,7 @@ export default function ProductCard({ product }) {
                 <Star key={i} className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
               ))}
             </div>
-            <span className="text-gray-500 text-[10px] font-semibold">({product.reviewsCount || 24})</span>
+            <span className="text-gray-500 font-semibold">({product.reviewsCount || 24})</span>
           </div>
 
           {/* Price */}
@@ -102,26 +101,26 @@ export default function ProductCard({ product }) {
           </div>
         </div>
 
-        {/* Action Buttons: BUY NOW & ADD TO CART */}
-        <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-gray-100 mt-2">
-          {/* Add to Cart Button */}
+        {/* Equal Sized Action Buttons: ADD & BUY */}
+        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100 mt-2">
+          {/* Add Button */}
           <button
             onClick={handleAddToCart}
-            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 text-[10px] sm:text-[11px] font-bold py-2 rounded-xl flex items-center justify-center gap-1 transition-all cursor-pointer"
-            title="Add to Shopping Cart"
+            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 text-[11px] font-bold py-1.5 px-2 rounded-lg flex items-center justify-center gap-1 transition-all cursor-pointer"
+            title="Add to Cart"
           >
-            <ShoppingBag className="w-3 h-3" />
-            <span className="truncate">Add to Cart</span>
+            <ShoppingBag className="w-3 h-3 text-gray-700" />
+            <span>Add</span>
           </button>
 
-          {/* Buy Now Button */}
+          {/* Buy Button */}
           <button
             onClick={handleBuyNow}
-            className="w-full bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-105 text-gray-950 text-[10px] sm:text-[11px] font-extrabold py-2 rounded-xl flex items-center justify-center gap-1 transition-all shadow-xs cursor-pointer"
-            title="Instant Buy Now"
+            className="w-full bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-105 text-gray-950 text-[11px] font-extrabold py-1.5 px-2 rounded-lg flex items-center justify-center gap-1 transition-all shadow-2xs cursor-pointer"
+            title="Buy Now"
           >
             <Zap className="w-3 h-3 fill-gray-950" />
-            <span className="truncate">Buy Now</span>
+            <span>Buy</span>
           </button>
         </div>
       </div>
