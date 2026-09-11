@@ -1,17 +1,14 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
-  ShoppingBag, ArrowRight, Heart, Star, ChevronRight, Zap, Sparkles, ShieldCheck, Truck, Award
+  ChevronRight, Sparkles, ShieldCheck, Truck, Award
 } from 'lucide-react';
 import { products } from '../data/products';
-import { useCart } from '../context/CartContext';
-import { useWishlist } from '../context/WishlistContext';
+import ProductCard from '../components/ProductCard';
 import { BRAND } from '../config/brand';
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { addToCart } = useCart();
-  const { toggleWishlist, isInWishlist } = useWishlist();
 
   // 8 circular category buttons with photorealistic 3D picture icons - NO gold border
   const quickCategories = [
@@ -26,17 +23,6 @@ export default function HomePage() {
   ];
 
   const featuredProducts = products.filter((p) => p.isFeatured).slice(0, 8);
-
-  const handleBuyNow = (e, p) => {
-    e.stopPropagation();
-    addToCart(p);
-    navigate('/checkout');
-  };
-
-  const handleAddToCart = (e, p) => {
-    e.stopPropagation();
-    addToCart(p);
-  };
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-20 text-gray-900 font-sans">
@@ -124,7 +110,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. FEATURED PRODUCTS SECTION WITH COMPACT, EQUAL ADD & BUY BUTTONS */}
+      {/* 3. FEATURED PRODUCTS SECTION - CLEAN, COMPACT, NO RATINGS, NO BADGES, EQUAL ADD & BUY BUTTONS */}
       <section className="px-4 sm:px-6 lg:px-8 py-4 max-w-7xl mx-auto space-y-3">
         <div className="flex items-center justify-between">
           <div>
@@ -141,106 +127,10 @@ export default function HomePage() {
         </div>
 
         {/* 2-Column Responsive Grid matching Screen 2 & Screen 4 */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
-          {featuredProducts.map((p) => {
-            const inWishlist = isInWishlist(p.id);
-            return (
-              <div
-                key={p.id}
-                onClick={() => navigate(`/product/${p.id}`)}
-                className="bg-white rounded-2xl border border-gray-200 hover:border-[#D4AF37] shadow-xs hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col justify-between group cursor-pointer"
-              >
-                {/* Product Image + Discount Pill + Wishlist Button */}
-                <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden">
-                  <img
-                    src={p.image}
-                    alt={p.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-106"
-                  />
-
-                  {/* 3D Custom Badge */}
-                  <span className="absolute top-2 left-2 z-10 bg-black/75 backdrop-blur-xs text-[#D4AF37] border border-[#D4AF37]/40 text-[9px] font-black px-2 py-0.5 rounded shadow-xs flex items-center gap-1">
-                    <Sparkles className="w-2.5 h-2.5" /> 3D PRINT
-                  </span>
-
-                  {p.discount && (
-                    <span className="absolute bottom-2 right-2 bg-gradient-to-r from-[#B38029] to-[#D4AF37] text-gray-950 font-extrabold text-[9px] px-2 py-0.5 rounded shadow-xs">
-                      {p.discount}
-                    </span>
-                  )}
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleWishlist(p);
-                    }}
-                    className="absolute top-2 right-2 w-7.5 h-7.5 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center shadow-xs text-gray-600 hover:scale-110 transition-transform"
-                    title="Wishlist"
-                  >
-                    <Heart
-                      className={`w-3.5 h-3.5 ${inWishlist ? 'fill-rose-500 text-rose-500' : 'text-gray-600'}`}
-                    />
-                  </button>
-                </div>
-
-                {/* Content */}
-                <div className="p-3 flex flex-col flex-1 justify-between space-y-2">
-                  <div>
-                    <span className="text-[9px] tracking-widest font-extrabold text-[#B38029] uppercase block">
-                      {p.subcategory || p.category || 'CUSTOM 3D GIFT'}
-                    </span>
-
-                    <h4 className="font-serif text-xs sm:text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-[#B38029] transition-colors mt-0.5">
-                      {p.name}
-                    </h4>
-
-                    {/* Ratings */}
-                    <div className="flex items-center gap-1 mt-1 text-[10px] text-amber-500">
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
-                        ))}
-                      </div>
-                      <span className="text-gray-500 font-semibold">({p.reviewsCount || 24})</span>
-                    </div>
-
-                    {/* Price & Old Price */}
-                    <div className="flex items-baseline gap-1.5 mt-1.5">
-                      <span className="font-serif font-bold text-sm sm:text-base text-gray-950">
-                        ₹{p.price.toLocaleString('en-IN')}
-                      </span>
-                      {p.oldPrice && (
-                        <span className="text-[10px] text-gray-400 line-through">
-                          ₹{p.oldPrice.toLocaleString('en-IN')}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* EQUAL COMPACT BUTTONS: ADD & BUY */}
-                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100 mt-2">
-                    <button
-                      onClick={(e) => handleAddToCart(e, p)}
-                      className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 text-[11px] font-bold py-1.5 px-2 rounded-lg flex items-center justify-center gap-1 transition-all cursor-pointer"
-                      title="Add to Cart"
-                    >
-                      <ShoppingBag className="w-3 h-3 text-gray-700" />
-                      <span>Add</span>
-                    </button>
-
-                    <button
-                      onClick={(e) => handleBuyNow(e, p)}
-                      className="w-full bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-105 text-gray-950 text-[11px] font-extrabold py-1.5 px-2 rounded-lg flex items-center justify-center gap-1 transition-all shadow-2xs cursor-pointer"
-                      title="Buy Now"
-                    >
-                      <Zap className="w-3 h-3 fill-gray-950" />
-                      <span>Buy</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
+          {featuredProducts.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
         </div>
       </section>
 
