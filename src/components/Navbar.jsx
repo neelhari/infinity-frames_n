@@ -1,10 +1,8 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, ShoppingBag, Heart, User, ArrowLeft } from 'lucide-react';
-import { useCart } from '../context/CartContext';
+import { Search, Heart } from 'lucide-react';
 import { useWishlist } from '../context/WishlistContext';
 import { useUI } from '../context/UIContext';
-import { useAuth } from '../context/AuthContext';
 import { BRAND } from '../config/brand';
 
 const navLinks = [
@@ -19,10 +17,8 @@ const navLinks = [
 ];
 
 export default function Navbar() {
-  const { totalItemsCount, setIsCartOpen } = useCart();
   const { wishlistCount } = useWishlist();
   const { setIsSearchOpen } = useUI();
-  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -31,32 +27,32 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-xs border-b border-gray-100 font-sans">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-2xs border-b border-gray-100 font-sans">
       <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-2 sm:py-2.5">
         <div className="flex items-center justify-between gap-3">
           
-          {/* Srivaikunta-style Brand: Logo First, Company Name beside it */}
+          {/* Brand: Isolated Infinity Symbol FIRST, then Company Name BESIDE IT */}
           <div
             onClick={() => goTo('/')}
-            className="cursor-pointer flex items-center gap-2.5 sm:gap-3 group select-none py-0.5 shrink-0"
+            className="cursor-pointer flex items-center gap-2 sm:gap-2.5 group select-none py-0.5 shrink-0"
+            title="Infinity Frames_N Home"
           >
-            {/* Logo Emblem - Clearly visible */}
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden shrink-0 bg-amber-50/50 flex items-center justify-center">
+            {/* 1. Highlighted Infinity Symbol ONLY */}
+            <div className="h-8 sm:h-9 md:h-10 flex items-center justify-center shrink-0">
               <img
-                src="/logo (4).png"
-                alt={BRAND.name}
-                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                src="/logo-symbol.png"
+                alt="Infinity Symbol"
+                className="h-full w-auto object-contain group-hover:scale-105 transition-transform duration-300"
               />
             </div>
 
-            {/* Company Name & Tagline beside the logo */}
+            {/* 2. Company Name from Logo Image beside the Symbol */}
             <div className="flex flex-col justify-center">
-              <span className="font-serif font-black text-[13px] sm:text-[15px] md:text-base tracking-[0.08em] text-gray-900 uppercase leading-none">
-                INFINITY FRAMES_N
-              </span>
-              <span className="text-[8px] sm:text-[9px] font-extrabold tracking-[0.15em] text-[#B38029] uppercase mt-1 leading-none">
-                CUSTOMIZED 3D GIFTS
-              </span>
+              <img
+                src="/logo-text.png"
+                alt={BRAND.name}
+                className="h-4.5 sm:h-5 md:h-6 w-auto object-contain shrink-0"
+              />
             </div>
           </div>
 
@@ -77,12 +73,12 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Srivaikunta-style Right Action Icons: Search, Wishlist, User, Cart */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5">
+          {/* Header Action Icons: ONLY SEARCH AND WISHLIST ICONS */}
+          <div className="flex items-center gap-1 sm:gap-2">
             {/* Search Icon */}
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="p-1.5 sm:p-2 text-gray-700 hover:text-[#B38029] transition-colors rounded-full hover:bg-gray-100 cursor-pointer"
+              className="p-2 text-gray-700 hover:text-[#B38029] transition-colors rounded-full hover:bg-gray-100 cursor-pointer"
               title="Search products"
             >
               <Search className="w-5 h-5" />
@@ -91,40 +87,13 @@ export default function Navbar() {
             {/* Wishlist Icon */}
             <button
               onClick={() => goTo('/wishlist')}
-              className="relative p-1.5 sm:p-2 text-gray-700 hover:text-[#B38029] transition-colors rounded-full hover:bg-gray-100 cursor-pointer"
+              className="relative p-2 text-gray-700 hover:text-[#B38029] transition-colors rounded-full hover:bg-gray-100 cursor-pointer"
               title="Wishlist"
             >
               <Heart className="w-5 h-5" />
               {wishlistCount > 0 && (
-                <span className="absolute top-0.5 right-0.5 bg-[#C89B3C] text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+                <span className="absolute top-1 right-1 bg-[#C89B3C] text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
                   {wishlistCount}
-                </span>
-              )}
-            </button>
-
-            {/* User Profile Icon (just like srivaikunta.com) */}
-            <button
-              onClick={() => goTo('/account')}
-              className={`p-1.5 sm:p-2 transition-colors rounded-full hover:bg-gray-100 cursor-pointer ${
-                location.pathname === '/account'
-                  ? 'text-[#B38029] bg-amber-50'
-                  : 'text-gray-700 hover:text-[#B38029]'
-              }`}
-              title="My Account"
-            >
-              <User className="w-5 h-5" />
-            </button>
-
-            {/* Shopping Cart Icon with Badge */}
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="relative p-1.5 sm:p-2 text-gray-700 hover:text-[#B38029] transition-colors rounded-full hover:bg-gray-100 cursor-pointer"
-              title="Shopping Cart"
-            >
-              <ShoppingBag className="w-5 h-5" />
-              {totalItemsCount > 0 && (
-                <span className="absolute top-0.5 right-0.5 bg-[#C89B3C] text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
-                  {totalItemsCount}
                 </span>
               )}
             </button>
