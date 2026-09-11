@@ -1,18 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Phone, Mail, MessageCircle, Heart, ArrowUp } from 'lucide-react';
-import { InstagramIcon, FacebookIcon } from './BrandIcons';
+import { Phone, Mail, MessageCircle, Heart, ArrowUp, MapPin } from 'lucide-react';
+import { InstagramIcon } from './BrandIcons';
 import { BRAND, waLink } from '../config/brand';
 
 const quickLinks = [
   { label: 'Home', path: '/' },
   { label: 'Categories', path: '/categories' },
-  { label: 'Products', path: '/shop' },
+  { label: 'All Products', path: '/shop' },
+  { label: 'Photo Frames', path: '/shop?category=photo-frames' },
+  { label: '3D Moon Lamps', path: '/shop?category=moon-lamps' },
+  { label: 'Lithophane Products', path: '/shop?category=lithophane-products' },
+  { label: 'Keychains', path: '/shop?category=keychains' },
   { label: 'My Account & Orders', path: '/account' },
-  { label: 'Shopping Cart', path: '/cart' },
-  { label: 'My Wishlist', path: '/wishlist' },
-  { label: 'FAQs & Help', path: '/faqs' },
-  { label: 'Our Story', path: '/our-story' },
   { label: 'Contact Us', path: '/contact' },
 ];
 
@@ -36,129 +36,166 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-[#360B0C] text-gray-200 border-t-4 border-[#D3923A] font-sans relative mb-14 xl:mb-0">
+    <footer className="bg-[#14110E] text-gray-300 border-t-2 border-[#C89B3C]/40 font-sans relative mb-14 xl:mb-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Column 1: Brand Info */}
           <div className="space-y-4">
-            {/* Header style Logo */}
             <div
               onClick={() => handleNav('/')}
-              className="flex items-center gap-3 cursor-pointer group"
+              className="flex items-center gap-3 cursor-pointer group select-none"
             >
-              <div className="h-12 w-12 rounded-full bg-[#FAF5EE] ring-2 ring-[#D3923A]/60 shadow-md flex items-center justify-center shrink-0 overflow-hidden group-hover:scale-105 transition-transform p-0.5">
-                <img src="/logo-icon.png" alt={BRAND.name} className="h-full w-full object-contain" />
+              {/* Golden Infinity Heart Emblem */}
+              <div className="w-10 h-10 relative flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 200 120" className="w-full h-full drop-shadow-xs">
+                  <defs>
+                    <linearGradient id="goldInfinityFoot" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#E5C068" />
+                      <stop offset="50%" stopColor="#C89B3C" />
+                      <stop offset="100%" stopColor="#9E7422" />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d="M100,60 C80,30 40,20 20,45 C-5,70 15,105 55,100 C85,95 95,70 100,60 C105,70 115,95 145,100 C185,105 205,70 180,45 C160,20 120,30 100,60 Z"
+                    fill="none"
+                    stroke="url(#goldInfinityFoot)"
+                    strokeWidth="14"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </div>
+
               <div>
-                <div className="font-serif font-bold text-xl sm:text-2xl text-white tracking-wide group-hover:text-[#D3923A] transition-colors">
+                <h3 className="font-serif text-lg font-bold text-[#E5C068] tracking-widest uppercase leading-none">
                   {BRAND.name}
-                </div>
-                <div className="text-[10px] uppercase tracking-[0.18em] text-[#D3923A] font-semibold">
+                </h3>
+                <p className="text-[10px] text-gray-400 font-medium tracking-wide mt-0.5">
                   {BRAND.tagline}
-                </div>
+                </p>
               </div>
             </div>
-            <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-              Bringing you timeless sarees, womenswear, and fine fabrics crafted with tradition, quality, and affordability. Owned with pride by <span className="text-[#D3923A] font-semibold">{BRAND.ownerFullName}</span>.
+
+            <p className="text-xs text-gray-400 leading-relaxed">
+              Specializing in 3D-printed personalized gifts, photo frames, lithophanes, moon lamps, devotional lamps, and customized tokens.
             </p>
+
             <div className="flex items-center gap-3 pt-2">
-              <a href="https://instagram.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#4B0F11] flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#6B1518] transition-colors">
-                <InstagramIcon className="w-4 h-4" />
-              </a>
-              <a href="https://facebook.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#4B0F11] flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#6B1518] transition-colors">
-                <FacebookIcon className="w-4 h-4" />
-              </a>
-              <a href={waLink(`Hello ${BRAND.name}, I have an inquiry.`)} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#4B0F11] flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#25D366] transition-colors">
+              <a
+                href={waLink(`Hello ${BRAND.name}, I would like to order a custom gift.`)}
+                target="_blank"
+                rel="noreferrer"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#25D366] hover:text-white text-gray-300 flex items-center justify-center transition-colors"
+                title="WhatsApp"
+              >
                 <MessageCircle className="w-4 h-4" />
+              </a>
+              <a
+                href={`tel:${BRAND.phone}`}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#C89B3C] hover:text-[#1A1A1A] text-gray-300 flex items-center justify-center transition-colors"
+                title="Phone Support"
+              >
+                <Phone className="w-4 h-4" />
+              </a>
+              <a
+                href={`mailto:${BRAND.email}`}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#C89B3C] hover:text-[#1A1A1A] text-gray-300 flex items-center justify-center transition-colors"
+                title="Email Us"
+              >
+                <Mail className="w-4 h-4" />
               </a>
             </div>
           </div>
 
           {/* Column 2: Quick Links */}
           <div>
-            <h4 className="font-serif text-lg font-semibold text-white tracking-wider mb-4 border-b border-[#6B1518] pb-2 inline-block">
-              QUICK LINKS
+            <h4 className="font-serif text-sm font-bold text-white uppercase tracking-wider mb-4 border-b border-white/10 pb-2">
+              Quick Links
             </h4>
-            <ul className="space-y-2 text-xs sm:text-sm">
-              {quickLinks.map((item) => (
-                <li key={item.path}>
+            <ul className="space-y-2 text-xs">
+              {quickLinks.slice(0, 6).map((link) => (
+                <li key={link.path}>
                   <button
-                    onClick={() => handleNav(item.path)}
-                    className="text-gray-300 hover:text-[#D3923A] transition-colors flex items-center gap-1.5"
+                    onClick={() => handleNav(link.path)}
+                    className="text-gray-400 hover:text-[#E5C068] transition-colors cursor-pointer"
                   >
-                    <span className="text-[#D3923A]">›</span> {item.label}
+                    {link.label}
                   </button>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Column 3: Customer Policies */}
+          {/* Column 3: Categories & Custom Gifts */}
           <div>
-            <h4 className="font-serif text-lg font-semibold text-white tracking-wider mb-4 border-b border-[#6B1518] pb-2 inline-block">
-              POLICIES & LEGAL
+            <h4 className="font-serif text-sm font-bold text-white uppercase tracking-wider mb-4 border-b border-white/10 pb-2">
+              Popular Collections
             </h4>
-            <ul className="space-y-2 text-xs sm:text-sm">
-              {policyLinks.map((policy) => (
-                <li key={policy.path}>
-                  <button
-                    onClick={() => handleNav(policy.path)}
-                    className="text-gray-300 hover:text-[#D3923A] transition-colors flex items-center gap-1.5"
-                  >
-                    <span className="text-[#D3923A]">›</span> {policy.label}
-                  </button>
-                </li>
-              ))}
+            <ul className="space-y-2 text-xs">
+              <li>
+                <button onClick={() => handleNav('/shop?category=photo-frames')} className="text-gray-400 hover:text-[#E5C068] transition-colors cursor-pointer">
+                  Personalized Photo Frames
+                </button>
+              </li>
+              <li>
+                <button onClick={() => handleNav('/shop?category=moon-lamps')} className="text-gray-400 hover:text-[#E5C068] transition-colors cursor-pointer">
+                  3D Moon Lamps (10cm, 12cm, 15cm)
+                </button>
+              </li>
+              <li>
+                <button onClick={() => handleNav('/shop?category=lithophane-products')} className="text-gray-400 hover:text-[#E5C068] transition-colors cursor-pointer">
+                  Light-Revealing Lithophanes
+                </button>
+              </li>
+              <li>
+                <button onClick={() => handleNav('/shop?category=devotional-lamps')} className="text-gray-400 hover:text-[#E5C068] transition-colors cursor-pointer">
+                  Devotional Mandir Lamps
+                </button>
+              </li>
+              <li>
+                <button onClick={() => handleNav('/shop?category=keychains')} className="text-gray-400 hover:text-[#E5C068] transition-colors cursor-pointer">
+                  Custom Couple Keychains
+                </button>
+              </li>
             </ul>
           </div>
 
-          {/* Column 4: Contact Info */}
-          <div>
-            <h4 className="font-serif text-lg font-semibold text-white tracking-wider mb-4 border-b border-[#6B1518] pb-2 inline-block">
-              CONTACT US
+          {/* Column 4: Contact & Workshop Location */}
+          <div className="space-y-3">
+            <h4 className="font-serif text-sm font-bold text-white uppercase tracking-wider mb-4 border-b border-white/10 pb-2">
+              Workshop & Store
             </h4>
-            <div className="space-y-3 text-xs sm:text-sm text-gray-300">
-              <p className="flex items-start gap-2.5">
-                <Phone className="w-4 h-4 text-[#D3923A] shrink-0 mt-0.5" />
-                <a href={`tel:${BRAND.phone}`} className="hover:text-white transition-colors">
+            <div className="text-xs text-gray-400 space-y-2">
+              <p className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 text-[#C89B3C] shrink-0 mt-0.5" />
+                <span>{BRAND.address.full}</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-[#C89B3C] shrink-0" />
+                <a href={`tel:${BRAND.phone}`} className="hover:text-white">
                   +91 {BRAND.phone}
                 </a>
               </p>
-              <p className="flex items-start gap-2.5">
-                <MessageCircle className="w-4 h-4 text-[#25D366] shrink-0 mt-0.5" />
-                <a href={waLink(`Hello ${BRAND.name}, I have an inquiry.`)} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">
-                  +91 {BRAND.phone} (WhatsApp)
-                </a>
-              </p>
-              <p className="flex items-start gap-2.5">
-                <Mail className="w-4 h-4 text-[#D3923A] shrink-0 mt-0.5" />
-                <a href={`mailto:${BRAND.email}`} className="hover:text-white transition-colors break-all">
+              <p className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-[#C89B3C] shrink-0" />
+                <a href={`mailto:${BRAND.email}`} className="hover:text-white">
                   {BRAND.email}
                 </a>
               </p>
-              <div className="pt-2 text-xs text-gray-400 border-t border-[#4B0F11] mt-3">
-                <span>Owner: </span>
-                <span className="text-white font-medium">{BRAND.ownerFullName}</span>
-              </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom copyright & scroll to top */}
-        <div className="pt-6 border-t border-[#4B0F11] flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-400">
-          <p>© 2026 {BRAND.name}. All Rights Reserved.</p>
-          <div className="flex items-center gap-1 text-gray-400">
-            <span>Crafted with</span>
-            <Heart className="w-3.5 h-3.5 text-[#D3923A] fill-[#D3923A]" />
-            <span>for timeless style & affordability.</span>
+        {/* Bottom Bar */}
+        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-gray-500">
+          <p>© {new Date().getFullYear()} {BRAND.name}. All Rights Reserved. Crafted with passion for lasting memories.</p>
+          <div className="flex items-center gap-4">
+            {policyLinks.map((p) => (
+              <button key={p.path} onClick={() => handleNav(p.path)} className="hover:text-gray-300 transition-colors cursor-pointer">
+                {p.label}
+              </button>
+            ))}
           </div>
-          <button
-            onClick={scrollToTop}
-            className="w-8 h-8 bg-[#6B1518] hover:bg-[#831A1D] text-white rounded-full flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
-            title="Scroll to top"
-          >
-            <ArrowUp className="w-4 h-4" />
-          </button>
         </div>
       </div>
     </footer>

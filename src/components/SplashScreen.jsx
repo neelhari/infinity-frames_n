@@ -6,16 +6,11 @@ export default function SplashScreen({ onComplete }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Trigger entrance animation immediately
     const loadTimer = setTimeout(() => setIsLoaded(true), 50);
-
-    // Fade out phase after 1.8 seconds
-    const fadeTimer = setTimeout(() => setIsFadingOut(true), 1850);
-
-    // Complete transition after 2.4 seconds
+    const fadeTimer = setTimeout(() => setIsFadingOut(true), 2100);
     const completeTimer = setTimeout(() => {
       if (onComplete) onComplete();
-    }, 2400);
+    }, 2600);
 
     return () => {
       clearTimeout(loadTimer);
@@ -26,36 +21,75 @@ export default function SplashScreen({ onComplete }) {
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] bg-[#FAF5EE] flex flex-col items-center justify-center overflow-hidden transition-opacity duration-700 ease-in-out ${
+      className={`fixed inset-0 z-[9999] bg-[#FFFFFF] flex flex-col items-center justify-between overflow-hidden transition-opacity duration-700 ease-in-out select-none ${
         isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
-      {/* Ambient Luxury Gold Radial Glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(211,146,58,0.12)_0%,transparent_70%)] pointer-events-none" />
+      {/* Top ambient space */}
+      <div className="pt-12 text-xs font-semibold text-gray-400 tracking-wider">
+        <span>9:41</span>
+      </div>
 
-      {/* Main Luxury Artwork Logo Container */}
+      {/* Center Brand Identity */}
       <div
-        className={`relative z-10 flex flex-col items-center justify-center px-6 transition-all duration-1000 ease-out transform ${
-          isLoaded ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
+        className={`relative z-10 flex flex-col items-center justify-center px-6 text-center max-w-sm transition-all duration-1000 ease-out transform ${
+          isLoaded ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'
         }`}
       >
-        <div className="w-[88%] sm:w-[480px] max-w-lg overflow-hidden drop-shadow-md transition-transform duration-1000 hover:scale-102">
-          <img
-            src="/brand-splash-logo.jpg"
-            alt={BRAND.name}
-            className="w-full h-auto object-contain mix-blend-multiply"
-          />
+        {/* Golden Infinity Heart Emblem */}
+        <div className="w-40 h-32 relative flex items-center justify-center mb-4">
+          <svg viewBox="0 0 200 120" className="w-full h-full drop-shadow-md">
+            <defs>
+              <linearGradient id="goldInfinity" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#E5C068" />
+                <stop offset="45%" stopColor="#C89B3C" />
+                <stop offset="75%" stopColor="#D4AF37" />
+                <stop offset="100%" stopColor="#9E7422" />
+              </linearGradient>
+            </defs>
+            {/* Elegant double-heart infinity curve */}
+            <path
+              d="M100,60 C80,30 40,20 20,45 C-5,70 15,105 55,100 C85,95 95,70 100,60 C105,70 115,95 145,100 C185,105 205,70 180,45 C160,20 120,30 100,60 Z"
+              fill="none"
+              stroke="url(#goldInfinity)"
+              strokeWidth="10"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </div>
 
-        {/* Shimmering Gold Bottom Divider Line */}
-        <div
-          className={`mt-4 flex items-center justify-center gap-3 w-48 sm:w-64 transition-all duration-1000 delay-300 ${
-            isLoaded ? 'opacity-100 w-48 sm:w-64' : 'opacity-0 w-0'
-          }`}
-        >
-          <span className="h-0.5 flex-1 bg-gradient-to-r from-transparent via-[#D3923A]/70 to-[#D3923A]" />
-          <span className="text-[#D3923A] text-xs font-serif font-bold">🪷</span>
-          <span className="h-0.5 flex-1 bg-gradient-to-l from-transparent via-[#D3923A]/70 to-[#D3923A]" />
+        {/* Brand Title */}
+        <h1 className="font-serif text-2xl font-bold tracking-[0.2em] text-[#C89B3C] mb-2 uppercase">
+          INFINITY FRAMES_N
+        </h1>
+
+        {/* Category subtitle pills */}
+        <p className="text-[11px] font-medium text-gray-500 tracking-wide leading-relaxed mb-6 max-w-xs">
+          Customized Gifts &bull; 3D Prints &bull; Photo Frames<br />
+          Lamps &bull; Keychains &bull; & More
+        </p>
+
+        {/* Signature Quote */}
+        <div className="font-serif italic text-lg text-gray-700 tracking-wide">
+          &ldquo;Turn Your Memories<br />Into Lasting Gifts&rdquo;
+        </div>
+      </div>
+
+      {/* Bottom Luxury Golden Wave Decoration */}
+      <div className="w-full relative overflow-hidden pointer-events-none">
+        <svg viewBox="0 0 400 120" preserveAspectRatio="none" className="w-full h-24 sm:h-32 opacity-85">
+          <defs>
+            <linearGradient id="goldWave" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.4" />
+              <stop offset="50%" stopColor="#C89B3C" stopOpacity="0.7" />
+              <stop offset="100%" stopColor="#9E7422" stopOpacity="0.9" />
+            </linearGradient>
+          </defs>
+          <path d="M0,60 C150,110 250,10 400,70 L400,120 L0,120 Z" fill="url(#goldWave)" />
+        </svg>
+        <div className="absolute bottom-3 inset-x-0 flex justify-center">
+          <div className="w-32 h-1 bg-white/70 rounded-full" />
         </div>
       </div>
     </div>
