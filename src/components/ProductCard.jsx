@@ -1,16 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, ShoppingBag, Star, Sparkles, Wand2 } from 'lucide-react';
+import { Heart, ShoppingBag, Star, Sparkles, Zap, Wand2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
-import { useAuth } from '../context/AuthContext';
 import { BRAND } from '../config/brand';
 
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
-  const { isAuthenticated, openLoginModal } = useAuth();
 
   const isLiked = isInWishlist(product.id);
 
@@ -19,14 +17,19 @@ export default function ProductCard({ product }) {
     addToCart(product);
   };
 
-  const handleCustomize = (e) => {
+  const handleBuyNow = (e) => {
     e.stopPropagation();
+    addToCart(product);
+    navigate('/checkout');
+  };
+
+  const handleCardClick = () => {
     navigate(`/product/${product.id}`);
   };
 
   return (
     <div
-      onClick={() => navigate(`/product/${product.id}`)}
+      onClick={handleCardClick}
       className="group bg-white rounded-2xl p-2.5 sm:p-3 border border-gray-200 hover:border-[#D4AF37] shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full cursor-pointer relative"
     >
       {/* Image Box */}
@@ -39,7 +42,7 @@ export default function ProductCard({ product }) {
         />
 
         {/* 3D Custom Badge */}
-        <span className="absolute top-2 left-2 z-10 bg-black/70 backdrop-blur-xs text-[#D4AF37] border border-[#D4AF37]/30 text-[9px] font-black px-2 py-0.5 rounded shadow-xs flex items-center gap-1">
+        <span className="absolute top-2 left-2 z-10 bg-black/75 backdrop-blur-xs text-[#D4AF37] border border-[#D4AF37]/40 text-[9px] font-black px-2 py-0.5 rounded shadow-xs flex items-center gap-1">
           <Sparkles className="w-2.5 h-2.5" /> 3D PRINT
         </span>
 
@@ -85,27 +88,40 @@ export default function ProductCard({ product }) {
             </div>
             <span className="text-gray-500 text-[10px] font-semibold">({product.reviewsCount || 24})</span>
           </div>
-        </div>
 
-        {/* Price & Action Button */}
-        <div className="flex items-center justify-between pt-2 border-t border-gray-100 mt-1.5">
-          <div>
-            <span className="font-serif font-bold text-sm text-gray-950">
+          {/* Price */}
+          <div className="flex items-baseline gap-1.5 mt-1">
+            <span className="font-serif font-bold text-sm sm:text-base text-gray-950">
               ₹{(product.price || 999).toLocaleString('en-IN')}
             </span>
             {product.originalPrice && (
-              <span className="text-[10px] text-gray-400 line-through ml-1.5">
+              <span className="text-[10px] text-gray-400 line-through">
                 ₹{product.originalPrice.toLocaleString('en-IN')}
               </span>
             )}
           </div>
+        </div>
 
+        {/* Action Buttons: BUY NOW & ADD TO CART */}
+        <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-gray-100 mt-2">
+          {/* Add to Cart Button */}
           <button
-            onClick={handleCustomize}
-            className="bg-[#1A1A1A] hover:bg-gray-800 text-[#D4AF37] text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 border border-[#D4AF37]/30 transition-all cursor-pointer shadow-xs"
+            onClick={handleAddToCart}
+            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 text-[10px] sm:text-[11px] font-bold py-2 rounded-xl flex items-center justify-center gap-1 transition-all cursor-pointer"
+            title="Add to Shopping Cart"
           >
-            <Wand2 className="w-3 h-3" />
-            <span>Customize</span>
+            <ShoppingBag className="w-3 h-3" />
+            <span className="truncate">Add to Cart</span>
+          </button>
+
+          {/* Buy Now Button */}
+          <button
+            onClick={handleBuyNow}
+            className="w-full bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-105 text-gray-950 text-[10px] sm:text-[11px] font-extrabold py-2 rounded-xl flex items-center justify-center gap-1 transition-all shadow-xs cursor-pointer"
+            title="Instant Buy Now"
+          >
+            <Zap className="w-3 h-3 fill-gray-950" />
+            <span className="truncate">Buy Now</span>
           </button>
         </div>
       </div>

@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, ShoppingBag, Heart, Menu, X, Phone, MessageCircle, User } from 'lucide-react';
+import { Search, ShoppingBag, Heart, Phone } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useUI } from '../context/UIContext';
 import { useAuth } from '../context/AuthContext';
-import { BRAND, waLink } from '../config/brand';
+import { BRAND } from '../config/brand';
 
 const navLinks = [
   { path: '/', label: 'HOME' },
@@ -22,69 +22,32 @@ export default function Navbar() {
   const { totalItemsCount, setIsCartOpen } = useCart();
   const { wishlistCount } = useWishlist();
   const { setIsSearchOpen } = useUI();
-  const { user, isAuthenticated, openLoginModal } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   const goTo = (path) => {
     navigate(path);
-    setMobileMenuOpen(false);
   };
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-xs border-b border-gray-100 font-sans">
-      {/* MAIN HEADER (Screen 2: Menu, Logo in center, Search & Cart on right - NO ANNOUNCEMENT BAR) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
-        <div className="flex items-center justify-between gap-3">
-          {/* Mobile Hamburger Menu button (Left in Screen 2) */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="xl:hidden p-1.5 -ml-1 text-gray-700 hover:text-[#B38029] rounded-lg transition-colors cursor-pointer"
-            aria-label="Toggle Navigation Menu"
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-
-          {/* Infinity Frames N Golden Logo (Screen 2 Header) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5">
+        <div className="flex items-center justify-between gap-4">
+          
+          {/* 1. Exact uploaded Logo as it is - NO CSS, NO 3-line menu button */}
           <div
             onClick={() => goTo('/')}
-            className="cursor-pointer flex items-center gap-2 sm:gap-2.5 group select-none"
+            className="cursor-pointer flex items-center select-none py-1 shrink-0"
           >
-            {/* Golden Infinity Heart Emblem */}
-            <div className="w-7 h-7 sm:w-9 sm:h-9 relative flex items-center justify-center shrink-0">
-              <svg viewBox="0 0 200 120" className="w-full h-full drop-shadow-xs transition-transform duration-300 group-hover:scale-108">
-                <defs>
-                  <linearGradient id="goldInfinityNav" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#E5C068" />
-                    <stop offset="50%" stopColor="#C89B3C" />
-                    <stop offset="100%" stopColor="#9E7422" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M100,60 C80,30 40,20 20,45 C-5,70 15,105 55,100 C85,95 95,70 100,60 C105,70 115,95 145,100 C185,105 205,70 180,45 C160,20 120,30 100,60 Z"
-                  fill="none"
-                  stroke="url(#goldInfinityNav)"
-                  strokeWidth="14"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-
-            {/* Brand Title */}
-            <div className="flex flex-col">
-              <span className="font-serif font-bold text-sm sm:text-base tracking-[0.14em] text-[#C89B3C] uppercase leading-none">
-                INFINITY FRAMES_N
-              </span>
-              <span className="text-[8px] sm:text-[9.5px] text-gray-400 font-medium tracking-wider hidden sm:block uppercase mt-0.5">
-                Customized 3D Gifts
-              </span>
-            </div>
+            <img
+              src="/logo (4).png"
+              alt={BRAND.name}
+              className="h-10 sm:h-12 md:h-14 w-auto object-contain"
+            />
           </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden xl:flex items-center gap-6 text-[12px] font-bold tracking-wider">
+          {/* 2. Desktop Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-6 text-[12px] font-bold tracking-wider">
             {navLinks.map((link) => (
               <button
                 key={link.path}
@@ -100,21 +63,21 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Header Action Icons (Search, Wishlist, Cart - Right in Screen 2) */}
+          {/* 3. Header Action Icons (Search, Wishlist, Cart) */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Search Icon */}
             <button
               onClick={() => setIsSearchOpen(true)}
               className="p-2 text-gray-700 hover:text-[#B38029] transition-colors rounded-full hover:bg-amber-50/50 cursor-pointer"
-              title="Search products"
+              title="Search 3D creations"
             >
               <Search className="w-5 h-5" />
             </button>
 
-            {/* Wishlist Icon (Desktop) */}
+            {/* Wishlist Icon */}
             <button
               onClick={() => goTo('/wishlist')}
-              className="hidden sm:flex relative p-2 text-gray-700 hover:text-[#B38029] transition-colors rounded-full hover:bg-amber-50/50 cursor-pointer"
+              className="relative p-2 text-gray-700 hover:text-[#B38029] transition-colors rounded-full hover:bg-amber-50/50 cursor-pointer"
               title="Wishlist"
             >
               <Heart className="w-5 h-5" />
@@ -125,7 +88,7 @@ export default function Navbar() {
               )}
             </button>
 
-            {/* Shopping Cart Icon with Badge (Screen 2) */}
+            {/* Shopping Cart Icon with Badge */}
             <button
               onClick={() => setIsCartOpen(true)}
               className="relative p-2 text-gray-700 hover:text-[#B38029] transition-colors rounded-full hover:bg-amber-50/50 cursor-pointer"
@@ -141,27 +104,6 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-
-      {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div className="xl:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-2 shadow-lg animate-fadeIn">
-          {navLinks.map((link) => (
-            <button
-              key={link.path}
-              onClick={() => goTo(link.path)}
-              className="block w-full text-left py-2 px-3 text-xs font-bold text-gray-700 hover:text-[#B38029] hover:bg-amber-50/50 rounded-xl transition-colors uppercase cursor-pointer"
-            >
-              {link.label}
-            </button>
-          ))}
-          <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 px-3">
-            <span>Customer Support:</span>
-            <a href={`tel:${BRAND.phone}`} className="font-bold text-[#B38029]">
-              +91 {BRAND.phone}
-            </a>
-          </div>
-        </div>
-      )}
     </header>
   );
 }
