@@ -1,194 +1,188 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronRight, ArrowLeft, Sparkles, ArrowUpRight, Search } from 'lucide-react';
-import { BRAND } from '../config/brand';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Search, X, Sparkles, SlidersHorizontal } from 'lucide-react';
+import ProductCard from '../components/ProductCard';
+import { products } from '../data/products';
 
-const categoriesList = [
-  {
-    id: 'customized-gifts',
-    name: 'Customized Gifts',
-    tagline: 'Turn Your Memories Into Lasting 3D Treasures',
-    description: 'Personalized engraved frames, custom anniversary keepsakes, and bespoke 3D tokens.',
-    image: '/categories/cat_gift_box.jpg',
-    itemCount: '12 Products',
-    highlights: ['Anniversary Specials', 'Couple Gifts', 'Custom Names']
-  },
-  {
-    id: 'moon-lamps',
-    name: '3D Moon Lamps',
-    tagline: 'Personalized Glowing Lunar Touch Lamps',
-    description: 'Ultra high-definition spherical 3D moon lamps with realistic lunar craters and touch dimming.',
-    image: '/categories/cat_moon_lamp.jpg',
-    itemCount: '8 Products',
-    highlights: ['15cm Diameter', '16 Color RGB', 'Wooden Stand']
-  },
-  {
-    id: 'photo-frames',
-    name: 'Photo Frames',
-    tagline: 'Illuminated LED & Handcrafted 3D Frames',
-    description: 'Preserve cherished portraits with optical backlighting and precision laser edges.',
-    image: '/categories/cat_photo_frame.jpg',
-    itemCount: '10 Products',
-    highlights: ['Warm White LED', 'Acrylic Crystal', 'Solid Wood']
-  },
-  {
-    id: 'lithophane-products',
-    name: 'Lithophanes',
-    tagline: 'Light-Activated Micro-Relief Photography',
-    description: 'Magic 3D carved portraits that reveal stunning photo contrasts when illuminated.',
-    image: '/categories/cat_lithophane.jpg',
-    itemCount: '6 Products',
-    highlights: ['0.12mm Micro Layers', 'Curved Display', 'Night Light']
-  },
-  {
-    id: 'acrylic-led',
-    name: 'Acrylic LED Lamps',
-    tagline: 'Warm Neon & Laser Engraved Plaques',
-    description: 'Crystal-clear cast acrylic with glowing couple silhouettes and Spotify song codes.',
-    image: '/categories/cat_acrylic_led.jpg',
-    itemCount: '9 Products',
-    highlights: ['Spotify Codes', 'Couple Silhouette', 'USB Powered']
-  },
-  {
-    id: 'devotional-lamps',
-    name: 'Devotional Lamps',
-    tagline: 'Sacred Temple Diyas & Pooja Room Illumination',
-    description: 'Divine 3D deities and sacred lamps casting warm spiritual aura for your mandir.',
-    image: '/categories/cat_devotional.jpg',
-    itemCount: '5 Products',
-    highlights: ['Ganesha & Shiva', 'Brass Tone Finish', 'Continuous Glow']
-  },
-  {
-    id: 'keychains',
-    name: '3D Keychains',
-    tagline: 'Miniature Photo & Name Engraved Charms',
-    description: 'Pocket-sized durable 3D printed lithophane and engraved photo keychains.',
-    image: '/categories/cat_keychain.jpg',
-    itemCount: '14 Products',
-    highlights: ['Photo Litho Ring', 'Metallic Chain', 'Double Sided']
-  },
-  {
-    id: 'more-creations',
-    name: 'Glow in Dark & More',
-    tagline: 'Phosphorescent & Specialized 3D Art',
-    description: 'Unique custom desk toys, glow-in-the-dark lithophanes, and creative bespoke prints.',
-    image: '/categories/cat_more.jpg',
-    itemCount: '7 Products',
-    highlights: ['Glow Pigments', 'Desk Sculptures', 'Custom Gifts']
-  },
+const quickCategories = [
+  { id: 'all', label: 'All Gifts', image: '/categories/cat_more.jpg' },
+  { id: 'customized-gifts', label: 'Customized', image: '/categories/cat_gift_box.jpg' },
+  { id: 'moon-lamps', label: 'Moon Lamps', image: '/categories/cat_moon_lamp.jpg' },
+  { id: 'photo-frames', label: 'Photo Frames', image: '/categories/cat_photo_frame.jpg' },
+  { id: 'lithophane-products', label: 'Lithophanes', image: '/categories/cat_lithophane.jpg' },
+  { id: 'acrylic-led', label: 'Acrylic LED', image: '/categories/cat_acrylic_led.jpg' },
+  { id: 'devotional-lamps', label: 'Devotional', image: '/categories/cat_devotional.jpg' },
+  { id: 'keychains', label: 'Keychains', image: '/categories/cat_keychain.jpg' },
 ];
 
 export default function CategoriesPage() {
-  const navigate = useNavigate();
-  const [selectedId, setSelectedId] = useState('all');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialCategory = searchParams.get('category') || 'all';
 
-  const filteredCategories = selectedId === 'all'
-    ? categoriesList
-    : categoriesList.filter(c => c.id === selectedId);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Sync with URL if query param changes
+  useEffect(() => {
+    const cat = searchParams.get('category');
+    if (cat) {
+      setSelectedCategory(cat);
+    }
+  }, [searchParams]);
+
+  const handleSelectCategory = (catId) => {
+    setSelectedCategory(catId);
+    if (catId === 'all') {
+      searchParams.delete('category');
+      setSearchParams(searchParams);
+    } else {
+      setSearchParams({ category: catId });
+    }
+  };
+
+  // Filter products based on selectedCategory and searchQuery
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      // Category filter
+      let matchesCategory = true;
+      if (selectedCategory !== 'all') {
+        matchesCategory =
+          p.category === selectedCategory ||
+          (p.tags && p.tags.includes(selectedCategory)) ||
+          (selectedCategory === 'customized-gifts' && (p.customizable || p.category === 'photo-frames'));
+      }
+
+      // Search query filter
+      let matchesQuery = true;
+      if (searchQuery.trim() !== '') {
+        const q = searchQuery.toLowerCase();
+        matchesQuery =
+          p.name.toLowerCase().includes(q) ||
+          (p.description && p.description.toLowerCase().includes(q)) ||
+          (p.category && p.category.toLowerCase().includes(q)) ||
+          (p.subcategory && p.subcategory.toLowerCase().includes(q));
+      }
+
+      return matchesCategory && matchesQuery;
+    });
+  }, [selectedCategory, searchQuery]);
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-24 font-sans">
       
-      {/* 1. Top Horizontal Scrolling Category Bar (Zepto/Blinkit Style) */}
-      <div className="bg-white border-b border-gray-100 py-3 px-4 shadow-2xs">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar scroll-smooth pb-1">
-            <button
-              onClick={() => setSelectedId('all')}
-              className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-                selectedId === 'all'
-                  ? 'bg-[#1A1A1A] text-[#D4AF37] shadow-sm'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              ★ All Categories
-            </button>
-
-            {categoriesList.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedId(selectedId === cat.id ? 'all' : cat.id)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 border ${
-                  selectedId === cat.id
-                    ? 'bg-[#FAF5EB] text-[#B38029] border-[#D4AF37] shadow-2xs'
-                    : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <img
-                  src={cat.image}
-                  alt={cat.name}
-                  className="w-5 h-5 rounded-full object-cover"
-                />
-                <span>{cat.name}</span>
-              </button>
-            ))}
+      {/* 1. HORIZONTAL SCROLLING CATEGORY ICONS (Exact same icons & sizes as Homepage) */}
+      <section className="bg-white border-b border-gray-100 py-3 shadow-2xs sticky top-[53px] sm:top-[61px] z-30">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-3 sm:gap-4 overflow-x-auto hide-scroll px-3.5 sm:px-6">
+            {quickCategories.map((cat) => {
+              const isSelected = selectedCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => handleSelectCategory(cat.id)}
+                  className="flex flex-col items-center text-center gap-1.5 shrink-0 group cursor-pointer"
+                >
+                  {/* Avatar Container */}
+                  <div
+                    className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden bg-white transition-all duration-200 p-0.5 ${
+                      isSelected
+                        ? 'ring-2 ring-[#B38029] ring-offset-2 shadow-md scale-105'
+                        : 'shadow-xs group-hover:shadow-md group-hover:scale-105 border border-gray-100'
+                    }`}
+                  >
+                    <img
+                      src={cat.image}
+                      alt={cat.label}
+                      className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-300"
+                    />
+                  </div>
+                  <span
+                    className={`text-[10px] sm:text-[11px] max-w-[70px] truncate leading-tight tracking-tight ${
+                      isSelected
+                        ? 'font-bold text-[#B38029]'
+                        : 'font-semibold text-gray-700 group-hover:text-gray-900'
+                    }`}
+                  >
+                    {cat.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* 3. Fluid Scrolling Categories Feed */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-4">
-        {filteredCategories.map((cat) => (
-          <div
-            key={cat.id}
-            onClick={() => navigate(`/shop?category=${cat.id}`)}
-            className="group bg-white rounded-2xl border border-gray-200 hover:border-[#D4AF37] shadow-xs hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer flex flex-col sm:flex-row"
-          >
-            {/* Left/Top: 3D Picture touching card boundary (Zepto style) */}
-            <div className="w-full sm:w-48 md:w-56 aspect-[16/9] sm:aspect-square overflow-hidden bg-gray-100 shrink-0 relative">
-              <img
-                src={cat.image}
-                alt={cat.name}
-                className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-500"
-              />
-              <span className="absolute top-2.5 left-2.5 bg-black/75 backdrop-blur-xs text-[#D4AF37] text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">
-                {cat.itemCount}
+      {/* 2. SEARCH BAR DIRECTLY BELOW CATEGORY SCROLL */}
+      <section className="max-w-7xl mx-auto px-3.5 sm:px-6 pt-3.5 pb-2">
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search in categories, moon lamps, 3D gifts..."
+            className="w-full pl-10 pr-10 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-[#B38029] focus:ring-2 focus:ring-[#B38029]/20 outline-none text-xs text-gray-900 placeholder:text-gray-400 shadow-2xs transition-all"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-full cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Active Filter Pill & Product Count */}
+        <div className="flex items-center justify-between text-xs text-gray-500 pt-2 px-1">
+          <span>
+            Showing <strong className="text-gray-900">{filteredProducts.length}</strong> items
+            {selectedCategory !== 'all' && (
+              <span className="ml-1 text-[#B38029] font-medium">
+                in "{quickCategories.find((c) => c.id === selectedCategory)?.label || selectedCategory}"
               </span>
-            </div>
+            )}
+          </span>
+          {selectedCategory !== 'all' && (
+            <button
+              onClick={() => handleSelectCategory('all')}
+              className="text-[#B38029] hover:underline font-bold text-[11px] cursor-pointer"
+            >
+              Clear filter
+            </button>
+          )}
+        </div>
+      </section>
 
-            {/* Right/Bottom: Category Details & CTA */}
-            <div className="p-4 sm:p-5 flex flex-col justify-between flex-1 space-y-3">
-              <div className="space-y-1">
-                <div className="flex items-center justify-between gap-2">
-                  <h2 className="font-serif text-base sm:text-lg font-bold text-gray-900 group-hover:text-[#B38029] transition-colors">
-                    {cat.name}
-                  </h2>
-                  <div className="w-7 h-7 rounded-full bg-gray-50 group-hover:bg-[#FAF5EB] group-hover:text-[#B38029] flex items-center justify-center text-gray-400 transition-colors">
-                    <ArrowUpRight className="w-4 h-4" />
-                  </div>
-                </div>
-
-                <p className="text-xs text-[#B38029] font-semibold">
-                  {cat.tagline}
-                </p>
-
-                <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
-                  {cat.description}
-                </p>
-              </div>
-
-              {/* Highlights Chips & Action Button */}
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-gray-100">
-                <div className="flex flex-wrap gap-1.5">
-                  {cat.highlights.map((tag, i) => (
-                    <span
-                      key={i}
-                      className="bg-gray-50 text-gray-600 text-[10px] font-medium px-2 py-0.5 rounded-md"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-[#B38029] group-hover:translate-x-0.5 transition-transform">
-                  <span>Explore Collection</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </span>
-              </div>
-            </div>
+      {/* 3. DIRECTLY THE PRODUCT CARDS (SIDE-BY-SIDE 2-COLUMN GRID ON MOBILE) */}
+      <section className="max-w-7xl mx-auto px-3.5 sm:px-6 py-2">
+        {filteredProducts.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
           </div>
-        ))}
-      </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center my-6 space-y-3 shadow-2xs">
+            <div className="w-12 h-12 rounded-full bg-amber-50 text-[#B38029] mx-auto flex items-center justify-center">
+              <Search className="w-6 h-6" />
+            </div>
+            <h3 className="font-serif font-bold text-gray-900 text-sm">No products found</h3>
+            <p className="text-xs text-gray-500 max-w-sm mx-auto">
+              No matching products for your search. Try resetting your search or selecting a different category.
+            </p>
+            <button
+              onClick={() => {
+                setSelectedCategory('all');
+                setSearchQuery('');
+              }}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gray-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer"
+            >
+              Show All Products
+            </button>
+          </div>
+        )}
+      </section>
 
     </div>
   );
