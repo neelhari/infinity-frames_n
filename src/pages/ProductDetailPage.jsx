@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Heart, Share2, Star, ShieldCheck, Plus, Minus,
-  Camera, Upload, Check, ChevronRight, ShoppingBag, Sparkles, X
+  Camera, Upload, Check, ChevronRight, ShoppingBag, Sparkles, Zap
 } from 'lucide-react';
 import { products } from '../data/products';
 import { useCart } from '../context/CartContext';
@@ -20,15 +20,15 @@ export default function ProductDetailPage() {
     return products.find((p) => p.id === id) || products[0];
   }, [id]);
 
-  // Screen 5 States: Size, Color, Quantity, Gallery Index
+  // Size, Color, Quantity, Gallery Index
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[1] || product.sizes?.[0] || '12 cm');
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || 'Warm White');
   const [quantity, setQuantity] = useState(1);
 
-  // Screen 6 States: Customizer Mode
+  // Customizer Mode States
   const [showCustomizer, setShowCustomizer] = useState(false);
-  const [customName, setCustomName] = useState('Best Dad ❤️');
+  const [customName, setCustomName] = useState('Best Dad Ever');
   const [customPhoto, setCustomPhoto] = useState(null);
   const [customPhotoPreview, setCustomPhotoPreview] = useState('https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop&q=80');
   const [selectedFrameColor, setSelectedFrameColor] = useState('Natural Wood');
@@ -58,38 +58,42 @@ export default function ProductDetailPage() {
 
   const fontStyles = ['Style 1', 'Style 2', 'Style 3'];
 
-  const handleAddToCart = () => {
-    const customizedItem = {
-      ...product,
-      selectedSize,
-      selectedColor,
-      customName: showCustomizer ? customName : null,
-      customPhoto: showCustomizer ? customPhotoPreview : null,
-      selectedFrameColor: showCustomizer ? selectedFrameColor : null,
-      selectedFontStyle: showCustomizer ? selectedFontStyle : null,
-    };
+  const getCustomizedItem = () => ({
+    ...product,
+    selectedSize,
+    selectedColor,
+    customName: showCustomizer ? customName : null,
+    customPhoto: showCustomizer ? customPhotoPreview : null,
+    selectedFrameColor: showCustomizer ? selectedFrameColor : null,
+    selectedFontStyle: showCustomizer ? selectedFontStyle : null,
+  });
 
-    addToCart(customizedItem, quantity);
+  const handleAddToCart = () => {
+    addToCart(getCustomizedItem(), quantity);
     setAddedToast(true);
     setTimeout(() => {
       setAddedToast(false);
-      navigate('/cart');
-    }, 800);
+    }, 2000);
+  };
+
+  const handleBuyNow = () => {
+    addToCart(getCustomizedItem(), quantity);
+    navigate('/checkout');
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] pb-28 font-sans">
-      {/* SCREEN 6: CUSTOMIZER MODE HEADER & SCREEN */}
+    <div className="min-h-screen bg-[#FAF9F6] pb-32 font-sans">
+      {/* CUSTOMIZER MODE */}
       {showCustomizer ? (
         <div className="max-w-xl mx-auto px-4 py-3 animate-fadeIn">
-          {/* Header */}
+          {/* Customizer Header */}
           <div className="sticky top-0 z-30 bg-[#FAF9F6] py-2 flex items-center justify-between border-b border-gray-200 mb-4">
             <button
               onClick={() => setShowCustomizer(false)}
               className="p-1.5 rounded-full hover:bg-gray-200 text-gray-700 cursor-pointer flex items-center gap-1.5 text-xs font-bold"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span>Back</span>
+              <span>Back to Product</span>
             </button>
             <h1 className="font-serif text-base font-bold text-gray-900">
               Customize Your Product
@@ -154,31 +158,25 @@ export default function ProductDetailPage() {
                     : 'text-gray-600'
                 }`}
               >
-                Forever in our hearts
+                Infinity Frames 3D Handcrafted
               </span>
             </div>
 
-            <h2 className="font-serif text-sm font-bold text-gray-800 mt-3">
-              {product.name}
-            </h2>
+            <p className="text-[11px] text-gray-500 mt-3 font-medium">
+              Live Preview: Your uploaded photo and chosen text engraved on the frame.
+            </p>
           </div>
 
-          {/* CUSTOMIZATION OPTIONS (Screen 6) */}
-          <div className="space-y-5 bg-white p-5 rounded-3xl border border-gray-100 shadow-xs text-xs">
-            <h3 className="font-serif text-sm font-bold text-gray-900 border-b border-gray-100 pb-2">
-              Customization Options
-            </h3>
-
-            {/* 1. Name / Text Input */}
+          {/* Form Controls */}
+          <div className="bg-white rounded-3xl p-5 border border-gray-100 shadow-xs space-y-4 text-xs">
+            {/* 1. Custom Text Input */}
             <div>
-              <label className="block font-bold text-gray-800 mb-1">
-                Name / Text <span className="text-gray-400 font-normal">(Optional)</span>
-              </label>
+              <label className="block font-bold text-gray-800 mb-1.5">Custom Text / Engraved Name</label>
               <input
                 type="text"
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
-                placeholder="e.g. Best Dad ❤️ or Anniversary Date"
+                placeholder="e.g. Best Dad Ever or Anniversary Date"
                 className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#B38029] focus:ring-1 focus:ring-[#B38029] outline-none text-xs"
               />
             </div>
@@ -269,57 +267,74 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Add to Cart Submit Button */}
-            <button
-              onClick={handleAddToCart}
-              className="w-full bg-[#B38029] hover:bg-[#8C5E16] text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer text-xs uppercase tracking-wider"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              <span>Add to Cart &bull; ₹{(product.price * quantity).toLocaleString('en-IN')}</span>
-            </button>
+            {/* Symmetrical Dual Action Buttons */}
+            <div className="grid grid-cols-2 gap-2.5 pt-2">
+              <button
+                onClick={handleAddToCart}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold py-3.5 rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer text-xs uppercase tracking-wider"
+              >
+                <ShoppingBag className="w-4 h-4 text-gray-700" />
+                <span>Add</span>
+              </button>
+              <button
+                onClick={handleBuyNow}
+                className="w-full bg-gradient-to-r from-[#D4AF37] to-[#B38029] hover:from-[#C89B3C] hover:to-[#8C5E16] text-white font-extrabold py-3.5 rounded-xl flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer text-xs uppercase tracking-wider"
+              >
+                <Zap className="w-4 h-4 fill-white" />
+                <span>Buy Now</span>
+              </button>
+            </div>
           </div>
         </div>
       ) : (
-        /* SCREEN 5: STANDARD PRODUCT DETAIL VIEW */
+        /* STANDARD PRODUCT DETAIL VIEW */
         <div className="max-w-xl mx-auto">
-          {/* 1. Header (Screen 5: Back, Heart, Share) */}
-          <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+          {/* Main Photo Gallery */}
+          <div className="relative w-full aspect-square bg-gray-100 overflow-hidden">
+            <img
+              src={(product.images && product.images[selectedImage]) || product.image}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
+
+            {/* Floating Back Button on top left */}
             <button
               onClick={() => navigate(-1)}
-              className="p-1.5 rounded-full hover:bg-gray-100 text-gray-700 cursor-pointer"
+              className="absolute top-3 left-3 z-10 w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-gray-800 hover:bg-white transition-all cursor-pointer"
+              title="Go Back"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <div className="flex items-center gap-2">
+
+            {/* Floating Wishlist & Share buttons on top right */}
+            <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
               <button
                 onClick={() => toggleWishlist(product)}
-                className="p-1.5 rounded-full hover:bg-gray-100 text-gray-700 cursor-pointer"
+                className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-gray-800 hover:bg-white transition-all cursor-pointer"
+                title="Wishlist"
               >
                 <Heart
-                  className={`w-5 h-5 ${inWishlist ? 'fill-red-500 text-red-500' : ''}`}
+                  className={`w-4 h-4 ${inWishlist ? 'fill-rose-500 text-rose-500' : 'text-gray-700'}`}
                 />
               </button>
               <button
                 onClick={() => {
                   if (navigator.share) {
-                    navigator.share({ title: product.name, url: window.location.href });
+                    navigator.share({
+                      title: product.name,
+                      text: product.description,
+                      url: window.location.href,
+                    });
                   }
                 }}
-                className="p-1.5 rounded-full hover:bg-gray-100 text-gray-700 cursor-pointer"
+                className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-gray-800 hover:bg-white transition-all cursor-pointer"
+                title="Share"
               >
-                <Share2 className="w-5 h-5" />
+                <Share2 className="w-4 h-4 text-gray-700" />
               </button>
             </div>
-          </div>
 
-          {/* 2. Gallery Carousel */}
-          <div className="relative aspect-square bg-gray-100 overflow-hidden">
-            <img
-              src={product.images?.[selectedImage] || product.image}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
-            {/* Dot indicators */}
+            {/* Dot Indicators */}
             <div className="absolute bottom-3 inset-x-0 flex justify-center gap-1.5">
               {(product.images || [product.image]).map((_, idx) => (
                 <button
@@ -350,7 +365,7 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          {/* 3. Product Info Block (Screen 5) */}
+          {/* Product Info Block */}
           <div className="p-4 space-y-4 bg-white border-b border-gray-100">
             <div>
               <div className="flex items-center justify-between gap-2">
@@ -391,7 +406,7 @@ export default function ProductDetailPage() {
               {product.description}
             </p>
 
-            {/* Size Selector Chips (Screen 5: 10cm, 12cm, 15cm) */}
+            {/* Size Selector */}
             {product.sizes && product.sizes.length > 0 && (
               <div>
                 <label className="block text-xs font-bold text-gray-800 mb-2">Size</label>
@@ -454,34 +469,67 @@ export default function ProductDetailPage() {
                 </button>
               </div>
             </div>
+
+            {/* In-Page Action Buttons: ADD & BUY NOW */}
+            <div className="pt-3 border-t border-gray-100 space-y-2.5">
+              {product.customizable && (
+                <button
+                  onClick={() => setShowCustomizer(true)}
+                  className="w-full bg-amber-50 hover:bg-amber-100 text-[#B38029] border border-amber-300 font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer text-xs"
+                >
+                  <Sparkles className="w-4 h-4 text-[#B38029]" />
+                  <span>Customize Photo & Text</span>
+                </button>
+              )}
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  onClick={handleAddToCart}
+                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer text-xs uppercase tracking-wider active:scale-95"
+                >
+                  <ShoppingBag className="w-4 h-4 text-gray-700" />
+                  <span>Add</span>
+                </button>
+
+                <button
+                  onClick={handleBuyNow}
+                  className="w-full bg-gradient-to-r from-[#D4AF37] to-[#B38029] hover:brightness-105 text-white font-extrabold py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer text-xs uppercase tracking-wider active:scale-95"
+                >
+                  <Zap className="w-4 h-4 fill-white" />
+                  <span>Buy Now</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* FIXED BOTTOM ACTION BAR (Screen 5) */}
-          <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-100 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-            <div className="max-w-xl mx-auto flex items-center gap-3">
+          {/* FIXED BOTTOM ACTION BAR - Always visible on mobile */}
+          <div className="fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-200 px-3.5 py-3 shadow-[0_-4px_25px_rgba(0,0,0,0.1)]">
+            <div className="max-w-xl mx-auto flex items-center gap-2.5">
               <button
                 onClick={() => toggleWishlist(product)}
-                className="p-3 rounded-2xl border border-gray-200 hover:bg-gray-50 flex flex-col items-center justify-center text-[9px] font-bold text-gray-600 transition-colors shrink-0"
+                className="p-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 flex flex-col items-center justify-center text-[9px] font-bold text-gray-600 transition-colors shrink-0 cursor-pointer"
+                title="Save to Wishlist"
               >
                 <Heart
-                  className={`w-5 h-5 ${inWishlist ? 'fill-red-500 text-red-500' : ''}`}
+                  className={`w-5 h-5 ${inWishlist ? 'fill-rose-500 text-rose-500' : 'text-gray-500'}`}
                 />
-                <span>Wishlist</span>
+                <span className="text-[8px] mt-0.5">Wishlist</span>
               </button>
 
-              {/* If customizable, open the Screen 6 Customizer. If standard, add to cart directly */}
               <button
-                onClick={() => {
-                  if (product.customizable) {
-                    setShowCustomizer(true);
-                  } else {
-                    handleAddToCart();
-                  }
-                }}
-                className="flex-1 bg-gradient-to-r from-[#D4AF37] to-[#B38029] hover:from-[#C89B3C] hover:to-[#8C5E16] text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-transform hover:scale-[1.01] active:scale-[0.98] cursor-pointer text-xs uppercase tracking-wider"
+                onClick={handleAddToCart}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer text-xs uppercase tracking-wider active:scale-95"
               >
-                <Sparkles className="w-4 h-4" />
-                <span>{product.customizable ? 'Customize Your Product' : 'Add to Cart'}</span>
+                <ShoppingBag className="w-4 h-4 text-gray-700" />
+                <span>Add</span>
+              </button>
+
+              <button
+                onClick={handleBuyNow}
+                className="flex-1 bg-gradient-to-r from-[#D4AF37] to-[#B38029] hover:brightness-105 text-white font-extrabold py-3 rounded-xl flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer text-xs uppercase tracking-wider active:scale-95"
+              >
+                <Zap className="w-4 h-4 fill-white" />
+                <span>Buy Now</span>
               </button>
             </div>
           </div>
@@ -490,10 +538,10 @@ export default function ProductDetailPage() {
 
       {/* Added Toast */}
       {addedToast && (
-        <div className="fixed bottom-20 inset-x-0 flex justify-center z-50 pointer-events-none animate-fadeIn">
+        <div className="fixed bottom-24 inset-x-0 flex justify-center z-50 pointer-events-none animate-fadeIn">
           <div className="bg-[#1A1A1A] text-white px-5 py-2.5 rounded-full shadow-2xl text-xs font-bold flex items-center gap-2 border border-[#C89B3C]">
             <Check className="w-4 h-4 text-[#C89B3C]" />
-            <span>Added to Cart! Redirecting...</span>
+            <span>Added to Cart!</span>
           </div>
         </div>
       )}

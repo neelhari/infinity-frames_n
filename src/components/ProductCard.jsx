@@ -31,7 +31,7 @@ export default function ProductCard({ product }) {
       onClick={handleCardClick}
       className="group bg-white rounded-2xl border border-gray-200 hover:border-[#D4AF37] shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full cursor-pointer overflow-hidden relative"
     >
-      {/* 1. Zepto-Style Image: Released to Card Boundary (Touches Top, Left, and Right Directly) */}
+      {/* 1. Zepto-Style Image: Released to Card Boundary */}
       <div className="relative w-full aspect-square overflow-hidden bg-gray-100">
         <img
           src={product.image || 'https://images.unsplash.com/photo-1532767153582-b1a0e5145009?w=500'}
@@ -83,7 +83,7 @@ export default function ProductCard({ product }) {
         <div className="grid grid-cols-2 gap-1.5 pt-1.5 border-t border-gray-100">
           <button
             onClick={handleAddToCart}
-            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 text-[11px] font-bold py-1.5 rounded-lg flex items-center justify-center gap-1 transition-all cursor-pointer"
+            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 text-[11px] font-bold py-1.5 rounded-lg flex items-center justify-center gap-1 transition-all cursor-pointer active:scale-95"
             title="Add to Cart"
           >
             <ShoppingBag className="w-3 h-3 text-gray-600" />
@@ -92,10 +92,10 @@ export default function ProductCard({ product }) {
 
           <button
             onClick={handleBuyNow}
-            className="w-full bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-105 text-gray-950 text-[11px] font-extrabold py-1.5 rounded-lg flex items-center justify-center gap-1 transition-all shadow-2xs cursor-pointer"
+            className="w-full bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-105 text-white text-[11px] font-extrabold py-1.5 rounded-lg flex items-center justify-center gap-1 transition-all shadow-2xs cursor-pointer active:scale-95"
             title="Buy Now"
           >
-            <Zap className="w-3 h-3 fill-gray-950" />
+            <Zap className="w-3 h-3 fill-white" />
             <span>Buy</span>
           </button>
         </div>

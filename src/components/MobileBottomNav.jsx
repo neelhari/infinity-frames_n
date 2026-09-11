@@ -8,7 +8,12 @@ export default function MobileBottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  if (location.pathname === '/checkout' || location.pathname === '/order-success') {
+  // Hide on checkout, order success, and product detail pages to avoid covering action buttons
+  if (
+    location.pathname === '/checkout' ||
+    location.pathname === '/order-success' ||
+    location.pathname.startsWith('/product/')
+  ) {
     return null;
   }
 
