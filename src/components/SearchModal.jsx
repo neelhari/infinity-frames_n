@@ -1,96 +1,131 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, X, ShoppingBag } from 'lucide-react';
+import { Search, X, ArrowRight, Sparkles } from 'lucide-react';
 import { useUI } from '../context/UIContext';
 import { useStoreData } from '../context/StoreDataContext';
+import { BRAND } from '../config/brand';
 
 export default function SearchModal() {
-  const navigate = useNavigate();
-  const { isSearchOpen, setIsSearchOpen } = useUI();
+  const { isSearchOpen, closeSearch } = useUI();
   const { products } = useStoreData();
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
 
   if (!isSearchOpen) return null;
 
-  const q = query.trim().toLowerCase();
-  const filtered = q === ''
-    ? []
-    : products.filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        (p.category || '').toLowerCase().includes(q) ||
-        (p.subcategory || '').toLowerCase().includes(q) ||
-        (p.description || '').toLowerCase().includes(q)
-      );
+  const filteredProducts = query.trim()
+    ? products.filter(
+        (p) =>
+          p.name.toLowerCase().includes(query.toLowerCase()) ||
+          p.category?.toLowerCase().includes(query.toLowerCase()) ||
+          p.description?.toLowerCase().includes(query.toLowerCase())
+      )
+    : [];
+
+  const handleSelectProduct = (id) => {
+    closeSearch();
+    navigate(`/product/${id}`);
+  };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto p-4 sm:p-6 md:p-20">
-      {/* Dark Backdrop */}
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4">
+      {/* Backdrop */}
       <div
-        onClick={() => setIsSearchOpen(false)}
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+        onClick={closeSearch}
+        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-fadeIn"
       />
 
-      <div className="relative bg-white w-full max-w-2xl mx-auto rounded-2xl shadow-2xl overflow-hidden z-10 border border-gray-100 animate-slideDown">
-        {/* Search Header */}
-        <div className="p-4 border-b border-gray-100 flex items-center gap-3">
-          <Search className="w-5 h-5 text-[#6B1518]" />
+      {/* Modal Card */}
+      <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden z-10 border border-gray-200 animate-scaleUp">
+        {/* Search Bar */}
+        <div className="p-4 sm:p-5 border-b border-gray-100 flex items-center gap-3">
+          <Search className="w-5 h-5 text-[#D4AF37]" />
           <input
-            type="text"
             autoFocus
-            placeholder="Search sarees, dresses, fabrics..."
+            type="text"
+            placeholder="Search 3D Moon Lamps, Lithophanes, Acrylic LED, Keychains..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 text-sm sm:text-base outline-none text-gray-900 placeholder:text-gray-400"
+            className="flex-1 text-sm sm:text-base font-semibold text-gray-900 placeholder:text-gray-400 focus:outline-hidden"
           />
+          {query && (
+            <button
+              onClick={() => setQuery('')}
+              className="p-1 rounded-full text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
           <button
-            onClick={() => setIsSearchOpen(false)}
-            className="p-1 text-gray-400 hover:text-gray-600 rounded"
+            onClick={closeSearch}
+            className="text-xs font-bold text-gray-500 hover:text-gray-800 px-2 py-1 rounded-lg hover:bg-gray-100"
           >
-            <X className="w-5 h-5" />
+            ESC
           </button>
         </div>
 
-        {/* Results Container */}
-        <div className="max-h-96 overflow-y-auto p-4">
-          {query.trim() === '' ? (
-            <div className="text-center py-8 space-y-2">
-              <p className="text-xs font-semibold uppercase text-gray-400 tracking-wider">Popular Searches</p>
-              <div className="flex flex-wrap justify-center gap-2 pt-2">
-                {['Banarasi Saree', 'Tassar Saree', 'Mulchanderi Dress', 'Jandani Cotton', 'Checks Silk', 'Manipuri Kota'].map((tag) => (
+        {/* Results Area */}
+        <div className="max-h-[60vh] overflow-y-auto p-4 sm:p-5">
+          {!query.trim() ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#B38029] uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <span>Popular 3D Gift Searches</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  '3D Moon Lamp',
+                  'Lithophane Night Light',
+                  'Couple Acrylic LED',
+                  'Personalized Keychain',
+                  'Devotional 3D Frame',
+                  'Spotify LED Plaque',
+                  'Wooden Stand Lamp',
+                  'Rotating 3D Lamp',
+                ].map((tag) => (
                   <button
                     key={tag}
                     onClick={() => setQuery(tag)}
-                    className="bg-gray-100 hover:bg-[#F8F0F0] hover:text-[#6B1518] text-gray-700 text-xs px-3 py-1.5 rounded-full transition-colors"
+                    className="bg-gray-100 hover:bg-[#FAF5EB] hover:text-[#B38029] text-gray-700 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors cursor-pointer border border-transparent hover:border-[#D4AF37]/30"
                   >
                     {tag}
                   </button>
                 ))}
               </div>
             </div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-10 text-gray-500 text-sm">
-              No products found matching "<strong>{query}</strong>". Try searching for "Saree", "Dress", or "Cotton".
+          ) : filteredProducts.length === 0 ? (
+            <div className="text-center py-10 text-gray-500 text-xs sm:text-sm space-y-2">
+              <p>No 3D creations found matching "<strong>{query}</strong>".</p>
+              <p className="text-gray-400 text-xs">Try searching for "Moon Lamp", "Lithophane", or "Acrylic".</p>
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-xs text-gray-400 font-semibold mb-2">Found {filtered.length} products:</p>
-              {filtered.map((product) => (
+              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                Found {filteredProducts.length} Results
+              </div>
+              {filteredProducts.map((product) => (
                 <div
                   key={product.id}
-                  onClick={() => {
-                    setIsSearchOpen(false);
-                    navigate(`/product/${product.id}`);
-                  }}
-                  className="flex items-center gap-3 p-2.5 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-gray-200"
+                  onClick={() => handleSelectProduct(product.id)}
+                  className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-gray-50 cursor-pointer border border-transparent hover:border-[#D4AF37]/30 transition-all group"
                 >
-                  <img src={product.image} alt={product.name} className="w-12 h-14 object-cover rounded-lg" />
-                  <div className="flex-1">
-                    <h5 className="font-serif font-semibold text-sm text-gray-900 line-clamp-1">{product.name}</h5>
-                    <span className="text-[10px] text-[#D3923A] font-bold uppercase tracking-wider block">
-                      {product.subcategory || product.category}
-                    </span>
-                    <span className="text-xs font-bold text-[#6B1518]">₹{product.price.toLocaleString('en-IN')}</span>
+                  <img
+                    src={product.image || 'https://images.unsplash.com/photo-1532767153582-b1a0e5145009?w=200'}
+                    alt={product.name}
+                    className="w-12 h-12 rounded-xl object-cover bg-gray-100 shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-serif font-bold text-xs sm:text-sm text-gray-900 truncate group-hover:text-[#B38029] transition-colors">
+                      {product.name}
+                    </h4>
+                    <span className="text-[10px] text-gray-500">{product.category || '3D Custom Gift'}</span>
                   </div>
+                  <div className="text-right shrink-0">
+                    <span className="text-xs font-bold text-gray-950">
+                      ₹{(product.price || 999).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#B38029] group-hover:translate-x-1 transition-all" />
                 </div>
               ))}
             </div>

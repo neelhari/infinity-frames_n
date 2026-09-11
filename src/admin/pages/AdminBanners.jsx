@@ -125,7 +125,7 @@ export default function AdminBanners() {
 
         <button
           onClick={openCreateModal}
-          className="bg-[#6B1518] hover:bg-[#4B0F11] text-white text-xs font-bold px-5 py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all self-start sm:self-auto cursor-pointer"
+          className="bg-[#1A1A1A] hover:bg-[#0A0A0A] text-white text-xs font-bold px-5 py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all self-start sm:self-auto cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Add New Hero Banner</span>
@@ -176,7 +176,7 @@ export default function AdminBanners() {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => openEditModal(b)}
-                  className="px-3 py-2 rounded-xl text-[#6B1518] hover:bg-[#6B1518]/10 border border-[#6B1518]/20 flex items-center gap-1.5 font-bold text-xs transition-colors cursor-pointer"
+                  className="px-3 py-2 rounded-xl text-[#1A1A1A] hover:bg-[#1A1A1A]/10 border border-[#1A1A1A]/20 flex items-center gap-1.5 font-bold text-xs transition-colors cursor-pointer"
                   title="Edit Banner Details & Image"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
@@ -202,8 +202,8 @@ export default function AdminBanners() {
           <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-4 text-xs max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div className="flex items-center gap-2">
-                {editingBanner ? <Edit3 className="w-5 h-5 text-[#6B1518]" /> : <Plus className="w-5 h-5 text-[#6B1518]" />}
-                <h3 className="font-serif text-lg font-bold text-[#6B1518]">
+                {editingBanner ? <Edit3 className="w-5 h-5 text-[#1A1A1A]" /> : <Plus className="w-5 h-5 text-[#1A1A1A]" />}
+                <h3 className="font-serif text-lg font-bold text-[#1A1A1A]">
                   {editingBanner ? 'Edit Hero Banner' : 'Add New Hero Banner'}
                 </h3>
               </div>
@@ -224,7 +224,7 @@ export default function AdminBanners() {
                   placeholder="e.g. Traditional Banarasi Silk Festival"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:ring-1 focus:ring-[#6B1518] outline-none"
+                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:ring-1 focus:ring-[#1A1A1A] outline-none"
                 />
               </div>
 
@@ -235,7 +235,7 @@ export default function AdminBanners() {
                   placeholder="/shop?category=sarees"
                   value={link}
                   onChange={(e) => setLink(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:ring-1 focus:ring-[#6B1518] outline-none font-mono text-[11px]"
+                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:ring-1 focus:ring-[#1A1A1A] outline-none font-mono text-[11px]"
                 />
               </div>
 
@@ -248,7 +248,7 @@ export default function AdminBanners() {
                     onChange={(e) => setActive(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#6B1518]"></div>
+                  <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#1A1A1A]"></div>
                   <span className="ml-2 font-bold text-[11px] text-gray-700">
                     {active ? 'Published' : 'Hidden'}
                   </span>
@@ -260,9 +260,9 @@ export default function AdminBanners() {
                   Banner Graphic Image {editingBanner ? '(Upload New to Replace)' : '*'}
                 </label>
                 
-                <div className="border-2 border-dashed border-gray-200 hover:border-[#6B1518] rounded-2xl p-4 transition-colors">
+                <div className="border-2 border-dashed border-gray-200 hover:border-[#1A1A1A] rounded-2xl p-4 transition-colors">
                   <div className="flex items-center gap-3">
-                    <label className="bg-[#6B1518]/10 hover:bg-[#6B1518]/20 text-[#6B1518] px-4 py-2 rounded-xl font-bold cursor-pointer transition-colors flex items-center gap-2">
+                    <label className="bg-[#1A1A1A]/10 hover:bg-[#1A1A1A]/20 text-[#1A1A1A] px-4 py-2 rounded-xl font-bold cursor-pointer transition-colors flex items-center gap-2">
                       <Upload className="w-4 h-4" />
                       <span>{image ? 'Replace Image' : 'Select Banner File'}</span>
                       <input
@@ -299,7 +299,7 @@ export default function AdminBanners() {
                 <button
                   type="submit"
                   disabled={saving || uploading || !image}
-                  className="bg-[#6B1518] hover:bg-[#4B0F11] disabled:opacity-60 text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-md cursor-pointer"
+                  className="bg-[#1A1A1A] hover:bg-[#0A0A0A] disabled:opacity-60 text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-md cursor-pointer"
                 >
                   {saving ? 'Saving...' : (editingBanner ? 'Save Changes' : 'Publish Banner')}
                 </button>

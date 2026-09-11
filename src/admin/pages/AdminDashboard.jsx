@@ -52,7 +52,7 @@ export default function AdminDashboard() {
       change: "Active Catalog",
       isPositive: true,
       icon: ShoppingBag,
-      color: "bg-[#F8F0F0] text-[#6B1518] border-[#EADEDF]",
+      color: "bg-[#F8F0F0] text-[#1A1A1A] border-[#EADEDF]",
     },
     {
       title: "Low Stock Alerts",
@@ -71,7 +71,7 @@ export default function AdminDashboard() {
         <div>
           <h2 className="font-serif text-2xl font-bold text-gray-900">Welcome Back, Harini! 👋</h2>
           <p className="text-xs text-gray-500 mt-0.5">
-            Here is what's happening with Aalaya Vastra store today.
+            Here is what's happening with Infinity Frames N store today.
           </p>
         </div>
 
@@ -83,7 +83,7 @@ export default function AdminDashboard() {
               onClick={() => setTimeRange(range)}
               className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all ${
                 timeRange === range
-                  ? 'bg-[#6B1518] text-white shadow-xs'
+                  ? 'bg-[#1A1A1A] text-white shadow-xs'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
             </div>
             <button
               onClick={() => navigate('/admin/orders')}
-              className="text-xs font-bold text-[#6B1518] hover:underline"
+              className="text-xs font-bold text-[#1A1A1A] hover:underline"
             >
               View All Orders →
             </button>
@@ -153,7 +153,7 @@ export default function AdminDashboard() {
               <tbody className="divide-y divide-gray-100 font-medium">
                 {orders.slice(0, 5).map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50/80 transition-colors">
-                    <td className="py-3 px-3 font-bold text-[#6B1518]">{order.id}</td>
+                    <td className="py-3 px-3 font-bold text-[#1A1A1A]">{order.id}</td>
                     <td className="py-3 px-3">
                       <div className="font-bold text-gray-900">{order.customerName}</div>
                       <div className="text-[10px] text-gray-400">{order.customerPhone}</div>
@@ -188,7 +188,7 @@ export default function AdminDashboard() {
               </h3>
               <button
                 onClick={() => navigate('/admin/inventory')}
-                className="text-xs font-bold text-[#6B1518] hover:underline"
+                className="text-xs font-bold text-[#1A1A1A] hover:underline"
               >
                 Manage Stock
               </button>
@@ -208,7 +208,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Quick Management Shortcuts */}
-          <div className="bg-[#6B1518] text-white p-6 rounded-3xl space-y-4 shadow-md">
+          <div className="bg-[#1A1A1A] text-white p-6 rounded-3xl space-y-4 shadow-md">
             <h3 className="font-serif text-lg font-bold">Quick Actions</h3>
             <div className="space-y-2">
               <button

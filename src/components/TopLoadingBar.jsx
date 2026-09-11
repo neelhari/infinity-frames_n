@@ -8,7 +8,6 @@ export default function TopLoadingBar() {
   const [navigating, setNavigating] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  // Trigger loading animation on route change
   useEffect(() => {
     setNavigating(true);
     setProgress(30);
@@ -32,7 +31,7 @@ export default function TopLoadingBar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-[9999] pointer-events-none h-[3px] bg-transparent overflow-hidden">
       <div
-        className="h-full bg-gradient-to-r from-[#6B1518] via-[#D3923A] to-[#6B1518] shadow-sm transition-all duration-300 ease-out animate-pulse"
+        className="h-full bg-gradient-to-r from-[#B38029] via-[#F3E5AB] to-[#D4AF37] shadow-sm transition-all duration-300 ease-out animate-pulse"
         style={{
           width: loading ? '85%' : `${progress}%`,
           opacity: isBuffering ? 1 : 0,

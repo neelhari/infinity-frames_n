@@ -12,7 +12,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
-      const saved = localStorage.getItem('aalaya_user');
+      const saved = localStorage.getItem('infinity_user');
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
@@ -21,12 +21,12 @@ export function AuthProvider({ children }) {
 
   const [registeredUsers, setRegisteredUsers] = useState(() => {
     try {
-      const saved = localStorage.getItem('aalaya_registered_users');
+      const saved = localStorage.getItem('infinity_registered_users');
       return saved ? JSON.parse(saved) : [
         {
           id: 'usr_harini',
           name: 'Harini Jupudy',
-          email: 'harini@aalayavastra.com',
+          email: 'harini@infinityframesn.com',
           phone: '9390299611',
           password: 'password123',
           addresses: [
@@ -52,14 +52,14 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem('aalaya_user', JSON.stringify(user));
+      localStorage.setItem('infinity_user', JSON.stringify(user));
     } else {
-      localStorage.removeItem('aalaya_user');
+      localStorage.removeItem('infinity_user');
     }
   }, [user]);
 
   useEffect(() => {
-    localStorage.setItem('aalaya_registered_users', JSON.stringify(registeredUsers));
+    localStorage.setItem('infinity_registered_users', JSON.stringify(registeredUsers));
   }, [registeredUsers]);
 
   // Listen to Supabase Auth State Changes
@@ -279,7 +279,7 @@ export function AuthProvider({ children }) {
       const newAddresses = [...(baseUser.addresses || []), createdAddr];
       const updated = { ...baseUser, addresses: newAddresses };
       try {
-        localStorage.setItem('aalaya_user', JSON.stringify(updated));
+        localStorage.setItem('infinity_user', JSON.stringify(updated));
       } catch (e) {
         console.warn('LocalStorage save error:', e);
       }
@@ -294,7 +294,7 @@ export function AuthProvider({ children }) {
   // 7. Logout
   const logout = async () => {
     setUser(null);
-    localStorage.removeItem('aalaya_user');
+    localStorage.removeItem('infinity_user');
     try {
       if (supabase) {
         await supabase.auth.signOut();

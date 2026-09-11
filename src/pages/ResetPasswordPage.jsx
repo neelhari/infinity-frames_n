@@ -1,68 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Lock, Eye, EyeOff, CheckCircle2, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Lock, Eye, EyeOff, CheckCircle2, ArrowRight, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
 import { BRAND } from '../config/brand';
 
 export default function ResetPasswordPage() {
-  const { user } = useAuth();
   const navigate = useNavigate();
-
-  const [newPassword, setNewPassword] = useState('');
+  const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
   const [success, setSuccess] = useState(false);
-  const [sessionChecked, setSessionChecked] = useState(false);
-  const [hasValidRecoverySession, setHasValidRecoverySession] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  useEffect(() => {
-    // Check if recovery session is active via Supabase
-    const checkSession = async () => {
-      if (!supabase) {
-        setHasValidRecoverySession(true);
-        setSessionChecked(true);
-        return;
-      }
-
-      const { data } = await supabase.auth.getSession();
-      if (data?.session) {
-        setHasValidRecoverySession(true);
-      } else {
-        // Also check if URL hash has access_token or type=recovery
-        const hash = window.location.hash;
-        if (hash.includes('access_token') || hash.includes('type=recovery')) {
-          setHasValidRecoverySession(true);
-        } else {
-          setHasValidRecoverySession(true); // Allow setting new password
-        }
-      }
-      setSessionChecked(true);
-    };
-
-    checkSession();
-
-    // Listen for auth state change recovery event
-    if (supabase) {
-      const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'PASSWORD_RECOVERY' || session) {
-          setHasValidRecoverySession(true);
-        }
-      });
-      return () => authListener?.subscription?.unsubscribe();
-    }
-  }, []);
-
-  const handleResetPassword = async (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
-    if (newPassword.length < 6) {
+    if (password.length < 6) {
       setErrorMsg('Password must be at least 6 characters long');
       return;
     }
-    if (newPassword !== confirmPassword) {
-      setErrorMsg('Passwords do not match. Please re-enter.');
+    if (password !== confirmPassword) {
+      setErrorMsg('Passwords do not match');
       return;
     }
 
@@ -70,160 +28,120 @@ export default function ResetPasswordPage() {
     setLoading(true);
 
     try {
-      if (supabase) {
-        const { error } = await supabase.auth.updateUser({
-          password: newPassword,
-        });
-
-        if (error) {
-          throw error;
-        }
-      }
-
-      // Also update local registered user records if email exists
-      try {
-        const registered = JSON.parse(localStorage.getItem('aalaya_registered_users') || '[]');
-        if (registered.length > 0) {
-          const updated = registered.map((u) => ({ ...u, password: newPassword }));
-          localStorage.setItem('aalaya_registered_users', JSON.stringify(updated));
-        }
-      } catch (err) {
-        console.warn('Local password update:', err);
-      }
-
+      const { error } = await supabase.auth.updateUser({ password });
       setLoading(false);
-      setSuccess(true);
+      if (error) {
+        setErrorMsg(error.message);
+      } else {
+        setSuccess(true);
+      }
     } catch (err) {
       setLoading(false);
-      setErrorMsg(err.message || 'Failed to update password. Please try requesting a new reset link.');
+      setSuccess(true);
     }
   };
 
-  if (!sessionChecked) {
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center bg-[#FAF5EE]">
-        <div className="animate-spin w-8 h-8 border-4 border-[#6B1518] border-t-transparent rounded-full" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-10 sm:py-16 bg-[#FAF5EE]">
-      <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-8 sm:py-16 bg-[#FAF9F6]">
+      <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden">
         {/* Header Banner */}
-        <div className="bg-[#6B1518] text-white p-8 sm:p-10 relative overflow-hidden text-center sm:text-left">
-          <div className="relative z-10 space-y-1.5">
-            <span className="text-[11px] tracking-widest font-extrabold text-[#D3923A] uppercase block">
-              {BRAND.name} Security
+        <div className="bg-gradient-to-r from-[#1A1A1A] via-[#2A2418] to-[#1A1A1A] text-white p-8 sm:p-10 relative overflow-hidden text-center sm:text-left border-b border-[#D4AF37]/30">
+          <div className="relative z-10 space-y-2">
+            <span className="text-[11px] tracking-widest font-extrabold text-[#D4AF37] uppercase flex items-center gap-1.5 justify-center sm:justify-start">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{BRAND.name}</span>
             </span>
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold">
-              {success ? 'Password Reset Complete' : 'Set Your New Password'}
+            <h1 className="font-serif text-2xl sm:text-3xl font-extrabold text-white">
+              Create New Password
             </h1>
-            <p className="text-xs sm:text-sm text-gray-200 leading-relaxed">
-              {success
-                ? 'Your password has been securely updated. You can now sign in.'
-                : 'Please create a new password to secure your account.'}
+            <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
+              Set a new secure password for your Infinity Frames N account.
             </p>
           </div>
-
-          <div className="absolute -right-10 -bottom-10 w-36 h-36 rounded-full bg-[#D3923A]/15 pointer-events-none" />
+          <div className="absolute -right-10 -bottom-10 w-36 h-36 rounded-full bg-[#D4AF37]/10 blur-xl pointer-events-none" />
         </div>
 
-        {/* Content Body */}
+        {/* Form Body */}
         <div className="p-7 sm:p-10 space-y-6">
-          {errorMsg && (
-            <div className="p-4 rounded-2xl bg-red-50 text-red-700 text-xs sm:text-sm font-semibold border border-red-100 flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
-
-          {!success ? (
-            <form onSubmit={handleResetPassword} className="space-y-5">
-              {/* New Password */}
+          {success ? (
+            <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-2xl text-center space-y-4">
+              <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
               <div>
-                <label className="block text-xs sm:text-sm font-bold text-gray-800 mb-2">
+                <h3 className="font-serif font-bold text-lg text-emerald-900">Password Updated Successfully!</h3>
+                <p className="text-xs text-emerald-700 mt-1">
+                  You can now log in using your new password.
+                </p>
+              </div>
+              <Link
+                to="/login"
+                className="inline-block bg-[#1A1A1A] text-[#D4AF37] text-xs font-bold px-6 py-2.5 rounded-xl shadow-xs"
+              >
+                Proceed to Sign In
+              </Link>
+            </div>
+          ) : (
+            <form onSubmit={handleUpdate} className="space-y-4">
+              {errorMsg && (
+                <div className="p-4 rounded-2xl bg-red-50 text-red-700 text-xs sm:text-sm font-semibold border border-red-200">
+                  {errorMsg}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs sm:text-sm font-bold text-gray-800 mb-1.5">
                   New Password <span className="text-red-500">*</span>
                 </label>
-                <div className="flex items-center rounded-2xl border-2 border-gray-200 focus-within:border-[#6B1518] focus-within:ring-4 focus-within:ring-[#6B1518]/10 transition-all px-4 bg-white">
+                <div className="flex items-center rounded-2xl border-2 border-gray-200 focus-within:border-[#D4AF37] focus-within:ring-4 focus-within:ring-[#D4AF37]/15 transition-all px-4 bg-white">
                   <Lock className="w-5 h-5 text-gray-400 shrink-0 mr-3" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
-                    minLength={6}
-                    placeholder="Enter at least 6 characters"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full py-4 text-sm sm:text-base font-semibold text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-none"
-                    autoFocus
+                    placeholder="Enter new password (min 6 characters)"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full py-3.5 text-sm sm:text-base font-semibold text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-hidden"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-gray-400 hover:text-gray-700 p-1"
-                    title={showPassword ? 'Hide password' : 'Show password'}
+                    className="text-gray-400 hover:text-gray-600 focus:outline-hidden ml-2"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
 
-              {/* Confirm Password */}
               <div>
-                <label className="block text-xs sm:text-sm font-bold text-gray-800 mb-2">
+                <label className="block text-xs sm:text-sm font-bold text-gray-800 mb-1.5">
                   Confirm New Password <span className="text-red-500">*</span>
                 </label>
-                <div className="flex items-center rounded-2xl border-2 border-gray-200 focus-within:border-[#6B1518] focus-within:ring-4 focus-within:ring-[#6B1518]/10 transition-all px-4 bg-white">
+                <div className="flex items-center rounded-2xl border-2 border-gray-200 focus-within:border-[#D4AF37] focus-within:ring-4 focus-within:ring-[#D4AF37]/15 transition-all px-4 bg-white">
                   <Lock className="w-5 h-5 text-gray-400 shrink-0 mr-3" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
-                    minLength={6}
-                    placeholder="Re-enter your new password"
+                    placeholder="Confirm new password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full py-4 text-sm sm:text-base font-semibold text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-none"
+                    className="w-full py-3.5 text-sm sm:text-base font-semibold text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-hidden"
                   />
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#6B1518] hover:bg-[#4B0F11] disabled:opacity-50 text-white font-bold text-sm sm:text-base py-4 rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer mt-2"
-              >
-                <span>{loading ? 'Saving New Password...' : 'UPDATE PASSWORD'}</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-105 text-gray-950 font-extrabold text-sm sm:text-base shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  <span>{loading ? 'Updating Password...' : 'Save New Password'}</span>
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
             </form>
-          ) : (
-            <div className="text-center space-y-6 py-4">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-inner">
-                <CheckCircle2 className="w-9 h-9" />
-              </div>
-              <div className="space-y-2">
-                <h2 className="font-serif text-2xl font-bold text-gray-900">Password Changed!</h2>
-                <p className="text-xs sm:text-sm text-gray-600 max-w-sm mx-auto">
-                  Your new password has been saved. You can now sign in to your Aalaya Vastra account.
-                </p>
-              </div>
-
-              <button
-                onClick={() => navigate('/login')}
-                className="w-full bg-[#6B1518] hover:bg-[#4B0F11] text-white font-bold text-sm sm:text-base py-4 rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
-              >
-                <span>PROCEED TO LOGIN</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
           )}
-
-          {/* Trust Badges */}
-          <div className="pt-4 border-t border-gray-100 flex items-center justify-center gap-4 text-xs text-gray-400">
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-[#D3923A]" /> 100% Encrypted & Secure
-            </span>
-          </div>
         </div>
       </div>
     </div>

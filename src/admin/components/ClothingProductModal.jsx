@@ -176,13 +176,13 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
       <div className="bg-white rounded-3xl w-full max-w-3xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
-        <div className="bg-[#6B1518] text-white px-6 py-4 flex items-center justify-between">
+        <div className="bg-[#1A1A1A] text-white px-6 py-4 flex items-center justify-between">
           <div>
             <h3 className="font-serif text-lg font-bold">
               {initialProduct ? 'Edit Clothing Product' : 'Add New Clothing Product'}
             </h3>
             <p className="text-[11px] text-gray-300">
-              Aalaya Vastra Clothing CMS • Live Storefront & Video Synchronization
+              Infinity Frames N Clothing CMS • Live Storefront & Video Synchronization
             </p>
           </div>
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/10 text-white">
@@ -196,7 +196,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
             type="button"
             onClick={() => setActiveTab('basic')}
             className={`py-3 border-b-2 transition-colors flex items-center gap-1.5 ${
-              activeTab === 'basic' ? 'border-[#6B1518] text-[#6B1518]' : 'border-transparent text-gray-500'
+              activeTab === 'basic' ? 'border-[#1A1A1A] text-[#1A1A1A]' : 'border-transparent text-gray-500'
             }`}
           >
             <Upload className="w-3.5 h-3.5" />
@@ -206,7 +206,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
             type="button"
             onClick={() => setActiveTab('attributes')}
             className={`py-3 border-b-2 transition-colors ${
-              activeTab === 'attributes' ? 'border-[#6B1518] text-[#6B1518]' : 'border-transparent text-gray-500'
+              activeTab === 'attributes' ? 'border-[#1A1A1A] text-[#1A1A1A]' : 'border-transparent text-gray-500'
             }`}
           >
             <span>2. Fabric & Specifications {!isCurrentSaree && '& Sizes'}</span>
@@ -226,7 +226,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                     placeholder="e.g. Mulchanderi 3 Piece Dress With Embroidery"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none"
+                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none"
                   />
                 </div>
 
@@ -236,7 +236,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                     type="text"
                     value={formData.sku}
                     onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none font-mono"
+                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none font-mono"
                   />
                 </div>
               </div>
@@ -255,7 +255,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                         sizes: isSaree ? [] : (prev.sizes.length > 0 ? prev.sizes : ['S', 'M', 'L', 'XL']),
                       }));
                     }}
-                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none bg-white"
+                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none bg-white"
                   >
                     {categories.length === 0 && <option value={formData.category}>{formData.category}</option>}
                     {categories.map((cat) => (
@@ -272,7 +272,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                     required
                     value={formData.stock}
                     onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
-                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none"
+                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none"
                   />
                 </div>
               </div>
@@ -285,7 +285,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                   placeholder="e.g. Banarasi Tissue, Mulchanderi Sets"
                   value={formData.subcategory}
                   onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none"
+                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none"
                 />
                 <datalist id="subcategory-suggestions">
                   {(categories.find((c) => c.id === formData.category)?.subcategories || []).map((sub) => (
@@ -305,7 +305,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                     placeholder="2499"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    className="w-full p-2.5 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none font-bold text-sm bg-white"
+                    className="w-full p-2.5 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none font-bold text-sm bg-white"
                   />
                   <p className="text-[10px] text-gray-400 mt-1">The price customers pay on the store.</p>
                 </div>
@@ -317,7 +317,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                     placeholder="3499"
                     value={formData.oldPrice}
                     onChange={(e) => setFormData({ ...formData, oldPrice: e.target.value })}
-                    className="w-full p-2.5 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none bg-white"
+                    className="w-full p-2.5 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none bg-white"
                   />
                   <p className="text-[10px] text-gray-400 mt-1">Strikethrough tag price to display discount.</p>
                 </div>
@@ -330,14 +330,14 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                   placeholder="Enter detailed fabric specifications, embroidery style, length, and drape guidance..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none resize-none"
+                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none resize-none"
                 />
               </div>
 
               {/* Media Section: Photos, Videos & Social Links directly here */}
               <div className="pt-4 border-t border-gray-200 space-y-4">
                 <div className="flex items-center gap-2">
-                  <Upload className="w-4 h-4 text-[#6B1518]" />
+                  <Upload className="w-4 h-4 text-[#1A1A1A]" />
                   <h4 className="font-serif text-sm font-bold text-gray-900">Product Photography & Media</h4>
                 </div>
 
@@ -351,7 +351,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                 {/* 1. Photo Upload Box */}
                 <div>
                   <label className="block font-bold text-gray-800 mb-1">Product Images (Upload photos)</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-2xl p-5 text-center hover:border-[#6B1518] transition-colors bg-gray-50">
+                  <div className="border-2 border-dashed border-gray-300 rounded-2xl p-5 text-center hover:border-[#1A1A1A] transition-colors bg-gray-50">
                     <Upload className="w-6 h-6 text-gray-400 mx-auto mb-1" />
                     <p className="font-bold text-gray-800">Upload Product Photos</p>
                     <p className="text-gray-400 text-[11px]">JPG, PNG or WEBP up to 10MB</p>
@@ -365,7 +365,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                     />
                     <label
                       htmlFor="cloudinary-upload-input"
-                      className="mt-2.5 inline-block bg-[#6B1518] text-white font-bold text-xs px-4 py-2 rounded-xl cursor-pointer hover:bg-[#4B0F11]"
+                      className="mt-2.5 inline-block bg-[#1A1A1A] text-white font-bold text-xs px-4 py-2 rounded-xl cursor-pointer hover:bg-[#0A0A0A]"
                     >
                       {uploadingImage ? 'Uploading Photos...' : 'Select Photos'}
                     </label>
@@ -396,7 +396,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                 {/* 2. Direct Video File Upload (3-4s motion video) */}
                 <div className="pt-3 border-t border-gray-100 space-y-2">
                   <label className="block font-bold text-gray-900 flex items-center gap-1.5">
-                    <Film className="w-4 h-4 text-[#D3923A]" /> 3-4s Drape Motion Video (Optional)
+                    <Film className="w-4 h-4 text-[#D4AF37]" /> 3-4s Drape Motion Video (Optional)
                   </label>
                   <p className="text-[11px] text-gray-500">
                     Short motion video showing fabric drape and sheen in real life.
@@ -413,7 +413,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                           playsInline
                           className="w-full h-full object-cover"
                         />
-                        <span className="absolute bottom-1 right-1 bg-[#D3923A] text-[#6B1518] text-[9px] font-extrabold px-1.5 py-0.5 rounded">
+                        <span className="absolute bottom-1 right-1 bg-[#D4AF37] text-[#1A1A1A] text-[9px] font-extrabold px-1.5 py-0.5 rounded">
                           ▶ Video
                         </span>
                       </div>
@@ -432,8 +432,8 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                       </div>
                     </div>
                   ) : (
-                    <div className="border-2 border-dashed border-gray-300 rounded-2xl p-4 text-center hover:border-[#D3923A] transition-colors bg-[#FAF8F5]">
-                      <Video className="w-6 h-6 text-[#D3923A] mx-auto mb-1" />
+                    <div className="border-2 border-dashed border-gray-300 rounded-2xl p-4 text-center hover:border-[#D4AF37] transition-colors bg-[#FAF8F5]">
+                      <Video className="w-6 h-6 text-[#D4AF37] mx-auto mb-1" />
                       <p className="font-bold text-gray-800">Upload Drape Motion Video</p>
                       <p className="text-gray-400 text-[11px]">MP4, WEBM or MOV up to 50MB</p>
                       <input
@@ -445,7 +445,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                       />
                       <label
                         htmlFor="cloudinary-video-upload-input"
-                        className="mt-2 inline-block bg-[#D3923A] hover:bg-[#B37C31] text-[#6B1518] font-extrabold text-xs px-3.5 py-1.5 rounded-xl cursor-pointer shadow-xs transition-colors"
+                        className="mt-2 inline-block bg-[#D4AF37] hover:bg-[#B37C31] text-[#1A1A1A] font-extrabold text-xs px-3.5 py-1.5 rounded-xl cursor-pointer shadow-xs transition-colors"
                       >
                         {uploadingVideo ? 'Uploading Video...' : 'Select Video File'}
                       </label>
@@ -456,14 +456,14 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                 {/* 3. External Video Demonstration Link */}
                 <div className="pt-2 border-t border-gray-100">
                   <label className="block font-bold text-gray-900 mb-1 flex items-center gap-1.5">
-                    <Play className="w-4 h-4 text-[#6B1518]" /> Video Demonstration Link (YouTube / Instagram Reel URL)
+                    <Play className="w-4 h-4 text-[#1A1A1A]" /> Video Demonstration Link (YouTube / Instagram Reel URL)
                   </label>
                   <input
                     type="url"
                     placeholder="https://www.youtube.com/watch?v=... or https://instagram.com/reel/..."
                     value={formData.videoUrl}
                     onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-                    className="w-full p-2.5 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none"
+                    className="w-full p-2.5 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none"
                   />
                   <p className="text-[10px] text-gray-400 mt-1">
                     Displays a "Watch Video Demonstration on YouTube / Instagram" button directly on the product detail page.
@@ -483,7 +483,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                     placeholder="e.g. Pure Cotton, Mulchanderi, Banarasi Silk"
                     value={formData.fabric}
                     onChange={(e) => setFormData({ ...formData, fabric: e.target.value })}
-                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none"
+                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none"
                   />
                 </div>
 
@@ -494,7 +494,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                     placeholder="e.g. Zari Embroidery, Handloom Weave"
                     value={formData.material}
                     onChange={(e) => setFormData({ ...formData, material: e.target.value })}
-                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none"
+                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none"
                   />
                 </div>
               </div>
@@ -507,7 +507,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                     placeholder="e.g. Festive, Wedding, Daily Wear"
                     value={formData.occasion}
                     onChange={(e) => setFormData({ ...formData, occasion: e.target.value })}
-                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none"
+                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none"
                   />
                 </div>
 
@@ -518,7 +518,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                     placeholder="e.g. Dry Clean Only / Gentle Handwash"
                     value={formData.careInstructions}
                     onChange={(e) => setFormData({ ...formData, careInstructions: e.target.value })}
-                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none"
+                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none"
                   />
                 </div>
               </div>
@@ -538,7 +538,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
                             onClick={() => toggleSize(sz)}
                             className={`px-4 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
                               selected
-                                ? 'bg-[#6B1518] text-white border-[#6B1518]'
+                                ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
                                 : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-gray-400'
                             }`}
                           >
@@ -575,7 +575,7 @@ export default function ClothingProductModal({ isOpen, onClose, onSave, initialP
             <button
               type="submit"
               disabled={saving || uploadingImage || uploadingVideo}
-              className="bg-[#6B1518] hover:bg-[#4B0F11] disabled:opacity-60 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-1.5 shadow-md"
+              className="bg-[#1A1A1A] hover:bg-[#0A0A0A] disabled:opacity-60 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-1.5 shadow-md"
             >
               <Check className="w-4 h-4" />
               <span>{saving ? 'Saving...' : 'Save & Publish Product'}</span>

@@ -54,18 +54,18 @@ export default function AdminSidebar({ onClose }) {
   ];
 
   return (
-    <aside className="w-64 bg-[#6B1518] text-white flex flex-col h-full shadow-2xl border-r border-[#831A1D]">
+    <aside className="w-64 bg-[#1A1A1A] text-white flex flex-col h-full shadow-2xl border-r border-[#831A1D]">
       {/* Brand Header */}
       <div className="p-5 border-b border-[#831A1D] flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#FAF5EE] ring-2 ring-[#D3923A]/60 flex items-center justify-center overflow-hidden p-0.5 shadow-sm shrink-0">
+          <div className="w-10 h-10 rounded-full bg-[#FAF5EE] ring-2 ring-[#D4AF37]/60 flex items-center justify-center overflow-hidden p-0.5 shadow-sm shrink-0">
             <img src="/logo-icon.png" alt={BRAND.name} className="w-full h-full object-contain" />
           </div>
           <div>
             <h2 className="font-serif text-lg font-bold tracking-wide text-white leading-tight">
               {BRAND.name}
             </h2>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-[#D3923A]">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-[#D4AF37]">
               Store CMS Admin
             </span>
           </div>
@@ -76,7 +76,7 @@ export default function AdminSidebar({ onClose }) {
       <nav className="flex-1 overflow-y-auto p-4 space-y-6 hide-scroll">
         {menuSections.map((sec, idx) => (
           <div key={idx} className="space-y-1.5">
-            <h3 className="text-[10px] font-extrabold uppercase tracking-widest text-[#D3923A]/90 px-3">
+            <h3 className="text-[10px] font-extrabold uppercase tracking-widest text-[#D4AF37]/90 px-3">
               {sec.title}
             </h3>
             <div className="space-y-1">
@@ -91,7 +91,7 @@ export default function AdminSidebar({ onClose }) {
                     className={({ isActive }) =>
                       `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 ${
                         isActive
-                          ? 'bg-[#D3923A] text-[#6B1518] shadow-md transform translate-x-1'
+                          ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-md transform translate-x-1'
                           : 'text-gray-200 hover:bg-[#831A1D] hover:text-white'
                       }`
                     }
@@ -114,7 +114,7 @@ export default function AdminSidebar({ onClose }) {
           rel="noreferrer"
           className="w-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-colors border border-white/10"
         >
-          <Store className="w-4 h-4 text-[#D3923A]" />
+          <Store className="w-4 h-4 text-[#D4AF37]" />
           <span>View Live Storefront →</span>
         </a>
       </div>

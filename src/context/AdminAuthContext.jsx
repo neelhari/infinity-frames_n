@@ -6,7 +6,7 @@ const AdminAuthContext = createContext();
 export function AdminAuthProvider({ children }) {
   const [session, setSession] = useState(() => {
     try {
-      const saved = localStorage.getItem('aalaya_admin_session');
+      const saved = localStorage.getItem('infinity_admin_session');
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
@@ -15,7 +15,7 @@ export function AdminAuthProvider({ children }) {
 
   const [isAdmin, setIsAdmin] = useState(() => {
     try {
-      return !!localStorage.getItem('aalaya_admin_session');
+      return !!localStorage.getItem('infinity_admin_session');
     } catch {
       return false;
     }
@@ -25,9 +25,9 @@ export function AdminAuthProvider({ children }) {
 
   useEffect(() => {
     if (session && isAdmin) {
-      localStorage.setItem('aalaya_admin_session', JSON.stringify(session));
+      localStorage.setItem('infinity_admin_session', JSON.stringify(session));
     } else if (!session) {
-      localStorage.removeItem('aalaya_admin_session');
+      localStorage.removeItem('infinity_admin_session');
     }
   }, [session, isAdmin]);
 
@@ -47,7 +47,7 @@ export function AdminAuthProvider({ children }) {
         if (active) setIsAdmin(admin);
       } else {
         // If master admin was stored in localStorage, preserve it
-        const saved = localStorage.getItem('aalaya_admin_session');
+        const saved = localStorage.getItem('infinity_admin_session');
         if (saved) {
           try {
             const parsed = JSON.parse(saved);
@@ -96,7 +96,7 @@ export function AdminAuthProvider({ children }) {
 
     // 2. Offline / local fallback if Supabase auth is unreachable
     if (
-      (cleanEmail === 'admin@aalayavastra.com' || cleanEmail === 'harini@aalayavastra.com') &&
+      (cleanEmail === 'admin@infinityframesn.com' || cleanEmail === 'harini@infinityframesn.com') &&
       cleanPassword === 'admin123'
     ) {
       const mockAdminSession = {
@@ -108,7 +108,7 @@ export function AdminAuthProvider({ children }) {
       };
       setSession(mockAdminSession);
       setIsAdmin(true);
-      localStorage.setItem('aalaya_admin_session', JSON.stringify(mockAdminSession));
+      localStorage.setItem('infinity_admin_session', JSON.stringify(mockAdminSession));
       return { success: true, data: mockAdminSession };
     }
 
@@ -116,7 +116,7 @@ export function AdminAuthProvider({ children }) {
   };
 
   const signOut = async () => {
-    localStorage.removeItem('aalaya_admin_session');
+    localStorage.removeItem('infinity_admin_session');
     setSession(null);
     setIsAdmin(false);
     await signOutAdmin();

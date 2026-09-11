@@ -81,7 +81,7 @@ function AppContent() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white font-sans antialiased text-gray-900 selection:bg-[#6B1518] selection:text-white">
+    <div className="min-h-screen flex flex-col bg-white font-sans antialiased text-gray-900 selection:bg-[#D4AF37] selection:text-white">
       {/* Splash Screen Animation */}
       {showSplash && !isAdminRoute && <SplashScreen onComplete={() => setShowSplash(false)} />}
 

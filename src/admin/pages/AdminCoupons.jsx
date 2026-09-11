@@ -54,7 +54,7 @@ export default function AdminCoupons() {
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-[#6B1518] hover:bg-[#4B0F11] text-white text-xs font-bold px-5 py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all self-start sm:self-auto"
+          className="bg-[#1A1A1A] hover:bg-[#0A0A0A] text-white text-xs font-bold px-5 py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Create New Coupon Code</span>
@@ -65,7 +65,7 @@ export default function AdminCoupons() {
         {coupons.map((c) => (
           <div key={c.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-2xs space-y-4 relative overflow-hidden">
             <div className="flex items-center justify-between">
-              <span className="font-mono font-extrabold text-base bg-[#F8F0F0] text-[#6B1518] border border-[#EADEDF] px-3 py-1 rounded-xl tracking-wider">
+              <span className="font-mono font-extrabold text-base bg-[#F8F0F0] text-[#1A1A1A] border border-[#EADEDF] px-3 py-1 rounded-xl tracking-wider">
                 {c.code}
               </span>
               <button
@@ -107,7 +107,7 @@ export default function AdminCoupons() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl p-6 space-y-4 text-xs">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-              <h3 className="font-serif text-lg font-bold text-[#6B1518]">Create Coupon Code</h3>
+              <h3 className="font-serif text-lg font-bold text-[#1A1A1A]">Create Coupon Code</h3>
               <button onClick={() => setIsModalOpen(false)} className="font-bold text-gray-400">✕</button>
             </div>
 
@@ -120,7 +120,7 @@ export default function AdminCoupons() {
                   placeholder="e.g. FESTIVE20"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] uppercase font-mono font-bold"
+                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] uppercase font-mono font-bold"
                 />
               </div>
 
@@ -145,7 +145,7 @@ export default function AdminCoupons() {
                     placeholder={type === 'percentage' ? '15' : '300'}
                     value={discountValue}
                     onChange={(e) => setDiscountValue(e.target.value)}
-                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518]"
+                    className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A]"
                   />
                 </div>
               </div>
@@ -157,7 +157,7 @@ export default function AdminCoupons() {
                   placeholder="1999"
                   value={minOrder}
                   onChange={(e) => setMinOrder(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518]"
+                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A]"
                 />
               </div>
 
@@ -165,7 +165,7 @@ export default function AdminCoupons() {
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2.5 rounded-xl border border-gray-300 font-bold">
                   Cancel
                 </button>
-                <button type="submit" disabled={saving} className="bg-[#6B1518] disabled:opacity-60 text-white px-5 py-2.5 rounded-xl font-bold">
+                <button type="submit" disabled={saving} className="bg-[#1A1A1A] disabled:opacity-60 text-white px-5 py-2.5 rounded-xl font-bold">
                   {saving ? 'Saving...' : 'Save Coupon'}
                 </button>
               </div>

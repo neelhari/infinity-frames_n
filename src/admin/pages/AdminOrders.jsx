@@ -38,7 +38,7 @@ export default function AdminOrders() {
               placeholder="Search by Order ID or Name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full text-xs pl-10 pr-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#6B1518]"
+              className="w-full text-xs pl-10 pr-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#1A1A1A]"
             />
           </div>
 
@@ -86,7 +86,7 @@ export default function AdminOrders() {
                 </tr>
               ) : filteredOrders.map((ord) => (
                 <tr key={ord.id} className="hover:bg-gray-50/80 transition-colors">
-                  <td className="p-4 font-bold text-[#6B1518] text-sm">{ord.id}</td>
+                  <td className="p-4 font-bold text-[#1A1A1A] text-sm">{ord.id}</td>
                   <td className="p-4">
                     <div className="font-bold text-gray-900">{ord.customerName}</div>
                     <div className="text-[10px] text-gray-500">{ord.customerPhone} • {ord.address}</div>
@@ -136,7 +136,7 @@ export default function AdminOrders() {
                   <td className="p-4 text-center">
                     <button
                       onClick={() => setSelectedOrder(ord)}
-                      className="p-2 rounded-xl text-[#6B1518] hover:bg-[#F8F0F0] font-bold"
+                      className="p-2 rounded-xl text-[#1A1A1A] hover:bg-[#F8F0F0] font-bold"
                       title="View Details"
                     >
                       <Eye className="w-4 h-4" />
@@ -155,7 +155,7 @@ export default function AdminOrders() {
           <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-4 text-xs">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div>
-                <h3 className="font-serif text-lg font-bold text-[#6B1518]">Order Details ({selectedOrder.id})</h3>
+                <h3 className="font-serif text-lg font-bold text-[#1A1A1A]">Order Details ({selectedOrder.id})</h3>
                 <p className="text-[11px] text-gray-500">Placed on {selectedOrder.date}</p>
               </div>
               <button onClick={() => setSelectedOrder(null)} className="font-bold text-gray-400 hover:text-gray-700 text-sm cursor-pointer">✕</button>
@@ -207,13 +207,13 @@ export default function AdminOrders() {
 
             <div className="pt-2 border-t border-gray-100 flex items-center justify-between font-extrabold text-sm">
               <span>Total Paid / Payable</span>
-              <span className="text-[#6B1518] text-base">₹{selectedOrder.totalAmount.toLocaleString('en-IN')}</span>
+              <span className="text-[#1A1A1A] text-base">₹{selectedOrder.totalAmount.toLocaleString('en-IN')}</span>
             </div>
 
             <div className="pt-2 flex items-center justify-between gap-3">
               <a
                 href={`https://wa.me/91${selectedOrder.customerPhone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                  `Hello ${selectedOrder.customerName}, this is regarding your order ${selectedOrder.id} at Aalaya Vastra. Your order status is currently: ${selectedOrder.status}.`
+                  `Hello ${selectedOrder.customerName}, this is regarding your order ${selectedOrder.id} at Infinity Frames N. Your order status is currently: ${selectedOrder.status}.`
                 )}`}
                 target="_blank"
                 rel="noreferrer"
@@ -222,7 +222,7 @@ export default function AdminOrders() {
                 <span>💬 WhatsApp Customer</span>
               </a>
 
-              <button onClick={() => setSelectedOrder(null)} className="bg-[#6B1518] text-white font-bold px-5 py-2.5 rounded-xl cursor-pointer">
+              <button onClick={() => setSelectedOrder(null)} className="bg-[#1A1A1A] text-white font-bold px-5 py-2.5 rounded-xl cursor-pointer">
                 Close View
               </button>
             </div>

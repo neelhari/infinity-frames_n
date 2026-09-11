@@ -5,7 +5,6 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useUI } from '../context/UIContext';
 import { useAuth } from '../context/AuthContext';
-import { useStoreData } from '../context/StoreDataContext';
 import { BRAND, waLink } from '../config/brand';
 
 const navLinks = [
@@ -24,7 +23,6 @@ export default function Navbar() {
   const { wishlistCount } = useWishlist();
   const { setIsSearchOpen } = useUI();
   const { user, isAuthenticated, openLoginModal } = useAuth();
-  const { settings } = useStoreData();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,44 +34,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-xs border-b border-gray-100 font-sans">
-      {/* 1. TOP ANNOUNCEMENT BAR (Clean & elegant, NO badge symbol) */}
-      {(settings?.announcementEnabled !== false) && (
-        <div className="bg-[#181512] text-white text-[11px] sm:text-xs py-1.5 px-3 sm:px-6 border-b border-amber-900/20">
-          <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 font-medium tracking-wide truncate">
-              {settings?.announcementLink ? (
-                <a href={settings.announcementLink} className="truncate hover:text-[#E5C068] transition-colors">
-                  {settings?.announcementText || `Free Shipping on Customized Orders above ₹${(settings?.freeShippingThreshold || BRAND.freeShippingThreshold).toLocaleString('en-IN')}`}
-                </a>
-              ) : (
-                <span className="truncate text-gray-200">
-                  {settings?.announcementText || `Free Shipping on Customized Orders above ₹${(settings?.freeShippingThreshold || BRAND.freeShippingThreshold).toLocaleString('en-IN')}`}
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3 text-gray-300 text-[11px] shrink-0">
-              <a href={`tel:${BRAND.phone}`} className="hover:text-[#E5C068] transition-colors flex items-center gap-1">
-                <Phone className="w-3 h-3 text-[#C89B3C]" />
-                <span className="hidden sm:inline">+91 {BRAND.phone}</span>
-              </a>
-              <span className="hidden sm:inline text-gray-700">|</span>
-              <a
-                href={waLink(`Hello Infinity Frames N, I would like to inquire about customized 3D gifting.`)}
-                target="_blank"
-                rel="noreferrer"
-                className="hover:text-[#E5C068] transition-colors flex items-center gap-1"
-                title="WhatsApp Support"
-              >
-                <MessageCircle className="w-3 h-3 text-[#25D366]" />
-                <span className="hidden sm:inline">WhatsApp</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 2. MAIN HEADER (Screen 2: Menu, Logo in center, Search & Cart on right) */}
+      {/* MAIN HEADER (Screen 2: Menu, Logo in center, Search & Cart on right - NO ANNOUNCEMENT BAR) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
         <div className="flex items-center justify-between gap-3">
           {/* Mobile Hamburger Menu button (Left in Screen 2) */}
@@ -158,7 +119,7 @@ export default function Navbar() {
             >
               <Heart className="w-5 h-5" />
               {wishlistCount > 0 && (
-                <span className="absolute 0 top-0.5 right-0.5 bg-[#C89B3C] text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+                <span className="absolute top-0.5 right-0.5 bg-[#C89B3C] text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
                   {wishlistCount}
                 </span>
               )}
@@ -188,7 +149,7 @@ export default function Navbar() {
             <button
               key={link.path}
               onClick={() => goTo(link.path)}
-              className="block w-full text-left py-2 px-3 text-xs font-bold text-gray-700 hover:text-[#B38029] hover:bg-amber-50/50 rounded-xl transition-colors uppercase"
+              className="block w-full text-left py-2 px-3 text-xs font-bold text-gray-700 hover:text-[#B38029] hover:bg-amber-50/50 rounded-xl transition-colors uppercase cursor-pointer"
             >
               {link.label}
             </button>

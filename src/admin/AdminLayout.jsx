@@ -64,11 +64,11 @@ export default function AdminLayout() {
               <Menu className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="font-serif text-lg sm:text-xl font-bold text-[#6B1518] leading-tight">
+              <h1 className="font-serif text-lg sm:text-xl font-bold text-[#1A1A1A] leading-tight">
                 {getPageTitle()}
               </h1>
               <p className="text-[11px] text-gray-500 hidden sm:block">
-                Aalaya Vastra Production CMS • Store Status: <span className="text-emerald-600 font-bold inline-flex items-center gap-1"><CheckCircle2 className="w-3 h-3 inline" /> Live</span>
+                Infinity Frames N Production CMS • Store Status: <span className="text-emerald-600 font-bold inline-flex items-center gap-1"><CheckCircle2 className="w-3 h-3 inline" /> Live</span>
               </p>
             </div>
           </div>
@@ -83,7 +83,7 @@ export default function AdminLayout() {
                 placeholder="Search products, orders, customers..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full text-xs pl-9 pr-3 py-2 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:border-[#6B1518] transition-colors"
+                className="w-full text-xs pl-9 pr-3 py-2 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:border-[#1A1A1A] transition-colors"
               />
             </div>
 
@@ -95,14 +95,14 @@ export default function AdminLayout() {
                 title="Notifications"
               >
                 <Bell className="w-5 h-5" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#6B1518]" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#1A1A1A]" />
               </button>
 
               {notificationsOpen && (
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 space-y-3 z-50 text-xs">
                   <div className="flex items-center justify-between border-b border-gray-100 pb-2">
                     <span className="font-bold text-gray-900">Notifications</span>
-                    <span className="text-[10px] bg-[#F8F0F0] text-[#6B1518] font-bold px-2 py-0.5 rounded-full">2 New</span>
+                    <span className="text-[10px] bg-[#F8F0F0] text-[#1A1A1A] font-bold px-2 py-0.5 rounded-full">2 New</span>
                   </div>
                   <div className="space-y-2">
                     <div className="p-2 rounded-xl bg-gray-50 border border-gray-100">
@@ -120,7 +120,7 @@ export default function AdminLayout() {
 
             {/* Admin Profile */}
             <div className="flex items-center gap-2 pl-2 border-l border-gray-200">
-              <div className="w-8 h-8 rounded-full bg-[#6B1518] text-[#D3923A] font-serif font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+              <div className="w-8 h-8 rounded-full bg-[#1A1A1A] text-[#D4AF37] font-serif font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
                 {user?.email?.slice(0, 2)?.toUpperCase() || 'AV'}
               </div>
               <div className="hidden sm:block text-left min-w-0">
@@ -130,7 +130,7 @@ export default function AdminLayout() {
               <button
                 onClick={handleSignOut}
                 title="Sign Out"
-                className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-[#6B1518] transition-colors"
+                className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-[#1A1A1A] transition-colors"
               >
                 <LogOut className="w-4 h-4" />
               </button>

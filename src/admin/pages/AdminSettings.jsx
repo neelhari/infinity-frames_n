@@ -82,9 +82,9 @@ export default function AdminSettings() {
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">
             <div className="flex items-center gap-2">
-              <Megaphone className="w-5 h-5 text-[#6B1518]" />
+              <Megaphone className="w-5 h-5 text-[#1A1A1A]" />
               <div>
-                <h3 className="font-serif text-lg font-bold text-[#6B1518]">
+                <h3 className="font-serif text-lg font-bold text-[#1A1A1A]">
                   1. Top Announcement Bar
                 </h3>
                 <p className="text-[11px] text-gray-500">Notice bar shown at the very top of all store pages</p>
@@ -98,7 +98,7 @@ export default function AdminSettings() {
                 onChange={(e) => setFormData({ ...formData, announcementEnabled: e.target.checked })}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6B1518]"></div>
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1A1A1A]"></div>
               <span className="ml-2.5 text-xs font-bold text-gray-700">
                 {formData.announcementEnabled ? 'Active (Visible)' : 'Disabled (Hidden)'}
               </span>
@@ -113,7 +113,7 @@ export default function AdminSettings() {
                 placeholder="e.g. ✨ FESTIVE SALE: Flat 20% OFF on all Pure Silk Sarees! Use Code: AV20"
                 value={formData.announcementText || ''}
                 onChange={(e) => setFormData({ ...formData, announcementText: e.target.value })}
-                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:ring-1 focus:ring-[#6B1518] outline-none"
+                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:ring-1 focus:ring-[#1A1A1A] outline-none"
               />
             </div>
 
@@ -124,16 +124,16 @@ export default function AdminSettings() {
                 placeholder="/shop?category=sarees"
                 value={formData.announcementLink || ''}
                 onChange={(e) => setFormData({ ...formData, announcementLink: e.target.value })}
-                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:ring-1 focus:ring-[#6B1518] outline-none font-mono text-[11px]"
+                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:ring-1 focus:ring-[#1A1A1A] outline-none font-mono text-[11px]"
               />
             </div>
 
             {/* Live Preview Box */}
             <div className="mt-3 bg-gray-50 p-3 rounded-2xl border border-gray-100">
               <span className="block text-[10px] font-extrabold uppercase text-gray-400 mb-1.5 tracking-wider">Live Storefront Header Preview:</span>
-              <div className="bg-[#6B1518] text-white text-xs py-2 px-4 rounded-xl flex items-center justify-between shadow-xs">
+              <div className="bg-[#1A1A1A] text-white text-xs py-2 px-4 rounded-xl flex items-center justify-between shadow-xs">
                 <div className="flex items-center gap-2 truncate">
-                  <span className="bg-[#D3923A] text-[#6B1518] text-[9px] uppercase font-black px-1.5 py-0.5 rounded shrink-0">Announcement</span>
+                  <span className="bg-[#D4AF37] text-[#1A1A1A] text-[9px] uppercase font-black px-1.5 py-0.5 rounded shrink-0">Announcement</span>
                   <span className="truncate font-medium">
                     {formData.announcementText || 'Special Festive Offer: Flat 20% Off on Pure Silk Sarees | Use Code: AV20'}
                   </span>
@@ -148,7 +148,7 @@ export default function AdminSettings() {
 
         {/* SECTION 2: BRAND & CONTACT INFO */}
         <div className="space-y-4 pt-4 border-t border-gray-100">
-          <h3 className="font-serif text-lg font-bold text-[#6B1518] border-b border-gray-100 pb-2">
+          <h3 className="font-serif text-lg font-bold text-[#1A1A1A] border-b border-gray-100 pb-2">
             2. Brand & Contact Information
           </h3>
 
@@ -159,7 +159,7 @@ export default function AdminSettings() {
                 type="text"
                 value={formData.storeName || ''}
                 onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
-                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] outline-none"
+                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] outline-none"
               />
             </div>
 
@@ -169,7 +169,7 @@ export default function AdminSettings() {
                 type="text"
                 value={formData.ownerName || ''}
                 onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
-                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] outline-none"
+                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] outline-none"
               />
             </div>
           </div>
@@ -181,7 +181,7 @@ export default function AdminSettings() {
                 type="text"
                 value={formData.phone || ''}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] outline-none"
+                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] outline-none"
               />
             </div>
 
@@ -191,7 +191,7 @@ export default function AdminSettings() {
                 type="text"
                 value={formData.whatsapp || formData.phone || ''}
                 onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] outline-none"
+                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] outline-none"
               />
             </div>
 
@@ -201,7 +201,7 @@ export default function AdminSettings() {
                 type="email"
                 value={formData.email || ''}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] outline-none"
+                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] outline-none"
               />
             </div>
           </div>
@@ -212,14 +212,14 @@ export default function AdminSettings() {
               type="text"
               value={formData.address || ''}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] outline-none"
+              className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] outline-none"
             />
           </div>
         </div>
 
         {/* SECTION 3: FINANCIAL & SHIPPING */}
         <div className="space-y-4 pt-4 border-t border-gray-100">
-          <h3 className="font-serif text-lg font-bold text-[#6B1518] border-b border-gray-100 pb-2">
+          <h3 className="font-serif text-lg font-bold text-[#1A1A1A] border-b border-gray-100 pb-2">
             3. Financial, GST & Shipping Policy
           </h3>
 
@@ -230,7 +230,7 @@ export default function AdminSettings() {
                 type="text"
                 value={formData.gstin || ''}
                 onChange={(e) => setFormData({ ...formData, gstin: e.target.value })}
-                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] font-mono outline-none"
+                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] font-mono outline-none"
               />
             </div>
 
@@ -240,7 +240,7 @@ export default function AdminSettings() {
                 type="number"
                 value={formData.freeShippingThreshold || 0}
                 onChange={(e) => setFormData({ ...formData, freeShippingThreshold: Number(e.target.value) })}
-                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] outline-none"
+                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] outline-none"
               />
             </div>
 
@@ -250,7 +250,7 @@ export default function AdminSettings() {
                 type="text"
                 value={formData.currency || '₹'}
                 onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] font-bold outline-none"
+                className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] font-bold outline-none"
               />
             </div>
           </div>
@@ -260,7 +260,7 @@ export default function AdminSettings() {
           <button
             type="submit"
             disabled={saving}
-            className="bg-[#6B1518] hover:bg-[#4B0F11] disabled:opacity-60 text-white px-8 py-3 rounded-xl font-bold text-xs flex items-center gap-2 shadow-md transition-all cursor-pointer"
+            className="bg-[#1A1A1A] hover:bg-[#0A0A0A] disabled:opacity-60 text-white px-8 py-3 rounded-xl font-bold text-xs flex items-center gap-2 shadow-md transition-all cursor-pointer"
           >
             <Save className="w-4 h-4" />
             <span>{saving ? 'Saving...' : 'Save Store Configuration'}</span>

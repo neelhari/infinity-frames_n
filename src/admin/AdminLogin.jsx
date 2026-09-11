@@ -42,11 +42,11 @@ export default function AdminLogin() {
   };
 
   const handleQuickFill = async () => {
-    setEmail('admin@aalayavastra.com');
+    setEmail('admin@infinityframesn.com');
     setPassword('admin123');
     setError('');
     setSubmitting(true);
-    const result = await signIn('admin@aalayavastra.com', 'admin123');
+    const result = await signIn('admin@infinityframesn.com', 'admin123');
     setSubmitting(false);
 
     if (result.success) {
@@ -60,10 +60,10 @@ export default function AdminLogin() {
     <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center p-4">
       <div className="w-full max-w-sm bg-white rounded-3xl border border-gray-100 shadow-xl p-7 sm:p-8 space-y-6">
         <div className="text-center space-y-2">
-          <div className="w-14 h-14 rounded-full bg-[#6B1518] text-[#D3923A] font-serif font-bold text-lg flex items-center justify-center mx-auto shadow-sm">
+          <div className="w-14 h-14 rounded-full bg-[#1A1A1A] text-[#D4AF37] font-serif font-bold text-lg flex items-center justify-center mx-auto shadow-sm">
             {BRAND.name?.slice(0, 2)?.toUpperCase() || 'AV'}
           </div>
-          <h1 className="font-serif text-xl sm:text-2xl font-bold text-[#6B1518]">Admin Sign In</h1>
+          <h1 className="font-serif text-xl sm:text-2xl font-bold text-[#1A1A1A]">Admin Sign In</h1>
           <p className="text-[11px] text-gray-500">{BRAND.name} Store CMS — Authorized access only</p>
         </div>
 
@@ -71,9 +71,9 @@ export default function AdminLogin() {
         <button
           type="button"
           onClick={handleQuickFill}
-          className="w-full bg-[#FAF5EE] hover:bg-[#F3EAE0] border border-[#D3923A]/50 text-[#6B1518] py-2.5 px-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+          className="w-full bg-[#FAF5EE] hover:bg-[#F3EAE0] border border-[#D4AF37]/50 text-[#1A1A1A] py-2.5 px-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
         >
-          <Sparkles className="w-4 h-4 text-[#D3923A]" />
+          <Sparkles className="w-4 h-4 text-[#D4AF37]" />
           <span>1-Click Master Admin Login</span>
         </button>
 
@@ -89,8 +89,8 @@ export default function AdminLogin() {
                 autoCorrect="off"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@aalayavastra.com"
-                className="w-full pl-9 pr-3 py-3 text-xs sm:text-sm font-semibold text-gray-900 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none"
+                placeholder="admin@infinityframesn.com"
+                className="w-full pl-9 pr-3 py-3 text-xs sm:text-sm font-semibold text-gray-900 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none"
               />
             </div>
           </div>
@@ -106,7 +106,7 @@ export default function AdminLogin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-9 pr-3 py-3 text-xs sm:text-sm font-semibold text-gray-900 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none"
+                className="w-full pl-9 pr-3 py-3 text-xs sm:text-sm font-semibold text-gray-900 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none"
               />
             </div>
           </div>
@@ -120,7 +120,7 @@ export default function AdminLogin() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-[#6B1518] hover:bg-[#4B0F11] disabled:opacity-60 text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer text-xs sm:text-sm"
+            className="w-full bg-[#1A1A1A] hover:bg-[#0A0A0A] disabled:opacity-60 text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer text-xs sm:text-sm"
           >
             {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
             <span>{submitting ? 'Signing In...' : 'Sign In as Admin'}</span>
@@ -128,7 +128,7 @@ export default function AdminLogin() {
         </form>
 
         <p className="text-[10px] text-gray-400 text-center leading-relaxed">
-          Master login: <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold text-gray-700">admin@aalayavastra.com</code> / <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold text-gray-700">admin123</code>
+          Master login: <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold text-gray-700">admin@infinityframesn.com</code> / <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold text-gray-700">admin123</code>
         </p>
       </div>
     </div>

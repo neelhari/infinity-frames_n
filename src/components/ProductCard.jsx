@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, ShoppingBag, Star, Zap } from 'lucide-react';
+import { Heart, ShoppingBag, Star, Sparkles, Wand2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
@@ -19,43 +19,29 @@ export default function ProductCard({ product }) {
     addToCart(product);
   };
 
-  const handleBuyNow = (e) => {
+  const handleCustomize = (e) => {
     e.stopPropagation();
-    addToCart(product);
-    if (!isAuthenticated) {
-      openLoginModal('/checkout');
-    } else {
-      navigate('/checkout');
-    }
+    navigate(`/product/${product.id}`);
   };
 
   return (
     <div
       onClick={() => navigate(`/product/${product.id}`)}
-      className="group bg-white rounded-2xl p-2.5 sm:p-3 border border-gray-100 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full cursor-pointer relative"
+      className="group bg-white rounded-2xl p-2.5 sm:p-3 border border-gray-200 hover:border-[#D4AF37] shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full cursor-pointer relative"
     >
       {/* Image Box */}
-      <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-gray-50">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-gray-100">
         <img
-          src={product.image}
+          src={product.image || 'https://images.unsplash.com/photo-1532767153582-b1a0e5145009?w=600'}
           alt={product.name}
           loading="lazy"
           className="w-full h-full object-cover object-center group-hover:scale-106 transition-transform duration-500 ease-out"
         />
 
-        {/* Video Badge */}
-        {product.video && (
-          <span className="absolute top-2 left-2 z-10 bg-[#D3923A] text-[#6B1518] text-[9px] font-extrabold px-1.5 py-0.5 rounded shadow-xs flex items-center gap-1">
-            ▶ Video
-          </span>
-        )}
-
-        {/* NEW Badge */}
-        {product.isNew && !product.video && (
-          <span className="absolute top-2 left-2 z-10 bg-[#6B1518] text-white text-[9px] sm:text-[10px] font-extrabold px-2 py-0.5 rounded shadow-xs">
-            NEW
-          </span>
-        )}
+        {/* 3D Custom Badge */}
+        <span className="absolute top-2 left-2 z-10 bg-black/70 backdrop-blur-xs text-[#D4AF37] border border-[#D4AF37]/30 text-[9px] font-black px-2 py-0.5 rounded shadow-xs flex items-center gap-1">
+          <Sparkles className="w-2.5 h-2.5" /> 3D PRINT
+        </span>
 
         {/* Wishlist Heart Button */}
         <button
@@ -63,17 +49,17 @@ export default function ProductCard({ product }) {
             e.stopPropagation();
             toggleWishlist(product);
           }}
-          className={`absolute top-2 right-2 w-7.5 h-7.5 bg-white/90 backdrop-blur-xs rounded-full flex items-center justify-center z-10 shadow-sm transition-colors ${
-            isLiked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'
+          className={`absolute top-2 right-2 w-7.5 h-7.5 bg-white/90 backdrop-blur-xs rounded-full flex items-center justify-center z-10 shadow-sm transition-transform hover:scale-110 ${
+            isLiked ? 'text-rose-500' : 'text-gray-500 hover:text-rose-500'
           }`}
           title="Save to Wishlist"
         >
-          <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-red-500' : ''}`} />
+          <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-rose-500' : ''}`} />
         </button>
 
         {/* Discount Badge */}
         {product.discount && (
-          <span className="absolute bottom-2 right-2 z-10 bg-[#6B1518] text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded shadow-xs">
+          <span className="absolute bottom-2 right-2 z-10 bg-gradient-to-r from-[#B38029] to-[#D4AF37] text-gray-950 text-[9px] font-black px-2 py-0.5 rounded shadow-xs">
             {product.discount}
           </span>
         )}
@@ -82,55 +68,44 @@ export default function ProductCard({ product }) {
       {/* Product Information */}
       <div className="pt-2.5 flex flex-col gap-1 flex-1 justify-between">
         <div>
-          <span className="text-[9px] tracking-widest font-bold text-[#D3923A] uppercase block">
-            {product.subcategory || product.category || BRAND.name.toUpperCase()}
+          <span className="text-[9px] tracking-widest font-extrabold text-[#B38029] uppercase block">
+            {product.subcategory || product.category || 'CUSTOM 3D GIFT'}
           </span>
 
-          <h3 className="text-xs sm:text-sm font-serif font-bold text-gray-900 line-clamp-1 group-hover:text-[#6B1518] transition-colors mt-0.5">
+          <h3 className="text-xs sm:text-sm font-serif font-bold text-gray-900 line-clamp-1 group-hover:text-[#B38029] transition-colors mt-0.5">
             {product.name}
           </h3>
 
           {/* Rating */}
-          <div className="flex items-center gap-1 text-[10px] text-amber-400 mt-1">
+          <div className="flex items-center gap-1 text-[10px] text-amber-500 mt-1">
             <div className="flex">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
               ))}
             </div>
-            <span className="text-gray-500 text-[10px] font-semibold">({product.reviewsCount || 12})</span>
+            <span className="text-gray-500 text-[10px] font-semibold">({product.reviewsCount || 24})</span>
           </div>
         </div>
 
-        {/* Price */}
-        <div className="flex items-baseline gap-1.5 pt-1.5 border-t border-gray-50 mt-1">
-          <span className="text-xs sm:text-base font-extrabold text-gray-900">
-            ₹{product.price.toLocaleString('en-IN')}
-          </span>
-          {product.oldPrice && (
-            <span className="text-[10px] text-gray-400 line-through">
-              ₹{product.oldPrice.toLocaleString('en-IN')}
+        {/* Price & Action Button */}
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100 mt-1.5">
+          <div>
+            <span className="font-serif font-bold text-sm text-gray-950">
+              ₹{(product.price || 999).toLocaleString('en-IN')}
             </span>
-          )}
-        </div>
+            {product.originalPrice && (
+              <span className="text-[10px] text-gray-400 line-through ml-1.5">
+                ₹{product.originalPrice.toLocaleString('en-IN')}
+              </span>
+            )}
+          </div>
 
-        {/* Add to Cart & Buy Now Actions */}
-        <div className="flex items-center gap-1.5 pt-1">
           <button
-            onClick={handleAddToCart}
-            title="Add to Cart"
-            className="flex-1 min-w-0 bg-white hover:bg-gray-50 text-[#6B1518] border border-[#6B1518] text-[9px] sm:text-[11px] font-bold px-1.5 sm:px-2.5 py-1.5 rounded-lg flex items-center justify-center gap-1 transition-colors"
+            onClick={handleCustomize}
+            className="bg-[#1A1A1A] hover:bg-gray-800 text-[#D4AF37] text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 border border-[#D4AF37]/30 transition-all cursor-pointer shadow-xs"
           >
-            <ShoppingBag className="w-3 h-3 shrink-0" />
-            <span className="sm:hidden">Add</span>
-            <span className="hidden sm:inline">Add to Cart</span>
-          </button>
-          <button
-            onClick={handleBuyNow}
-            title="Buy Now"
-            className="flex-1 min-w-0 bg-[#6B1518] hover:bg-[#4B0F11] text-white text-[9px] sm:text-[11px] font-bold px-1.5 sm:px-2.5 py-1.5 rounded-lg flex items-center justify-center gap-1 shadow-2xs transition-colors"
-          >
-            <Zap className="w-3 h-3 shrink-0 fill-current" />
-            <span>Buy Now</span>
+            <Wand2 className="w-3 h-3" />
+            <span>Customize</span>
           </button>
         </div>
       </div>

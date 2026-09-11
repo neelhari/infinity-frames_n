@@ -105,7 +105,7 @@ export default function AdminProducts() {
 
         <button
           onClick={handleOpenAddModal}
-          className="bg-[#6B1518] hover:bg-[#4B0F11] text-white text-xs font-bold px-5 py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all self-start sm:self-auto"
+          className="bg-[#1A1A1A] hover:bg-[#0A0A0A] text-white text-xs font-bold px-5 py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Add New Clothing Item</span>
@@ -121,7 +121,7 @@ export default function AdminProducts() {
             placeholder="Search by product name or SKU..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full text-xs pl-10 pr-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#6B1518]"
+            className="w-full text-xs pl-10 pr-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#1A1A1A]"
           />
         </div>
 
@@ -150,7 +150,7 @@ export default function AdminProducts() {
                     type="checkbox"
                     checked={selectedItems.length === filteredProducts.length && filteredProducts.length > 0}
                     onChange={toggleSelectAll}
-                    className="rounded text-[#6B1518]"
+                    className="rounded text-[#1A1A1A]"
                   />
                 </th>
                 <th className="p-4">Product</th>
@@ -177,7 +177,7 @@ export default function AdminProducts() {
                         type="checkbox"
                         checked={selectedItems.includes(p.id)}
                         onChange={() => toggleSelectItem(p.id)}
-                        className="rounded text-[#6B1518]"
+                        className="rounded text-[#1A1A1A]"
                       />
                     </td>
                     <td className="p-4">

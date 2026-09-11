@@ -1,313 +1,260 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { X, Trash2, ShoppingBag, ArrowRight, MessageCircle, Truck, Sparkles, Check } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Tag, Plus, Minus, Sparkles } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
-import { BRAND, waLink } from '../config/brand';
+import { BRAND } from '../config/brand';
 
 export default function CartDrawer() {
   const navigate = useNavigate();
-  const { isAuthenticated, openLoginModal } = useAuth();
   const {
-    cartItems,
     isCartOpen,
-    setIsCartOpen,
-    removeFromCart,
-    updateQuantity,
+    closeCart,
+    cartItems,
+    cartCount,
     subtotal,
-    isFreeShipping,
-    amountNeededForFreeShipping,
-    clearCart,
+    discount,
     appliedCoupon,
-    discountAmount,
     applyCoupon,
     removeCoupon,
+    updateQuantity,
+    removeFromCart,
   } = useCart();
 
   const [couponInput, setCouponInput] = useState('');
-  const [couponError, setCouponError] = useState('');
+  const [couponMsg, setCouponMsg] = useState('');
 
   if (!isCartOpen) return null;
 
+  const freeShippingThreshold = BRAND.freeShippingThreshold || 999;
+  const isFreeShipping = subtotal >= freeShippingThreshold;
+  const missingAmount = freeShippingThreshold - subtotal;
+  const finalTotal = subtotal - discount;
+
   const handleApplyCoupon = (e) => {
     e.preventDefault();
-    const result = applyCoupon(couponInput);
-    if (result.success) {
-      setCouponError('');
+    if (!couponInput.trim()) return;
+    const res = applyCoupon(couponInput.trim().toUpperCase());
+    if (res.success) {
+      setCouponMsg(res.message);
       setCouponInput('');
     } else {
-      setCouponError(result.message);
+      setCouponMsg(res.message);
     }
-  };
-
-  const finalTotal = subtotal - discountAmount;
-
-  const handleWhatsAppCheckout = () => {
-    if (cartItems.length === 0) return;
-
-    let text = `*New Order Request - ${BRAND.name}*\n`;
-    text += `-----------------------------------\n`;
-    cartItems.forEach((item, index) => {
-      text += `${index + 1}. *${item.name}*\n   Qty: ${item.quantity} x ₹${item.price} = ₹${item.price * item.quantity}\n`;
-    });
-    text += `-----------------------------------\n`;
-    text += `*Subtotal:* ₹${subtotal.toLocaleString('en-IN')}\n`;
-    if (appliedCoupon) {
-      text += `*Discount (${appliedCoupon.code}):* -₹${discountAmount.toLocaleString('en-IN')}\n`;
-    }
-    text += `*Estimated Shipping:* ${isFreeShipping ? 'FREE' : '₹99'}\n`;
-    text += `*Total Amount:* ₹${(finalTotal + (isFreeShipping ? 0 : 99)).toLocaleString('en-IN')}\n\n`;
-    text += `Please confirm availability and payment instructions. Thank you!`;
-
-    window.open(waLink(text), '_blank');
   };
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
-      {/* Dark backdrop */}
+      {/* Backdrop */}
       <div
-        onClick={() => setIsCartOpen(false)}
-        className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
+        onClick={closeCart}
+        className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-fadeIn"
       />
 
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col z-10 animate-slideLeft">
+        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between">
+          
           {/* Header */}
-          <div className="p-4 sm:p-5 bg-[#6B1518] text-white flex items-center justify-between">
+          <div className="p-4 sm:p-5 bg-gradient-to-r from-[#1A1A1A] via-[#2A2418] to-[#1A1A1A] text-white flex items-center justify-between border-b border-[#D4AF37]/30">
             <div className="flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-[#D3923A]" />
-              <h3 className="font-serif font-bold text-lg text-white">Your Shopping Cart</h3>
-              <span className="bg-[#4B0F11] text-[#D3923A] text-xs font-bold px-2 py-0.5 rounded-full border border-[#831A1D]">
-                {cartItems.length} items
+              <ShoppingBag className="w-5 h-5 text-[#D4AF37]" />
+              <h2 className="font-serif font-bold text-base sm:text-lg text-white">Your 3D Gift Cart</h2>
+              <span className="bg-[#D4AF37] text-gray-950 font-black text-xs px-2 py-0.5 rounded-full">
+                {cartCount}
               </span>
             </div>
             <button
-              onClick={() => setIsCartOpen(false)}
-              className="p-1 text-gray-200 hover:text-white rounded"
+              onClick={closeCart}
+              className="p-1 rounded-full text-gray-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Free Shipping Progress Indicator */}
-          <div className="bg-[#F8F0F0] p-3 px-5 border-b border-[#EADEDF] text-xs text-[#6B1518]">
+          <div className="bg-[#FAF5EB] p-3 px-5 border-b border-[#D4AF37]/20 text-xs text-[#B38029]">
             {isFreeShipping ? (
-              <div className="flex items-center gap-2 font-bold text-emerald-700">
-                <Truck className="w-4 h-4 text-emerald-600" />
-                <span>🎉 You qualify for FREE Shipping!</span>
-              </div>
+              <span className="font-bold flex items-center gap-1.5 text-emerald-800">
+                ✨ Congratulations! You unlocked 100% Free Express Shipping!
+              </span>
             ) : (
               <div className="space-y-1.5">
-                <div className="flex justify-between font-medium">
-                  <span>Add <strong>₹{amountNeededForFreeShipping.toLocaleString('en-IN')}</strong> more for FREE shipping</span>
-                  <span>₹{subtotal}/₹{BRAND.freeShippingThreshold.toLocaleString('en-IN')}</span>
+                <div className="flex justify-between font-semibold">
+                  <span>Add ₹{missingAmount.toLocaleString('en-IN')} more for Free Shipping</span>
+                  <span>{Math.round((subtotal / freeShippingThreshold) * 100)}%</span>
                 </div>
-                <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
                   <div
-                    className="bg-[#6B1518] h-full rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min(100, (subtotal / BRAND.freeShippingThreshold) * 100)}%` }}
+                    className="bg-[#D4AF37] h-full rounded-full transition-all duration-300"
+                    style={{ width: `${Math.min(100, (subtotal / freeShippingThreshold) * 100)}%` }}
                   />
                 </div>
               </div>
             )}
           </div>
 
-          {/* Cart Body */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {/* Cart Item List */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
             {cartItems.length === 0 ? (
-              <div className="text-center py-16 space-y-4">
-                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto text-gray-400">
-                  <ShoppingBag className="w-10 h-10" />
+              <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-12">
+                <div className="w-16 h-16 rounded-full bg-[#FAF5EB] border border-[#D4AF37]/30 flex items-center justify-center text-[#B38029]">
+                  <ShoppingBag className="w-8 h-8" />
                 </div>
-                <h4 className="font-serif text-xl font-bold text-gray-800">Your cart is empty</h4>
-                <p className="text-xs text-gray-500 max-w-xs mx-auto">
-                  Explore our sarees, womenswear & fabric collections to discover beautiful products.
-                </p>
+                <div>
+                  <h3 className="font-serif font-bold text-lg text-gray-900">Your Cart is Empty</h3>
+                  <p className="text-xs text-gray-500 max-w-xs mx-auto mt-1">
+                    Explore our customized 3D Moon Lamps, Lithophanes & Acrylic LED gifts.
+                  </p>
+                </div>
                 <button
                   onClick={() => {
-                    setIsCartOpen(false);
+                    closeCart();
                     navigate('/shop');
                   }}
-                  className="bg-[#6B1518] hover:bg-[#4B0F11] text-white px-6 py-2.5 rounded-lg text-xs font-bold inline-flex items-center gap-2 transition-colors shadow-sm"
+                  className="bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-105 text-gray-950 px-6 py-2.5 rounded-xl text-xs font-bold inline-flex items-center gap-2 transition-all shadow-md cursor-pointer"
                 >
-                  <span>Explore Products</span>
+                  <span>Explore 3D Collection</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             ) : (
-              <div className="space-y-3">
-                {cartItems.map((item) => (
-                  <div
-                    key={item.itemKey}
-                    className="flex gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100 relative group"
-                  >
+              cartItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-200 relative group"
+                >
+                  <div className="w-20 h-20 bg-gray-100 rounded-xl overflow-hidden shrink-0 relative">
                     <img
-                      src={item.image}
+                      src={item.image || 'https://images.unsplash.com/photo-1532767153582-b1a0e5145009?w=300'}
                       alt={item.name}
-                      className="w-20 h-24 object-cover rounded-lg shrink-0"
+                      className="w-full h-full object-cover"
                     />
+                    {item.customPhoto && (
+                      <div className="absolute bottom-0 right-0 w-6 h-6 rounded-tl bg-black/70 overflow-hidden border-t border-l border-white/40" title="Custom Photo Uploaded">
+                        <img src={item.customPhoto} alt="Upload" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
 
-                    <div className="flex-1 flex flex-col justify-between">
-                      <div>
-                        <div className="flex justify-between items-start pr-6">
-                          <h4 className="font-serif text-sm font-semibold text-gray-900 line-clamp-1">
-                            {item.name}
-                          </h4>
-                        </div>
-                        <span className="text-[10px] text-[#D3923A] font-bold uppercase tracking-wider block">
-                          {item.subcategory || item.category}
-                        </span>
-                        <div className="text-xs font-bold text-[#6B1518] mt-1">
-                          ₹{item.price.toLocaleString('en-IN')}
-                        </div>
+                  <div className="flex-1 min-w-0 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-start justify-between gap-1">
+                        <h4 className="font-serif font-bold text-xs sm:text-sm text-gray-900 truncate">
+                          {item.name}
+                        </h4>
+                        <button
+                          onClick={() => removeFromCart(item.id)}
+                          className="text-gray-400 hover:text-rose-600 transition-colors p-1"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
 
-                      {/* Quantity Controls */}
-                      <div className="flex items-center justify-between pt-2">
-                        <div className="flex items-center border border-gray-300 rounded bg-white overflow-hidden">
-                          <button
-                            onClick={() => updateQuantity(item.itemKey, item.quantity - 1)}
-                            className="px-2 py-0.5 text-gray-600 hover:bg-gray-100 text-xs font-bold"
-                          >
-                            -
-                          </button>
-                          <span className="px-3 text-xs font-bold text-gray-800">{item.quantity}</span>
-                          <button
-                            onClick={() => updateQuantity(item.itemKey, item.quantity + 1)}
-                            className="px-2 py-0.5 text-gray-600 hover:bg-gray-100 text-xs font-bold"
-                          >
-                            +
-                          </button>
-                        </div>
+                      <div className="flex items-center gap-2 text-[10px] text-gray-500 mt-0.5">
+                        {item.selectedSize && <span>Size: {item.selectedSize}</span>}
+                        {item.selectedColor && <span>• Style: {item.selectedColor}</span>}
+                      </div>
 
-                        <span className="font-bold text-xs text-gray-900">
-                          ₹{(item.price * item.quantity).toLocaleString('en-IN')}
-                        </span>
+                      {item.customText && (
+                        <div className="inline-flex items-center gap-1 text-[10px] text-[#B38029] bg-[#FAF5EB] px-2 py-0.5 rounded-md mt-1 border border-[#D4AF37]/30">
+                          <Sparkles className="w-2.5 h-2.5" />
+                          <span className="truncate max-w-[160px]">"{item.customText}"</span>
+                        </div>
+                      )}
+
+                      <div className="text-xs font-bold text-gray-900 mt-1">
+                        ₹{(item.price || 0).toLocaleString('en-IN')}
                       </div>
                     </div>
 
-                    {/* Delete Item */}
-                    <button
-                      onClick={() => removeFromCart(item.itemKey)}
-                      className="absolute top-2.5 right-2.5 text-gray-400 hover:text-red-500 p-1"
-                      title="Remove item"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="flex items-center border border-gray-300 rounded-lg bg-white overflow-hidden">
+                        <button
+                          onClick={() => updateQuantity(item.id, (item.quantity || 1) - 1)}
+                          className="px-2 py-0.5 text-gray-500 hover:bg-gray-100"
+                        >
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="px-2 text-xs font-bold text-gray-800">
+                          {item.quantity || 1}
+                        </span>
+                        <button
+                          onClick={() => updateQuantity(item.id, (item.quantity || 1) + 1)}
+                          className="px-2 py-0.5 text-gray-500 hover:bg-gray-100"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                ))}
-
-                {/* Clear Cart link */}
-                <div className="text-right pt-1">
-                  <button
-                    onClick={clearCart}
-                    className="text-[11px] text-gray-500 hover:text-red-600 underline"
-                  >
-                    Clear Cart
-                  </button>
                 </div>
-              </div>
+              ))
             )}
           </div>
 
-          {/* Cart Footer / Checkout Summary */}
+          {/* Footer & Checkout Area */}
           {cartItems.length > 0 && (
-            <div className="p-4 sm:p-5 bg-white border-t border-gray-100 space-y-3">
-              {/* Promo Code Form */}
-              {appliedCoupon ? (
-                <div className="text-[11px] text-emerald-700 bg-emerald-50 p-2 rounded flex items-center justify-between gap-1">
-                  <span className="flex items-center gap-1">
-                    <Check className="w-3.5 h-3.5" />
-                    Promo code <strong>{appliedCoupon.code}</strong> applied!
-                  </span>
-                  <button type="button" onClick={removeCoupon} className="font-bold underline">Remove</button>
-                </div>
-              ) : (
-                <form onSubmit={handleApplyCoupon} className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Enter promo code"
-                    value={couponInput}
-                    onChange={(e) => setCouponInput(e.target.value)}
-                    className="flex-1 text-xs p-2 rounded-lg border border-gray-200 focus:outline-none focus:border-[#6B1518] uppercase"
-                  />
-                  <button
-                    type="submit"
-                    className="bg-gray-900 hover:bg-black text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors"
-                  >
-                    Apply
-                  </button>
-                </form>
-              )}
-              {couponError && (
-                <div className="text-[11px] text-red-600 bg-red-50 p-2 rounded">
-                  {couponError}
-                </div>
+            <div className="p-4 sm:p-5 border-t border-gray-100 bg-white space-y-3">
+              {/* Promo Coupon Form */}
+              <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Coupon (e.g. INFINITY10)"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value)}
+                  className="flex-1 text-xs p-2 rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#D4AF37] uppercase"
+                />
+                <button
+                  type="submit"
+                  className="bg-[#1A1A1A] hover:bg-gray-800 text-[#D4AF37] px-3.5 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer border border-[#D4AF37]/30"
+                >
+                  Apply
+                </button>
+              </form>
+
+              {couponMsg && (
+                <p className="text-[11px] text-emerald-700 font-bold">{couponMsg}</p>
               )}
 
               {/* Price Breakdown */}
-              <div className="space-y-1.5 text-xs text-gray-600 border-t border-gray-100 pt-3">
+              <div className="space-y-1.5 text-xs text-gray-600 pt-1">
                 <div className="flex justify-between">
-                  <span>Subtotal:</span>
-                  <span className="font-semibold text-gray-800">₹{subtotal.toLocaleString('en-IN')}</span>
+                  <span>Subtotal</span>
+                  <span className="font-bold text-gray-900">₹{subtotal.toLocaleString('en-IN')}</span>
                 </div>
-                {appliedCoupon && (
-                  <div className="flex justify-between text-emerald-600 font-medium">
-                    <span>Discount ({appliedCoupon.code}):</span>
-                    <span>-₹{discountAmount.toLocaleString('en-IN')}</span>
+                {discount > 0 && (
+                  <div className="flex justify-between text-emerald-700 font-bold">
+                    <span>Discount</span>
+                    <span>-₹{discount.toLocaleString('en-IN')}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span>Delivery Charge:</span>
-                  <span className="font-semibold">{isFreeShipping ? <strong className="text-emerald-600">FREE</strong> : '₹99'}</span>
+                  <span>Express Shipping</span>
+                  <span className="font-bold text-gray-900">
+                    {isFreeShipping ? <span className="text-emerald-700">FREE</span> : '₹99'}
+                  </span>
                 </div>
-                <div className="flex justify-between text-sm font-bold text-gray-900 pt-2 border-t border-gray-200">
+                <div className="flex justify-between text-sm font-bold text-gray-900 pt-2 border-t border-gray-100">
                   <span>Total Amount:</span>
-                  <span className="text-[#6B1518] text-lg font-extrabold">
+                  <span className="text-base text-gray-950 font-serif font-black">
                     ₹{(finalTotal + (isFreeShipping ? 0 : 99)).toLocaleString('en-IN')}
                   </span>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="space-y-2 pt-1">
-                <button
-                  onClick={() => {
-                    setIsCartOpen(false);
-                    if (!isAuthenticated) {
-                      openLoginModal('/checkout');
-                    } else {
-                      navigate('/checkout');
-                    }
-                  }}
-                  className="w-full bg-[#6B1518] hover:bg-[#4B0F11] text-white py-3 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-colors"
-                >
-                  <ShoppingBag className="w-4 h-4" />
-                  <span>Proceed to Online Checkout</span>
-                </button>
-
-                <button
-                  onClick={handleWhatsAppCheckout}
-                  className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-colors"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Order via WhatsApp</span>
-                </button>
-
-                <div className="text-center pt-1">
-                  <button
-                    onClick={() => {
-                      setIsCartOpen(false);
-                      navigate('/cart');
-                    }}
-                    className="text-xs font-semibold text-gray-600 hover:text-[#6B1518] underline"
-                  >
-                    View Full Cart Page →
-                  </button>
-                </div>
-              </div>
+              {/* Checkout Action Button */}
+              <button
+                onClick={() => {
+                  closeCart();
+                  navigate('/checkout');
+                }}
+                className="w-full bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-105 text-gray-950 py-3.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer"
+              >
+                <span>PROCEED TO CHECKOUT</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
           )}
+
         </div>
       </div>
     </div>

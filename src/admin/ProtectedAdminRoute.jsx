@@ -12,7 +12,7 @@ export default function ProtectedAdminRoute({ children }) {
       <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7] px-4">
         <div className="max-w-md text-center space-y-3 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
           <ShieldAlert className="w-10 h-10 text-amber-500 mx-auto" />
-          <h1 className="font-serif text-xl font-bold text-[#6B1518]">Supabase Not Configured</h1>
+          <h1 className="font-serif text-xl font-bold text-[#1A1A1A]">Supabase Not Configured</h1>
           <p className="text-xs text-gray-500">
             VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY are missing from .env. The admin panel cannot
             authenticate or load data until this is fixed.
@@ -25,7 +25,7 @@ export default function ProtectedAdminRoute({ children }) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7]">
-        <Loader2 className="w-6 h-6 animate-spin text-[#6B1518]" />
+        <Loader2 className="w-6 h-6 animate-spin text-[#1A1A1A]" />
       </div>
     );
   }
@@ -38,9 +38,9 @@ export default function ProtectedAdminRoute({ children }) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7] px-4">
         <div className="max-w-md text-center space-y-4 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <ShieldAlert className="w-10 h-10 text-[#6B1518] mx-auto" />
+          <ShieldAlert className="w-10 h-10 text-[#1A1A1A] mx-auto" />
           <div className="space-y-1.5">
-            <h1 className="font-serif text-xl font-bold text-[#6B1518]">Access Restricted</h1>
+            <h1 className="font-serif text-xl font-bold text-[#1A1A1A]">Access Restricted</h1>
             <p className="text-xs text-gray-500">
               You're signed in as <strong className="text-gray-800">{user?.email}</strong>, but this account is
               not authorized as a store admin. Ask the store owner to add your account to the{' '}
@@ -49,7 +49,7 @@ export default function ProtectedAdminRoute({ children }) {
           </div>
           <button
             onClick={signOut}
-            className="inline-flex items-center gap-2 text-xs font-bold text-[#6B1518] bg-[#F8F0F0] hover:bg-[#EADEDF] px-4 py-2.5 rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-bold text-[#1A1A1A] bg-[#F8F0F0] hover:bg-[#EADEDF] px-4 py-2.5 rounded-xl transition-colors"
           >
             <LogOut className="w-3.5 h-3.5" /> Sign Out
           </button>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Phone, Mail, MessageCircle, MapPin, Send, CheckCircle2, User, HelpCircle, ChevronDown, AlertTriangle } from 'lucide-react';
+import { Phone, Mail, MessageCircle, MapPin, Send, CheckCircle2, User, HelpCircle, ChevronDown, Sparkles, Clock, AlertCircle } from 'lucide-react';
 import { BRAND, waLink } from '../config/brand';
 import { saveContactMessageToSupabase } from '../lib/supabase';
 
@@ -8,28 +8,23 @@ export default function ContactPage() {
     name: '',
     phone: '',
     email: '',
+    occasion: 'Anniversary Gift',
     message: ''
   });
 
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [saveFailed, setSaveFailed] = useState(false);
 
   const validate = () => {
     const errs = {};
-    if (!formData.name.trim()) errs.name = 'Full Name is required';
+    if (!formData.name.trim()) errs.name = 'Please provide your full name';
     if (!formData.phone.trim()) {
-      errs.phone = 'Phone number is required';
+      errs.phone = 'WhatsApp phone number is required';
     } else if (!/^[0-9+\s-]{10,15}$/.test(formData.phone.trim())) {
-      errs.phone = 'Enter a valid phone number';
+      errs.phone = 'Please enter a valid 10-digit number';
     }
-    if (!formData.email.trim()) {
-      errs.email = 'Email address is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errs.email = 'Enter a valid email address';
-    }
-    if (!formData.message.trim()) errs.message = 'Please enter your message';
+    if (!formData.message.trim()) errs.message = 'Please tell us what customized gift you need';
 
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -40,329 +35,287 @@ export default function ContactPage() {
     if (!validate() || submitting) return;
 
     setSubmitting(true);
-    const result = await saveContactMessageToSupabase(formData);
+    await saveContactMessageToSupabase(formData);
     setSubmitting(false);
-    setSaveFailed(!result.success);
     setSubmitted(true);
   };
 
   const contactCards = [
     {
-      icon: <Phone className="w-6 h-6 text-[#6B1518]" />,
-      title: "Phone Support",
+      icon: <MessageCircle className="w-7 h-7 text-[#25D366]" />,
+      title: "Direct WhatsApp",
       detail: `+91 ${BRAND.phone}`,
-      subdetail: "Available 9:00 AM - 9:00 PM IST",
+      subdetail: "Instant response for photo proofs & custom orders",
+      href: waLink(`Hello Naresh, I'm interested in ordering a customized 3D gift from Infinity Frames N.`),
+      actionText: "Chat On WhatsApp",
+      highlight: true
+    },
+    {
+      icon: <Phone className="w-7 h-7 text-[#B38029]" />,
+      title: "Founder Contact",
+      detail: `${BRAND.ownerFullName}`,
+      subdetail: `+91 ${BRAND.phone} (9 AM - 9 PM IST)`,
       href: `tel:${BRAND.phone}`,
-      actionText: "Call Us Now"
+      actionText: "Call Naresh Now",
+      highlight: false
     },
     {
-      icon: <MessageCircle className="w-6 h-6 text-[#25D366]" />,
-      title: "WhatsApp Chat",
-      detail: `+91 ${BRAND.phone}`,
-      subdetail: "Instant response for product inquiries",
-      href: waLink(`Hello ${BRAND.name}, I have an inquiry.`),
-      actionText: "Chat on WhatsApp"
-    },
-    {
-      icon: <Mail className="w-6 h-6 text-[#6B1518]" />,
-      title: "Email Us",
-      detail: BRAND.email,
-      subdetail: "Send your detailed questions",
-      href: `mailto:${BRAND.email}`,
-      actionText: "Send Email"
+      icon: <MapPin className="w-7 h-7 text-emerald-600]" />,
+      title: "3D Printing Studio",
+      detail: "Drakshramam, Andhra Pradesh",
+      subdetail: "Near Bhimeswara Swamy Temple - 533262",
+      href: "https://maps.google.com/?q=Drakshramam+Andhra+Pradesh",
+      actionText: "Open Location Map",
+      highlight: false
     }
   ];
 
   const faqs = [
     {
-      q: "How can I place an order for sarees or womenswear?",
-      a: `You can easily add items to your cart on this website and click 'Place Order via WhatsApp', or reach out to us directly at +91 ${BRAND.phone}.`
+      q: "How do I submit my photo for 3D Moon Lamps or Lithophanes?",
+      a: "You can upload your photo directly on the product customizer screen during order placement, or simply send the high-resolution photo on WhatsApp to +91 9494066914 along with your order ID."
     },
     {
-      q: "What payment methods are accepted?",
-      a: "We accept UPI (GPay, PhonePe, Paytm), Net Banking, direct Bank Transfer, and cash on delivery where available."
+      q: "How long does it take to 3D print and deliver my customized gift?",
+      a: "Each 3D moon lamp or lithophane takes 18-24 hours of continuous high-precision printing to achieve smooth light diffusion. Orders are dispatched within 24-48 hours and delivered within 3-5 business days across India via Bluedart Express."
     },
     {
-      q: "What is the delivery time across India?",
-      a: "Orders are usually dispatched within 24 hours. Standard delivery takes 3 to 5 business days across India."
+      q: "Can I see a 3D digital preview before you start printing?",
+      a: "Yes! Our product customizer provides an instant live preview of your uploaded photo and engraved text on the frame. Additionally, Naresh can share a digital proof on WhatsApp before 3D slicing upon request."
     },
     {
-      q: "Is there free shipping available?",
-      a: `Yes! All orders above ₹${BRAND.freeShippingThreshold.toLocaleString('en-IN')} qualify for 100% Free Express Shipping.`
+      q: "What materials do you use for the 3D frames and lamps?",
+      a: "We use 100% premium, eco-friendly, biodegradable PLA biopolymers imported for optical diffusion, paired with natural solid wooden bases and touch-sensitive dimmable LED modules."
     },
     {
-      q: "Do you have a physical store I can visit?",
-      a: `Yes — you're welcome to visit us at ${BRAND.address.full}.`
+      q: "What if the 3D gift arrives damaged during courier transit?",
+      a: "We pack all customized gifts in shock-absorbing multi-layer foam and wooden-reinforced boxes. In the rare event of transit damage, we provide a 100% free re-print and expedited replacement upon sharing an unboxing video."
     }
   ];
 
-  const [openFaq, setOpenFaq] = useState(null);
+  const [openFaq, setOpenFaq] = useState(0);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+    <div className="min-h-screen bg-[#FAF9F6] pb-24 pt-8 px-4 sm:px-6 lg:px-8 space-y-16">
       {/* Header */}
       <section className="text-center max-w-3xl mx-auto space-y-3" data-aos="fade-down">
-        <span className="text-xs uppercase font-bold tracking-widest text-[#D3923A]">We Are Here To Help</span>
-        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900">
-          Contact {BRAND.name}
+        <div className="inline-flex items-center gap-2 bg-[#FAF5EB] text-[#B38029] border border-[#D4AF37]/40 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+          <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+          <span>Screen 12 • Contact & Direct Assistance</span>
+        </div>
+        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-950">
+          Get in Touch with {BRAND.name}
         </h1>
         <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
-          Have a question about a product, order tracking, or saree draping guidance? Reach out to {BRAND.ownerName} directly.
+          Need a personalized 3D gift for an upcoming anniversary, birthday, or corporate event? Talk directly to founder <strong>Naresh Kukkala</strong>.
         </p>
       </section>
 
       {/* Contact Cards Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6" data-aos="fade-up">
+      <section className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6" data-aos="fade-up">
         {contactCards.map((card, idx) => (
-          <a
+          <div
             key={idx}
-            href={card.href}
-            target={card.href.startsWith('http') ? '_blank' : '_self'}
-            rel="noreferrer"
-            className="group bg-white p-6 sm:p-8 rounded-2xl border border-gray-100 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-6 text-center"
+            className={`bg-white p-6 sm:p-8 rounded-3xl border transition-all duration-300 flex flex-col justify-between space-y-6 text-center ${
+              card.highlight
+                ? 'border-[#25D366] shadow-lg ring-2 ring-[#25D366]/20 relative overflow-hidden'
+                : 'border-gray-200 hover:border-[#D4AF37] hover:shadow-md'
+            }`}
           >
+            {card.highlight && (
+              <span className="absolute top-0 right-0 bg-[#25D366] text-white text-[9px] font-black uppercase px-3 py-1 rounded-bl-xl tracking-wider">
+                Instant Response
+              </span>
+            )}
             <div className="space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-[#F8F0F0] mx-auto flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="w-16 h-16 rounded-2xl bg-[#FAF5EB] border border-[#D4AF37]/30 mx-auto flex items-center justify-center">
                 {card.icon}
               </div>
               <div>
-                <h3 className="font-serif text-xl font-bold text-gray-900">{card.title}</h3>
-                <p className="text-base font-extrabold text-[#6B1518] mt-1">{card.detail}</p>
-                <p className="text-xs text-gray-400 mt-1">{card.subdetail}</p>
+                <h3 className="font-serif font-bold text-lg text-gray-900">{card.title}</h3>
+                <p className="font-mono text-sm font-black text-[#B38029] mt-0.5">{card.detail}</p>
+                <p className="text-xs text-gray-500 mt-1">{card.subdetail}</p>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-gray-100">
-              <span className="text-xs font-bold text-[#6B1518] group-hover:underline">
-                {card.actionText} →
-              </span>
-            </div>
-          </a>
+            <a
+              href={card.href}
+              target={card.href.startsWith('http') ? '_blank' : '_self'}
+              rel="noreferrer"
+              className={`w-full py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                card.highlight
+                  ? 'bg-[#25D366] hover:bg-[#20bd5a] text-white shadow-md'
+                  : 'bg-gray-950 hover:bg-gray-800 text-[#D4AF37]'
+              }`}
+            >
+              <span>{card.actionText}</span>
+            </a>
+          </div>
         ))}
       </section>
 
-      {/* Main Form & Business Information Section */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12" data-aos="fade-up">
-        {/* Left Side: Business Info */}
-        <div className="lg:col-span-5 bg-[#6B1518] text-white p-8 sm:p-10 rounded-3xl space-y-8 flex flex-col justify-between shadow-xl">
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-full bg-[#FAF5EE] ring-2 ring-[#D3923A]/60 shadow-md flex items-center justify-center shrink-0 overflow-hidden p-0.5">
-                <img src="/logo-icon.png" alt={BRAND.name} className="h-full w-full object-contain" />
-              </div>
-              <div>
-                <div className="font-serif font-bold text-2xl text-white tracking-wide">
-                  {BRAND.name}
-                </div>
-                <div className="text-[10px] uppercase tracking-[0.18em] text-[#D3923A] font-semibold">
-                  {BRAND.tagline}
-                </div>
-              </div>
-            </div>
-
-            <p className="text-gray-200 text-xs sm:text-sm leading-relaxed">
-              We look forward to serving you with stylish and affordable fashion. Feel free to contact us anytime for customized saree inquiries or order assistance.
-            </p>
-
-            <div className="space-y-4 text-xs sm:text-sm text-gray-200 pt-4 border-t border-[#831A1D]">
-              <div className="flex items-center gap-3">
-                <User className="w-4 h-4 text-[#D3923A]" />
-                <span>Owner: <strong className="text-white">{BRAND.ownerFullName}</strong></span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-[#D3923A]" />
-                <a href={`tel:${BRAND.phone}`} className="hover:text-white underline">
-                  {BRAND.phone}
-                </a>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <MessageCircle className="w-4 h-4 text-[#25D366]" />
-                <a href={waLink(`Hello ${BRAND.name}, I have an inquiry.`)} target="_blank" rel="noreferrer" className="hover:text-white underline">
-                  WhatsApp: {BRAND.phone}
-                </a>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-[#D3923A]" />
-                <a href={`mailto:${BRAND.email}`} className="hover:text-white underline">
-                  {BRAND.email}
-                </a>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-[#D3923A] mt-0.5 shrink-0" />
-                <span>{BRAND.address.full}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-6 border-t border-[#831A1D] text-xs text-gray-300">
-            <p><strong>Note:</strong> Submitting this contact form does not require any payment.</p>
-          </div>
-        </div>
-
-        {/* Right Side: Interactive Form */}
-        <div className="lg:col-span-7 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6">
+      {/* Main Grid: Form & FAQs */}
+      <section className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-start" data-aos="fade-up">
+        {/* Contact Form */}
+        <div className="lg:col-span-6 bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm space-y-6">
           <div>
-            <h3 className="font-serif text-2xl font-bold text-gray-900">Send Us a Message</h3>
-            <p className="text-xs text-gray-500 mt-1">Fill out the form below and we will get back to you promptly.</p>
+            <span className="text-[11px] font-bold text-[#B38029] uppercase tracking-wider">Custom Gift Request</span>
+            <h3 className="font-serif font-bold text-2xl text-gray-900 mt-1">Send Us Your Requirement</h3>
+            <p className="text-xs text-gray-500 mt-1">
+              Share details about your desired 3D frame, lamp, or lithophane.
+            </p>
           </div>
 
           {submitted ? (
-            saveFailed ? (
-              <div className="bg-amber-50 border border-amber-200 p-8 rounded-2xl text-center space-y-4 animate-fadeIn">
-                <div className="w-16 h-16 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto">
-                  <AlertTriangle className="w-8 h-8" />
-                </div>
-                <h4 className="font-serif text-2xl font-bold text-amber-900">We couldn't save your message</h4>
-                <p className="text-xs text-amber-800 max-w-md mx-auto">
-                  Something went wrong on our end. Please reach out directly on WhatsApp or phone instead so your message isn't lost.
-                </p>
-                <div className="flex items-center justify-center gap-3">
-                  <a
-                    href={waLink(`Hello ${BRAND.name}, my message: ${formData.message}`)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="bg-[#25D366] hover:bg-[#128C7E] text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-xs inline-flex items-center gap-1.5"
-                  >
-                    <MessageCircle className="w-3.5 h-3.5" /> WhatsApp Us
-                  </a>
-                  <button
-                    onClick={() => {
-                      setSubmitted(false);
-                      setSaveFailed(false);
-                    }}
-                    className="bg-white border border-gray-300 text-gray-700 text-xs font-bold px-5 py-2.5 rounded-xl"
-                  >
-                    Try Again
-                  </button>
-                </div>
+            <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-2xl text-center space-y-4">
+              <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
+                <CheckCircle2 className="w-6 h-6" />
               </div>
-            ) : (
-              <div className="bg-emerald-50 border border-emerald-200 p-8 rounded-2xl text-center space-y-4 animate-fadeIn">
-                <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-                  <CheckCircle2 className="w-8 h-8" />
-                </div>
-                <h4 className="font-serif text-2xl font-bold text-emerald-900">Message Received!</h4>
-                <p className="text-xs text-emerald-700 max-w-md mx-auto">
-                  Thank you for contacting <strong>{BRAND.name}</strong>. {BRAND.ownerName} will respond to your message shortly.
+              <div>
+                <h4 className="font-serif font-bold text-lg text-emerald-900">Thank You! Message Received</h4>
+                <p className="text-xs text-emerald-700 mt-1">
+                  Naresh Kukkala will contact you on WhatsApp (+91 {formData.phone}) within a few hours.
                 </p>
-                <button
-                  onClick={() => {
-                    setSubmitted(false);
-                    setFormData({ name: '', phone: '', email: '', message: '' });
-                  }}
-                  className="bg-[#6B1518] text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-xs"
-                >
-                  Send Another Message
-                </button>
               </div>
-            )
+              <a
+                href={waLink(`Hi Naresh, I just submitted a custom gift request on the website for: ${formData.occasion}`)}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 bg-[#25D366] text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-xs hover:brightness-105"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Speed Up on WhatsApp</span>
+              </a>
+            </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name */}
               <div>
-                <label className="block text-xs font-bold text-gray-800 uppercase mb-1">Your Name *</label>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Your Full Name *</label>
                 <input
                   type="text"
-                  placeholder="Enter full name"
+                  placeholder="e.g. Ramesh Varma"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className={`w-full text-xs p-3 rounded-xl border focus:outline-none ${
-                    errors.name ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-[#6B1518]'
-                  }`}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-hidden"
                 />
-                {errors.name && <p className="text-[11px] text-red-500 mt-1 font-semibold">{errors.name}</p>}
+                {errors.name && <p className="text-[11px] text-rose-600 mt-1">{errors.name}</p>}
               </div>
 
-              {/* Phone & Email Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-800 uppercase mb-1">Phone Number *</label>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">WhatsApp Number *</label>
                   <input
                     type="tel"
-                    placeholder={BRAND.phone}
+                    placeholder="10-digit mobile number"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className={`w-full text-xs p-3 rounded-xl border focus:outline-none ${
-                      errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-[#6B1518]'
-                    }`}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-hidden"
                   />
-                  {errors.phone && <p className="text-[11px] text-red-500 mt-1 font-semibold">{errors.phone}</p>}
+                  {errors.phone && <p className="text-[11px] text-rose-600 mt-1">{errors.phone}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-800 uppercase mb-1">Email Address *</label>
-                  <input
-                    type="email"
-                    placeholder="name@example.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className={`w-full text-xs p-3 rounded-xl border focus:outline-none ${
-                      errors.email ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-[#6B1518]'
-                    }`}
-                  />
-                  {errors.email && <p className="text-[11px] text-red-500 mt-1 font-semibold">{errors.email}</p>}
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Occasion / Gift Type</label>
+                  <select
+                    value={formData.occasion}
+                    onChange={(e) => setFormData({ ...formData, occasion: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-hidden bg-white"
+                  >
+                    <option value="Anniversary Gift">Anniversary Gift</option>
+                    <option value="Birthday Gift">Birthday Gift</option>
+                    <option value="Wedding / Couple Gift">Wedding / Couple Gift</option>
+                    <option value="Devotional / Pooja Room Lamp">Devotional / Pooja Lamp</option>
+                    <option value="Memorial Frame">Memorial Frame</option>
+                    <option value="Corporate / Bulk Order">Corporate / Bulk Order</option>
+                  </select>
                 </div>
               </div>
 
-              {/* Message */}
               <div>
-                <label className="block text-xs font-bold text-gray-800 uppercase mb-1">Your Message *</label>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Email Address (Optional)</label>
+                <input
+                  type="email"
+                  placeholder="yourname@gmail.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-hidden"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Message / Customization Details *</label>
                 <textarea
-                  rows={4}
-                  placeholder="Tell us what you are looking for..."
+                  rows={3}
+                  placeholder="Describe your photo, text to be engraved, required size, or required delivery date..."
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className={`w-full text-xs p-3 rounded-xl border focus:outline-none resize-none ${
-                    errors.message ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-[#6B1518]'
-                  }`}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-hidden"
                 />
-                {errors.message && <p className="text-[11px] text-red-500 mt-1 font-semibold">{errors.message}</p>}
+                {errors.message && <p className="text-[11px] text-rose-600 mt-1">{errors.message}</p>}
               </div>
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-[#6B1518] hover:bg-[#4B0F11] disabled:opacity-60 text-white py-3.5 px-6 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-colors"
+                className="w-full py-3.5 rounded-xl bg-[#1A1A1A] hover:bg-gray-800 text-[#D4AF37] text-xs font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md disabled:opacity-50"
               >
                 <Send className="w-4 h-4" />
-                <span>{submitting ? 'Sending...' : 'Submit Contact Message'}</span>
+                <span>{submitting ? 'Submitting...' : 'Send Custom Gift Inquiry'}</span>
               </button>
             </form>
           )}
         </div>
-      </section>
 
-      {/* Accordion FAQ Section */}
-      <section className="space-y-6" data-aos="fade-up">
-        <div className="text-center space-y-2">
-          <HelpCircle className="w-6 h-6 text-[#6B1518] mx-auto" />
-          <h2 className="font-serif text-3xl font-bold text-gray-900">Frequently Asked Questions</h2>
-        </div>
+        {/* FAQs */}
+        <div className="lg:col-span-6 space-y-4">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold text-[#B38029] uppercase tracking-wider">Help & Answers</span>
+            <h3 className="font-serif font-bold text-2xl text-gray-900">Frequently Asked Questions</h3>
+          </div>
 
-        <div className="max-w-3xl mx-auto space-y-3">
-          {faqs.map((faq, idx) => {
-            const isFaqOpen = openFaq === idx;
-            return (
-              <div key={idx} className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-xs">
+          <div className="space-y-3">
+            {faqs.map((faq, idx) => (
+              <div
+                key={idx}
+                className="bg-white rounded-2xl border border-gray-200 overflow-hidden transition-all"
+              >
                 <button
-                  onClick={() => setOpenFaq(isFaqOpen ? null : idx)}
-                  className="w-full text-left p-4 font-serif font-bold text-base text-gray-900 flex justify-between items-center hover:bg-gray-50 transition-colors"
+                  type="button"
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                  className="w-full p-4 text-left flex items-center justify-between gap-4 font-bold text-xs sm:text-sm text-gray-900 cursor-pointer"
                 >
                   <span>{faq.q}</span>
-                  <ChevronDown className={`w-5 h-5 text-[#6B1518] transition-transform ${isFaqOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${
+                      openFaq === idx ? 'rotate-180 text-[#B38029]' : ''
+                    }`}
+                  />
                 </button>
-                {isFaqOpen && (
-                  <div className="px-4 pb-4 text-xs text-gray-600 leading-relaxed border-t border-gray-100 pt-3">
+                {openFaq === idx && (
+                  <div className="px-4 pb-4 pt-1 text-xs text-gray-600 leading-relaxed border-t border-gray-50 bg-[#FAF9F6]">
                     {faq.a}
                   </div>
                 )}
               </div>
-            );
-          })}
+            ))}
+          </div>
+
+          {/* Direct Support Box */}
+          <div className="bg-[#FAF5EB] rounded-2xl p-5 border border-[#D4AF37]/30 flex items-center justify-between gap-4">
+            <div>
+              <h5 className="font-serif font-bold text-sm text-gray-900">Still have a unique gift idea?</h5>
+              <p className="text-xs text-gray-600 mt-0.5">Send your concept photo directly to Naresh on WhatsApp</p>
+            </div>
+            <a
+              href={waLink("Hi Naresh, I have a unique customized 3D gift idea.")}
+              target="_blank"
+              rel="noreferrer"
+              className="bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all flex items-center gap-1.5 shrink-0"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>WhatsApp</span>
+            </a>
+          </div>
         </div>
       </section>
     </div>

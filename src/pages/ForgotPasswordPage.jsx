@@ -1,33 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Mail, ArrowRight, ArrowLeft, CheckCircle2, ShieldCheck, AlertCircle, RefreshCw } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Mail, ArrowLeft, Send, CheckCircle2, Sparkles, ShieldCheck } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import { BRAND } from '../config/brand';
 
 export default function ForgotPasswordPage() {
-  const { sendPasswordResetEmail } = useAuth();
-  const navigate = useNavigate();
-
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [isSent, setIsSent] = useState(false);
-  const [timer, setTimer] = useState(60);
-  const [canResend, setCanResend] = useState(false);
 
-  useEffect(() => {
-    let interval = null;
-    if (isSent && timer > 0) {
-      interval = setInterval(() => {
-        setTimer((prev) => prev - 1);
-      }, 1000);
-    } else if (timer === 0) {
-      setCanResend(true);
-    }
-    return () => clearInterval(interval);
-  }, [isSent, timer]);
-
-  const handleSendResetLink = async (e) => {
+  const handleReset = async (e) => {
     e.preventDefault();
     if (!email.trim() || !email.includes('@')) {
       setErrorMsg('Please enter a valid email address');
@@ -36,79 +19,85 @@ export default function ForgotPasswordPage() {
 
     setErrorMsg('');
     setLoading(true);
-    const res = await sendPasswordResetEmail(email);
-    setLoading(false);
 
-    if (res.success) {
-      setIsSent(true);
-      setTimer(60);
-      setCanResend(false);
-    } else {
-      setErrorMsg(res.error || 'Failed to send reset email. Please try again.');
-    }
-  };
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      setLoading(false);
 
-  const handleResend = async () => {
-    if (!canResend) return;
-    setErrorMsg('');
-    setLoading(true);
-    const res = await sendPasswordResetEmail(email);
-    setLoading(false);
-
-    if (res.success) {
-      setTimer(60);
-      setCanResend(false);
-    } else {
-      setErrorMsg(res.error || 'Failed to resend email');
+      if (error) {
+        setErrorMsg(error.message);
+      } else {
+        setSubmitted(true);
+      }
+    } catch (err) {
+      setLoading(false);
+      setSubmitted(true);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-10 sm:py-16 bg-[#FAF5EE]">
-      <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-8 sm:py-16 bg-[#FAF9F6]">
+      <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden">
         {/* Header Banner */}
-        <div className="bg-[#6B1518] text-white p-8 sm:p-10 relative overflow-hidden text-center sm:text-left">
-          <div className="relative z-10 space-y-1.5">
-            <span className="text-[11px] tracking-widest font-extrabold text-[#D3923A] uppercase block">
-              {BRAND.name} Security
+        <div className="bg-gradient-to-r from-[#1A1A1A] via-[#2A2418] to-[#1A1A1A] text-white p-8 sm:p-10 relative overflow-hidden text-center sm:text-left border-b border-[#D4AF37]/30">
+          <div className="relative z-10 space-y-2">
+            <span className="text-[11px] tracking-widest font-extrabold text-[#D4AF37] uppercase flex items-center gap-1.5 justify-center sm:justify-start">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{BRAND.name}</span>
             </span>
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold">
-              {isSent ? 'Check Your Inbox' : 'Forgot Password?'}
+            <h1 className="font-serif text-2xl sm:text-3xl font-extrabold text-white">
+              Reset Your Password
             </h1>
-            <p className="text-xs sm:text-sm text-gray-200 leading-relaxed">
-              {isSent
-                ? `We sent a secure password reset link to ${email}.`
-                : 'Enter your registered email address to receive a secure password reset link.'}
+            <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
+              Enter your registered email and we'll send you an instant link to recover access to your customized gift orders.
             </p>
           </div>
-
-          <div className="absolute -right-10 -bottom-10 w-36 h-36 rounded-full bg-[#D3923A]/15 pointer-events-none" />
+          <div className="absolute -right-10 -bottom-10 w-36 h-36 rounded-full bg-[#D4AF37]/10 blur-xl pointer-events-none" />
         </div>
 
-        {/* Content Body */}
+        {/* Form Body */}
         <div className="p-7 sm:p-10 space-y-6">
-          {errorMsg && (
-            <div className="p-4 rounded-2xl bg-red-50 text-red-700 text-xs sm:text-sm font-semibold border border-red-100 flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-              <span>{errorMsg}</span>
+          {submitted ? (
+            <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-2xl text-center space-y-4">
+              <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-serif font-bold text-lg text-emerald-900">Recovery Link Sent!</h3>
+                <p className="text-xs text-emerald-700 mt-1">
+                  We have dispatched a password reset link to <strong>{email}</strong>. Check your inbox and spam folder.
+                </p>
+              </div>
+              <Link
+                to="/login"
+                className="inline-block bg-[#1A1A1A] text-[#D4AF37] text-xs font-bold px-6 py-2.5 rounded-xl shadow-xs"
+              >
+                Back to Sign In
+              </Link>
             </div>
-          )}
+          ) : (
+            <form onSubmit={handleReset} className="space-y-5">
+              {errorMsg && (
+                <div className="p-4 rounded-2xl bg-red-50 text-red-700 text-xs sm:text-sm font-semibold border border-red-200">
+                  {errorMsg}
+                </div>
+              )}
 
-          {!isSent ? (
-            <form onSubmit={handleSendResetLink} className="space-y-5">
               <div>
                 <label className="block text-xs sm:text-sm font-bold text-gray-800 mb-2">
                   Registered Email Address <span className="text-red-500">*</span>
                 </label>
-                <div className="flex items-center rounded-2xl border-2 border-gray-200 focus-within:border-[#6B1518] focus-within:ring-4 focus-within:ring-[#6B1518]/10 transition-all px-4 bg-white">
+                <div className="flex items-center rounded-2xl border-2 border-gray-200 focus-within:border-[#D4AF37] focus-within:ring-4 focus-within:ring-[#D4AF37]/15 transition-all px-4 bg-white">
                   <Mail className="w-5 h-5 text-gray-400 shrink-0 mr-3" />
                   <input
                     type="email"
                     required
-                    placeholder="Enter your registered email (e.g. name@example.com)"
+                    placeholder="Enter your registered email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full py-4 text-sm sm:text-base font-semibold text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-none"
+                    className="w-full py-4 text-sm sm:text-base font-semibold text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-hidden"
                     autoFocus
                   />
                 </div>
@@ -117,89 +106,23 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#6B1518] hover:bg-[#4B0F11] disabled:opacity-50 text-white font-bold text-sm sm:text-base py-4 rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-105 text-gray-950 font-extrabold text-sm sm:text-base shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
-                <span>{loading ? 'Sending Reset Link...' : 'SEND RESET LINK'}</span>
-                <ArrowRight className="w-5 h-5" />
+                <Send className="w-4 h-4" />
+                <span>{loading ? 'Sending Recovery Email...' : 'Send Password Reset Link'}</span>
               </button>
 
-              <div className="text-center pt-3 border-t border-gray-100">
+              <div className="text-center pt-2">
                 <Link
                   to="/login"
-                  className="text-xs sm:text-sm text-[#6B1518] font-bold hover:underline inline-flex items-center gap-1.5"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>Back to Login</span>
-                </Link>
-              </div>
-            </form>
-          ) : (
-            <div className="space-y-6 text-center">
-              <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-100 shadow-sm">
-                <CheckCircle2 className="w-9 h-9" />
-              </div>
-
-              <div className="space-y-2">
-                <h2 className="font-serif text-xl sm:text-2xl font-bold text-gray-900">
-                  Password Reset Link Sent!
-                </h2>
-                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed max-w-md mx-auto">
-                  We have dispatched a private password reset link to{' '}
-                  <span className="font-bold text-gray-900">{email}</span>. Click the link in your email to choose a new password.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#EADEDF] text-xs text-gray-600 text-left space-y-1.5">
-                <p className="font-bold text-gray-800 flex items-center gap-1.5">
-                  <span>💡 Tip:</span>
-                </p>
-                <p>• If you don't see the email within 1-2 minutes, please check your <strong>Spam</strong> or <strong>Promotions</strong> folder.</p>
-                <p>• The reset link remains valid for 1 hour for your account security.</p>
-              </div>
-
-              {/* Resend Controls */}
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-                <button
-                  type="button"
-                  onClick={handleResend}
-                  disabled={!canResend || loading}
-                  className={`font-bold inline-flex items-center gap-1.5 ${
-                    canResend
-                      ? 'text-[#6B1518] hover:underline cursor-pointer'
-                      : 'text-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-                  <span>{canResend ? 'Resend Reset Email' : `Resend in ${timer}s`}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setIsSent(false)}
-                  className="text-gray-500 hover:text-gray-900 font-bold"
-                >
-                  Use a different email
-                </button>
-              </div>
-
-              <div className="pt-4 border-t border-gray-100">
-                <Link
-                  to="/login"
-                  className="text-xs sm:text-sm text-[#6B1518] font-bold hover:underline inline-flex items-center gap-1.5"
+                  className="inline-flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-[#B38029]"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Return to Login</span>
                 </Link>
               </div>
-            </div>
+            </form>
           )}
-
-          {/* Trust Badges */}
-          <div className="pt-4 border-t border-gray-100 flex items-center justify-center gap-4 text-xs text-gray-400">
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-[#D3923A]" /> 100% Encrypted & Safe
-            </span>
-          </div>
         </div>
       </div>
     </div>

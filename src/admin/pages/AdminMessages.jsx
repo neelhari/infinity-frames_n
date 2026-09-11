@@ -36,15 +36,15 @@ export default function AdminMessages() {
             <div
               key={m.id}
               className={`bg-white rounded-3xl border p-5 shadow-2xs space-y-3 ${
-                m.status === 'New' ? 'border-[#6B1518]/30 ring-1 ring-[#6B1518]/10' : 'border-gray-100'
+                m.status === 'New' ? 'border-[#1A1A1A]/30 ring-1 ring-[#1A1A1A]/10' : 'border-gray-100'
               }`}
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-[#6B1518]" />
+                  <MessageSquare className="w-4 h-4 text-[#1A1A1A]" />
                   <span className="font-bold text-sm text-gray-900">{m.name}</span>
                   {m.status === 'New' && (
-                    <span className="bg-[#F8F0F0] text-[#6B1518] text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">New</span>
+                    <span className="bg-[#F8F0F0] text-[#1A1A1A] text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">New</span>
                   )}
                 </div>
                 <span className="text-[11px] text-gray-400">

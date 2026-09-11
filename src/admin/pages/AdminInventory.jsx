@@ -39,7 +39,7 @@ export default function AdminInventory() {
             placeholder="Search by SKU or item name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full text-xs pl-10 pr-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#6B1518]"
+            className="w-full text-xs pl-10 pr-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#1A1A1A]"
           />
         </div>
       </div>
@@ -79,7 +79,7 @@ export default function AdminInventory() {
                         min="0"
                         value={stock}
                         onChange={(e) => handleSetStock(p, e.target.value)}
-                        className="w-20 p-1.5 rounded-lg border border-gray-300 font-extrabold text-sm text-center focus:outline-none focus:border-[#6B1518]"
+                        className="w-20 p-1.5 rounded-lg border border-gray-300 font-extrabold text-sm text-center focus:outline-none focus:border-[#1A1A1A]"
                       />
                     </td>
                     <td className="p-4">
@@ -108,7 +108,7 @@ export default function AdminInventory() {
                         </button>
                         <button
                           onClick={() => handleStockChange(p, 1)}
-                          className="w-8 h-8 rounded-lg bg-[#6B1518] hover:bg-[#4B0F11] font-bold text-white flex items-center justify-center shadow-xs"
+                          className="w-8 h-8 rounded-lg bg-[#1A1A1A] hover:bg-[#0A0A0A] font-bold text-white flex items-center justify-center shadow-xs"
                           title="Increase Stock"
                         >
                           <Plus className="w-3.5 h-3.5" />

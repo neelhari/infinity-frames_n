@@ -102,7 +102,7 @@ export default function AdminCategories() {
 
         <button
           onClick={handleOpenAdd}
-          className="bg-[#6B1518] hover:bg-[#4B0F11] text-white text-xs font-bold px-5 py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all self-start sm:self-auto"
+          className="bg-[#1A1A1A] hover:bg-[#0A0A0A] text-white text-xs font-bold px-5 py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Add New Category</span>
@@ -118,7 +118,7 @@ export default function AdminCategories() {
             placeholder="Search categories by name or ID..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full text-xs pl-10 pr-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#6B1518]"
+            className="w-full text-xs pl-10 pr-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#1A1A1A]"
           />
         </div>
         <div className="text-xs font-bold text-gray-500">
@@ -200,7 +200,7 @@ export default function AdminCategories() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-              <h3 className="font-serif text-lg font-bold text-[#6B1518]">
+              <h3 className="font-serif text-lg font-bold text-[#1A1A1A]">
                 {editingCat ? 'Edit Category' : 'Create New Category'}
               </h3>
               <button onClick={() => setIsModalOpen(false)}><X className="w-5 h-5 text-gray-400" /></button>
@@ -222,7 +222,7 @@ export default function AdminCategories() {
                   placeholder="e.g. Handloom Sarees"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none"
+                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none"
                 />
               </div>
 
@@ -233,7 +233,7 @@ export default function AdminCategories() {
                   placeholder="e.g. Timeless Weaves & Elegant Drapes"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#6B1518] focus:outline-none"
+                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none"
                 />
               </div>
 
@@ -268,7 +268,7 @@ export default function AdminCategories() {
                     </div>
                   </div>
                 ) : (
-                  <div className="border-2 border-dashed border-gray-300 rounded-2xl p-5 text-center hover:border-[#6B1518] transition-colors bg-gray-50">
+                  <div className="border-2 border-dashed border-gray-300 rounded-2xl p-5 text-center hover:border-[#1A1A1A] transition-colors bg-gray-50">
                     <Upload className="w-6 h-6 text-gray-400 mx-auto mb-1.5" />
                     <p className="font-bold text-gray-800">Upload Category Cover Photo</p>
                     <p className="text-gray-400 text-[11px] mt-0.5">JPG, PNG or WEBP up to 10MB</p>
@@ -281,7 +281,7 @@ export default function AdminCategories() {
                     />
                     <label
                       htmlFor="category-photo-input"
-                      className="mt-2.5 inline-block bg-[#6B1518] text-white font-bold text-xs px-4 py-2 rounded-xl cursor-pointer hover:bg-[#4B0F11] shadow-xs"
+                      className="mt-2.5 inline-block bg-[#1A1A1A] text-white font-bold text-xs px-4 py-2 rounded-xl cursor-pointer hover:bg-[#0A0A0A] shadow-xs"
                     >
                       {uploadingImage ? 'Uploading Photo...' : 'Select Cover Photo'}
                     </label>
@@ -300,7 +300,7 @@ export default function AdminCategories() {
                 <button
                   type="submit"
                   disabled={saving || uploadingImage}
-                  className="bg-[#6B1518] hover:bg-[#4B0F11] disabled:opacity-60 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-1.5 shadow-md"
+                  className="bg-[#1A1A1A] hover:bg-[#0A0A0A] disabled:opacity-60 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-1.5 shadow-md"
                 >
                   {saving ? 'Saving...' : 'Save & Publish Category'}
                 </button>

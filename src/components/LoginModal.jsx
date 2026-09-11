@@ -45,7 +45,7 @@ export default function LoginModal() {
     await sendOtp(phoneNumber);
     setLoading(false);
     setTimer(30);
-    setOtpDigits(['1', '2', '3', '4']); // Autofill demo OTP for instant convenience
+    setOtpDigits(['1', '2', '3', '4']);
   };
 
   const handleOtpChange = (index, value) => {
@@ -54,7 +54,6 @@ export default function LoginModal() {
     newOtp[index] = value.slice(-1);
     setOtpDigits(newOtp);
 
-    // Auto-focus next input box
     if (value && index < 3) {
       otpInputRefs[index + 1].current?.focus();
     }
@@ -98,43 +97,40 @@ export default function LoginModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-      <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-gray-100 overflow-hidden relative">
+      <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-gray-200 overflow-hidden relative">
         {/* Close Button */}
         <button
           onClick={closeLoginModal}
-          className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 text-white flex items-center justify-center transition-colors"
+          className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors cursor-pointer font-bold"
           title="Close Modal"
         >
           <X className="w-4 h-4" />
         </button>
 
-        {/* Myntra-style Luxury Header Banner */}
-        <div className="relative bg-[#6B1518] text-white p-6 sm:p-7 overflow-hidden">
-          <div className="relative z-10 space-y-1">
-            <span className="text-[10px] tracking-widest font-extrabold text-[#D3923A] uppercase block">
-              {BRAND.name} Membership
+        {/* Luxury Header Banner */}
+        <div className="relative bg-gradient-to-r from-[#1A1A1A] via-[#2A2418] to-[#1A1A1A] text-white p-6 sm:p-7 overflow-hidden border-b border-[#D4AF37]/30">
+          <div className="relative z-10 space-y-1.5">
+            <span className="text-[10px] tracking-widest font-extrabold text-[#D4AF37] uppercase flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-[#D4AF37]" />
+              <span>{BRAND.name} Member Portal</span>
             </span>
-            <h2 className="font-serif text-2xl font-bold">
-              {authStep === 'phone' ? 'Login or Signup' : 'Verify with OTP'}
+            <h2 className="font-serif text-2xl font-bold text-white">
+              {authStep === 'phone' ? 'Log In / Register' : 'Verify with OTP'}
             </h2>
-            <p className="text-xs text-gray-200">
+            <p className="text-xs text-gray-300">
               {authStep === 'phone'
-                ? 'Get instant order tracking, member discounts & fast checkout.'
+                ? 'Save your 3D gift designs, track printing status & quick checkout.'
                 : `Sent 4-digit OTP to +91 ${phoneNumber}`}
             </p>
           </div>
 
-          {/* Decorative Lotus & Pattern Overlays */}
-          <div className="absolute -right-8 -bottom-8 w-32 h-32 rounded-full bg-[#D3923A]/15 pointer-events-none" />
-          <div className="absolute right-6 top-6 opacity-20 pointer-events-none text-4xl font-serif">
-            🥻
-          </div>
+          <div className="absolute -right-8 -bottom-8 w-32 h-32 rounded-full bg-[#D4AF37]/10 blur-xl pointer-events-none" />
         </div>
 
-        {/* Modal Form Body */}
+        {/* Modal Form Content */}
         <div className="p-6 sm:p-7 space-y-5">
           {errorMsg && (
-            <div className="p-3 rounded-xl bg-red-50 text-red-700 text-xs font-semibold border border-red-100 animate-fadeIn">
+            <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold">
               {errorMsg}
             </div>
           )}
@@ -142,61 +138,60 @@ export default function LoginModal() {
           {authStep === 'phone' ? (
             <form onSubmit={handleSendOtp} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                  Mobile Number <span className="text-red-500">*</span>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  Mobile Phone Number <span className="text-rose-500">*</span>
                 </label>
-                <div className="flex rounded-xl border border-gray-300 focus-within:border-[#6B1518] focus-within:ring-2 focus-within:ring-[#6B1518]/20 transition-all overflow-hidden bg-white">
+                <div className="flex rounded-xl border border-gray-300 focus-within:border-[#D4AF37] focus-within:ring-2 focus-within:ring-[#D4AF37]/20 transition-all overflow-hidden bg-white">
                   <span className="bg-gray-50 px-3.5 py-3 text-xs font-bold text-gray-600 border-r border-gray-200 flex items-center">
                     +91
                   </span>
                   <input
                     type="tel"
-                    required
                     maxLength={10}
-                    placeholder="Enter 10 digit number"
+                    placeholder="Enter 10-digit number"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                    className="flex-1 px-3 py-3 text-xs sm:text-sm font-semibold text-gray-900 focus:outline-none tracking-wider"
+                    className="w-full px-3.5 py-3 text-xs font-semibold text-gray-900 focus:outline-hidden"
                     autoFocus
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                  Your Full Name <span className="text-gray-400 font-normal">(Optional)</span>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  Full Name (Optional for new members)
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Harini Jupudy"
+                  placeholder="e.g. Ramesh Varma"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-3.5 py-3 text-xs rounded-xl border border-gray-300 focus:border-[#6B1518] focus:outline-none"
+                  className="w-full px-3.5 py-3 text-xs rounded-xl border border-gray-300 focus:border-[#D4AF37] focus:outline-hidden"
                 />
               </div>
 
               <div className="text-[11px] text-gray-500 leading-relaxed">
                 By continuing, you agree to {BRAND.name}'s{' '}
-                <a href="/terms" className="text-[#6B1518] font-bold underline">Terms of Use</a> &{' '}
-                <a href="/privacy-policy" className="text-[#6B1518] font-bold underline">Privacy Policy</a>.
+                <a href="/terms" className="text-[#B38029] font-bold underline">Terms</a> &{' '}
+                <a href="/privacy-policy" className="text-[#B38029] font-bold underline">Photo Privacy Policy</a>.
               </div>
 
               <button
                 type="submit"
                 disabled={loading || phoneNumber.length !== 10}
-                className="w-full bg-[#6B1518] hover:bg-[#4B0F11] disabled:opacity-50 text-white font-bold text-xs sm:text-sm py-3.5 rounded-xl shadow-md flex items-center justify-center gap-2 transition-all"
+                className="w-full bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-105 disabled:opacity-50 text-gray-950 font-extrabold text-xs sm:text-sm py-3.5 rounded-xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
-                <span>{loading ? 'Sending OTP...' : 'CONTINUE'}</span>
+                <span>{loading ? 'Sending OTP...' : 'CONTINUE WITH OTP'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
           ) : (
             <form onSubmit={handleVerifyOtp} className="space-y-5">
-              <div className="space-y-2 text-center">
-                <label className="block text-xs font-bold text-gray-700">
-                  Enter 4-Digit Verification Code
-                </label>
-                <div className="flex items-center justify-center gap-3">
+              <div className="text-center space-y-2">
+                <p className="text-xs text-gray-600">
+                  Enter the 4-digit code sent to <strong>+91 {phoneNumber}</strong>
+                </p>
+                <div className="flex justify-center gap-3 pt-2">
                   {otpDigits.map((digit, idx) => (
                     <input
                       key={idx}
@@ -206,29 +201,20 @@ export default function LoginModal() {
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(idx, e)}
-                      className="w-12 h-14 text-center text-xl font-extrabold rounded-xl border-2 border-gray-300 focus:border-[#6B1518] focus:outline-none bg-gray-50"
+                      className="w-12 h-14 text-center text-xl font-extrabold rounded-xl border-2 border-gray-300 focus:border-[#D4AF37] focus:outline-hidden bg-gray-50"
                     />
                   ))}
                 </div>
-                <p className="text-[10px] text-emerald-700 font-bold mt-1">
-                  ✓ Demo OTP <span className="bg-emerald-100 px-1.5 py-0.5 rounded text-emerald-900">1234</span> auto-filled for instant login.
-                </p>
               </div>
 
-              <div className="flex items-center justify-between text-xs pt-1">
-                <button
-                  type="button"
-                  onClick={() => setAuthStep('phone')}
-                  className="text-gray-500 hover:text-gray-800 font-bold"
-                >
-                  Change Mobile
-                </button>
+              <div className="text-center text-xs">
+                <span className="text-gray-500">Didn't receive code? </span>
                 <button
                   type="button"
                   onClick={handleResendOtp}
                   disabled={timer > 0}
                   className={`font-bold ${
-                    timer > 0 ? 'text-gray-400 cursor-not-allowed' : 'text-[#6B1518] hover:underline'
+                    timer > 0 ? 'text-gray-400 cursor-not-allowed' : 'text-[#B38029] hover:underline'
                   }`}
                 >
                   {timer > 0 ? `Resend in ${timer}s` : 'Resend OTP'}
@@ -238,23 +224,27 @@ export default function LoginModal() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#6B1518] hover:bg-[#4B0F11] text-white font-bold text-xs sm:text-sm py-3.5 rounded-xl shadow-md flex items-center justify-center gap-2 transition-all"
+                className="w-full bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-105 text-gray-950 font-extrabold text-xs sm:text-sm py-3.5 rounded-xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <span>{loading ? 'Verifying...' : 'VERIFY & PROCEED'}</span>
                 <CheckCircle2 className="w-4 h-4" />
               </button>
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setAuthStep('phone')}
+                  className="text-xs font-semibold text-gray-500 hover:text-gray-900 underline"
+                >
+                  Edit phone number
+                </button>
+              </div>
             </form>
           )}
 
-          {/* Trust badges */}
-          <div className="pt-3 border-t border-gray-100 flex items-center justify-center gap-4 text-[10px] text-gray-400">
-            <span className="flex items-center gap-1">
-              <Lock className="w-3 h-3 text-emerald-600" /> 100% Safe & Secure
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3 text-[#D3923A]" /> Authentic Handloom
-            </span>
+          <div className="pt-2 border-t border-gray-100 flex items-center justify-center gap-2 text-[10px] text-gray-400">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span>End-to-End Encrypted Customer Authentication</span>
           </div>
         </div>
       </div>
