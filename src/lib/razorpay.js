@@ -1,5 +1,5 @@
 /**
- * Razorpay Payment Gateway Integration Helper for Aalaya Vastra.
+ * Razorpay Payment Gateway Integration Helper for Infinity Frames N.
  * Supports standard Razorpay Checkout SDK.
  */
 
@@ -79,7 +79,7 @@ export async function openRazorpayCheckout({
       shipping_address: `${customer?.address || ''}, ${customer?.city || ''} ${customer?.pincode || ''}`.trim(),
     },
     theme: {
-      color: '#6B1518', // Aalaya Vastra brand maroon
+      color: '#B38029', // Infinity Frames N brand gold
       backdrop_color: 'rgba(0, 0, 0, 0.7)',
     },
     modal: {
