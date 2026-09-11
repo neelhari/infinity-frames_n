@@ -18,18 +18,6 @@ export default function PolicyPage() {
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-24 pt-6 px-4 sm:px-6 lg:px-8 space-y-8">
       <div className="max-w-5xl mx-auto space-y-6">
-        {/* Top Navigation */}
-        <div className="pb-2">
-          <button
-            type="button"
-            onClick={() => navigate('/')}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-700 hover:text-[#B38029] py-1 px-2.5 rounded-lg hover:bg-white transition-all cursor-pointer border border-transparent hover:border-gray-200"
-          >
-            <ArrowLeft className="w-4 h-4 text-gray-500" />
-            <span>Back to Home</span>
-          </button>
-        </div>
-
         {/* Header Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-gray-200 hide-scroll">
           {tabs.map((tab) => {

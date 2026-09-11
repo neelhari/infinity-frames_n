@@ -1,10 +1,9 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, ShoppingBag, Heart, Phone } from 'lucide-react';
+import { Search, ShoppingBag, Heart, ArrowLeft } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useUI } from '../context/UIContext';
-import { useAuth } from '../context/AuthContext';
 import { BRAND } from '../config/brand';
 
 const navLinks = [
@@ -25,6 +24,8 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const isHome = location.pathname === '/';
+
   const goTo = (path) => {
     navigate(path);
   };
@@ -34,19 +35,30 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5">
         <div className="flex items-center justify-between gap-4">
           
-          {/* 1. Exact uploaded Logo as it is - NO CSS, NO 3-line menu button */}
-          <div
-            onClick={() => goTo('/')}
-            className="cursor-pointer flex items-center select-none py-1 shrink-0"
-          >
-            <img
-              src="/logo (4).png"
-              alt={BRAND.name}
-              className="h-10 sm:h-12 md:h-14 w-auto object-contain"
-            />
-          </div>
+          {/* Left: On Homepage show Logo; on every other page show clean Go Back button */}
+          {isHome ? (
+            <div
+              onClick={() => goTo('/')}
+              className="cursor-pointer flex items-center select-none py-1 shrink-0"
+            >
+              <img
+                src="/logo (4).png"
+                alt={BRAND.name}
+                className="h-10 sm:h-12 md:h-14 w-auto object-contain"
+              />
+            </div>
+          ) : (
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-gray-800 hover:text-[#B38029] py-1.5 px-3 rounded-xl hover:bg-gray-100 transition-all cursor-pointer -ml-2"
+              title="Go Back"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-700" />
+              <span>Back</span>
+            </button>
+          )}
 
-          {/* 2. Desktop Navigation Links */}
+          {/* Desktop Navigation Links */}
           <nav className="hidden lg:flex items-center gap-6 text-[12px] font-bold tracking-wider">
             {navLinks.map((link) => (
               <button
@@ -63,7 +75,7 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* 3. Header Action Icons (Search, Wishlist, Cart) */}
+          {/* Header Action Icons (Search, Wishlist, Cart) */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Search Icon */}
             <button

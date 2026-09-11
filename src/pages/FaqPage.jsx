@@ -60,21 +60,6 @@ export default function FaqPage() {
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-24 pt-6 px-4 sm:px-6 lg:px-8 space-y-12">
       <div className="max-w-4xl mx-auto space-y-8">
-        {/* Top Navigation */}
-        <div className="flex items-center justify-between pb-3 border-b border-gray-200">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-700 hover:text-[#B38029] py-1 px-2.5 rounded-lg hover:bg-white transition-all cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4 text-gray-500" />
-            <span>Go Back</span>
-          </button>
-          <span className="text-xs font-bold text-[#B38029] bg-[#FAF5EB] px-3 py-1 rounded-full border border-[#D4AF37]/30">
-            3D Knowledge Base & Help
-          </span>
-        </div>
-
         {/* Hero Section */}
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 bg-[#FAF5EB] text-[#B38029] border border-[#D4AF37]/40 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">

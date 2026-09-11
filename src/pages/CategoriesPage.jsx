@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronRight, ArrowLeft, Sparkles, ArrowUpRight, Search } from 'lucide-react';
 import { BRAND } from '../config/brand';
 
-export const categoriesList = [
+const categoriesList = [
   {
     id: 'customized-gifts',
     name: 'Customized Gifts',
@@ -89,37 +89,7 @@ export default function CategoriesPage() {
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-24 font-sans">
       
-      {/* 1. Sticky Header Bar */}
-      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 px-4 py-3 shadow-2xs">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/')}
-              className="p-1.5 rounded-full hover:bg-gray-100 text-gray-700 cursor-pointer transition-colors"
-              title="Back to Home"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="font-serif text-base sm:text-lg font-bold text-gray-900 leading-tight">
-                3D Gift Collections
-              </h1>
-              <span className="text-[10.5px] text-gray-400 font-medium">
-                {categoriesList.length} Categories Available
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={() => navigate('/shop')}
-            className="text-xs font-bold text-[#B38029] hover:text-amber-800 bg-[#FAF5EB] px-3 py-1.5 rounded-full border border-[#D4AF37]/30 transition-colors"
-          >
-            Browse All Products
-          </button>
-        </div>
-      </div>
-
-      {/* 2. Top Horizontal Scrolling Category Bar (Zepto/Blinkit Style) */}
+      {/* 1. Top Horizontal Scrolling Category Bar (Zepto/Blinkit Style) */}
       <div className="bg-white border-b border-gray-100 py-3 px-4 shadow-2xs">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 overflow-x-auto no-scrollbar scroll-smooth pb-1">

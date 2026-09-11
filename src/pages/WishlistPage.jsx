@@ -15,17 +15,11 @@ export default function WishlistPage() {
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Top Navigation Bar with Back Button */}
         <div className="flex items-center justify-between pb-3 border-b border-gray-200">
-          <button
-            type="button"
-            onClick={() => navigate('/shop')}
-            className="inline-flex items-center gap-2 text-xs font-bold text-gray-700 hover:text-[#B38029] py-1.5 px-3 rounded-xl hover:bg-white transition-all cursor-pointer border border-transparent hover:border-gray-200"
-          >
-            <ArrowLeft className="w-4 h-4 text-gray-500" />
-            <span>Explore 3D Catalog</span>
-          </button>
-
+          <h1 className="font-serif text-xl sm:text-2xl font-bold text-gray-900">
+            Saved 3D Gifts
+          </h1>
           <div className="text-xs font-bold text-gray-900 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-2xs">
-            Saved 3D Gifts ({wishlistItems.length})
+            {wishlistItems.length} {wishlistItems.length === 1 ? 'item' : 'items'}
           </div>
         </div>
 
