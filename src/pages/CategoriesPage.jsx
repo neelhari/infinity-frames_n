@@ -83,13 +83,7 @@ export default function CategoriesPage() {
                   className="flex flex-col items-center text-center gap-1.5 shrink-0 group cursor-pointer"
                 >
                   {/* Avatar Container */}
-                  <div
-                    className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden bg-white transition-all duration-200 p-0.5 ${
-                      isSelected
-                        ? 'ring-2 ring-[#B38029] ring-offset-2 shadow-md scale-105'
-                        : 'shadow-xs group-hover:shadow-md group-hover:scale-105 border border-gray-100'
-                    }`}
-                  >
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden shadow-xs group-hover:shadow-md group-hover:scale-108 transition-all duration-200 bg-white">
                     <img
                       src={cat.image}
                       alt={cat.label}
