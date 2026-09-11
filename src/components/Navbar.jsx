@@ -31,14 +31,14 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-2 sm:py-2.5">
         <div className="flex items-center justify-between gap-3">
           
-          {/* Brand: Isolated Infinity Symbol FIRST, then Company Name BESIDE IT */}
+          {/* Brand: Isolated Infinity Symbol FIRST, then Harmonious Company Name BESIDE IT */}
           <div
             onClick={() => goTo('/')}
             className="cursor-pointer flex items-center gap-2 sm:gap-2.5 group select-none py-0.5 shrink-0"
             title="Infinity Frames_N Home"
           >
-            {/* 1. Highlighted Infinity Symbol ONLY */}
-            <div className="h-8 sm:h-9 md:h-10 flex items-center justify-center shrink-0">
+            {/* 1. Highlighted Infinity Symbol */}
+            <div className="h-7 sm:h-8 flex items-center justify-center shrink-0">
               <img
                 src="/logo-symbol.png"
                 alt="Infinity Symbol"
@@ -46,13 +46,14 @@ export default function Navbar() {
               />
             </div>
 
-            {/* 2. Company Name from Logo Image beside the Symbol */}
-            <div className="flex flex-col justify-center">
-              <img
-                src="/logo-text.png"
-                alt={BRAND.name}
-                className="h-4.5 sm:h-5 md:h-6 w-auto object-contain shrink-0"
-              />
+            {/* 2. Softened, Harmonious Two-Tier Company Name */}
+            <div className="flex flex-col justify-center select-none">
+              <span className="font-serif font-bold text-[11px] sm:text-[13px] tracking-[0.1em] text-gray-800 uppercase leading-none">
+                INFINITY FRAMES_N
+              </span>
+              <span className="text-[7.5px] sm:text-[8.5px] font-semibold tracking-[0.2em] text-[#B38029] uppercase mt-1 leading-none">
+                CUSTOMIZED 3D GIFTS
+              </span>
             </div>
           </div>
 
