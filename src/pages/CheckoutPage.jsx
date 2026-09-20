@@ -1,27 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, MapPin, ChevronRight, ShieldCheck, Lock, CheckCircle2,
   CreditCard, Smartphone, Banknote, Building2, Plus
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { useStoreData } from '../context/StoreDataContext';
 import { BRAND, waLink } from '../config/brand';
+import { openRazorpayCheckout } from '../lib/razorpay';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
   const { cartItems, subtotal, clearCart, appliedCoupon, discountAmount } = useCart();
   const { saveOrder, settings } = useStoreData();
 
-  // Address state
-  const [address, setAddress] = useState({
-    name: 'Naresh Kukkala',
-    phone: '9494066914',
-    street: 'Near Bheemeswara Swami Temple, 1st Floor',
-    city: 'Drakshramam',
-    pincode: '533262',
-    state: 'Andhra Pradesh',
-  });
+  // Redirect to login if user is not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/checkout', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Redirect to cart if empty
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      navigate('/cart', { replace: true });
+    }
+  }, [cartItems, navigate]);
+
+  // Address state populated with logged-in user profile
+  const [address, setAddress] = useState(() => ({
+    name: user?.name || '',
+    phone: user?.phone || '',
+    email: user?.email || '',
+    street: user?.addresses?.[0]?.addressLine || user?.addresses?.[0]?.street || 'Main Road',
+    city: user?.addresses?.[0]?.city || 'Drakshramam',
+    pincode: user?.addresses?.[0]?.pincode || '533262',
+    state: user?.addresses?.[0]?.state || 'Andhra Pradesh',
+  }));
+
+  // Sync address if user loads asynchronously
+  useEffect(() => {
+    if (user) {
+      setAddress((prev) => ({
+        ...prev,
+        name: prev.name || user.name || '',
+        phone: prev.phone || user.phone || '',
+        email: prev.email || user.email || '',
+      }));
+    }
+  }, [user]);
 
   const [isEditingAddress, setIsEditingAddress] = useState(false);
 
@@ -29,6 +59,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState('upi'); // 'upi', 'card', 'cod', 'netbanking'
   const [placingOrder, setPlacingOrder] = useState(false);
 
+  // Exact Arithmetic: Subtotal, Shipping, Discount, Total
   const freeShippingThreshold = Number(settings?.freeShippingThreshold) || 1499;
   const shippingCost = Number(settings?.shippingCost) || 50;
   const discount = discountAmount || 0;
@@ -36,24 +67,41 @@ export default function CheckoutPage() {
   const total = Math.max(0, subtotal - discount + (cartItems.length > 0 ? shipping : 0));
 
   const handlePlaceOrder = async () => {
+    // Validate required address fields
+    if (!address.name.trim()) {
+      alert('Please enter your Full Name for delivery.');
+      setIsEditingAddress(true);
+      return;
+    }
+    if (!address.phone.trim() || address.phone.trim().length < 10) {
+      alert('Please enter a valid 10-digit Mobile Number for delivery.');
+      setIsEditingAddress(true);
+      return;
+    }
+    if (!address.street.trim() || !address.pincode.trim()) {
+      alert('Please enter your Street Address and PIN Code.');
+      setIsEditingAddress(true);
+      return;
+    }
+
     setPlacingOrder(true);
     const orderId = `IFN-${Date.now().toString().slice(-6)}`;
 
     // Prepare order payload for Supabase database
     const orderPayload = {
       id: orderId,
-      customerName: address.name,
-      customerPhone: address.phone,
-      customerEmail: address.email || '',
-      address: `${address.street}, ${address.city} - ${address.pincode}, ${address.state}`,
-      city: address.city,
-      state: address.state,
-      pincode: address.pincode,
+      customerName: address.name.trim(),
+      customerPhone: address.phone.trim(),
+      customerEmail: address.email || user?.email || '',
+      address: `${address.street.trim()}, ${address.city.trim()} - ${address.pincode.trim()}, ${address.state.trim()}`,
+      city: address.city.trim(),
+      state: address.state.trim(),
+      pincode: address.pincode.trim(),
       items: cartItems.map((it) => ({
         id: it.id,
         name: it.name,
-        price: it.price,
-        quantity: it.quantity,
+        price: Number(it.price) || 0,
+        quantity: Number(it.quantity) || 1,
         image: it.image || '',
         customName: it.customName || null,
         customPhoto: it.customPhoto || null,
@@ -65,40 +113,94 @@ export default function CheckoutPage() {
       subtotal: subtotal,
       deliveryCharge: shipping,
       totalAmount: total,
-      paymentMethod: paymentMethod.toUpperCase(),
+      paymentMethod: paymentMethod === 'cod' ? 'CASH ON DELIVERY (COD)' : `RAZORPAY (${paymentMethod.toUpperCase()})`,
       paymentStatus: 'Pending',
       status: 'Pending',
       couponCode: appliedCoupon?.code || null,
     };
 
-    // Save directly to Supabase
-    await saveOrder(orderPayload);
+    const finishOrderAndRedirect = async (finalPayload) => {
+      // 1. Save directly to Supabase
+      await saveOrder(finalPayload);
 
-    // Format WhatsApp invoice
-    const orderItemsSummary = cartItems
-      .map(
-        (it, idx) =>
-          `${idx + 1}. *${it.name}* (Qty: ${it.quantity}) - ₹${it.price * it.quantity}` +
-          (it.customName ? `\n   Custom Text: "${it.customName}"` : '') +
-          (it.selectedSize ? `\n   Size: ${it.selectedSize}` : '') +
-          (it.customPhoto ? `\n   Photo: [Uploaded]` : '')
-      )
-      .join('\n\n');
+      // 2. Format WhatsApp invoice
+      const orderItemsSummary = cartItems
+        .map(
+          (it, idx) =>
+            `${idx + 1}. *${it.name}* (Qty: ${it.quantity}) - ₹${it.price * it.quantity}` +
+            (it.customName ? `\n   Custom Text: "${it.customName}"` : '') +
+            (it.selectedSize ? `\n   Size: ${it.selectedSize}` : '') +
+            (it.customPhoto ? `\n   Photo: [Uploaded]` : '')
+        )
+        .join('\n\n');
 
-    const whatsappMessage = `*NEW ORDER (${orderId}) - INFINITY FRAMES N*\n\n` +
-      `*Customer:* ${address.name}\n` +
-      `*Phone:* ${address.phone}\n` +
-      `*Address:* ${address.street}, ${address.city} - ${address.pincode}\n\n` +
-      `*Ordered Items:*\n${orderItemsSummary}\n\n` +
-      `*Total Amount:* ₹${total}\n` +
-      `*Payment Method:* ${paymentMethod.toUpperCase()}\n\n` +
-      `Please confirm my custom order!`;
+      const whatsappMessage = `*NEW ORDER (${orderId}) - INFINITY FRAMES N*\n\n` +
+        `*Customer:* ${finalPayload.customerName}\n` +
+        `*Phone:* ${finalPayload.customerPhone}\n` +
+        `*Address:* ${finalPayload.address}\n\n` +
+        `*Ordered Items:*\n${orderItemsSummary}\n\n` +
+        `*Subtotal:* ₹${finalPayload.subtotal}\n` +
+        `*Delivery Charge:* ₹${finalPayload.deliveryCharge}\n` +
+        (discount > 0 ? `*Discount:* -₹${discount}\n` : '') +
+        `*Total Paid:* ₹${finalPayload.totalAmount}\n` +
+        `*Payment Method:* ${finalPayload.paymentMethod}\n` +
+        `*Payment Status:* ${finalPayload.paymentStatus}\n` +
+        (finalPayload.paymentId ? `*Payment ID:* ${finalPayload.paymentId}\n\n` : '\n') +
+        `Please confirm my custom order!`;
 
-    clearCart();
-    setPlacingOrder(false);
-    // Open WhatsApp directly for fulfillment
-    window.open(waLink(whatsappMessage), '_blank');
-    navigate('/order-success');
+      clearCart();
+      setPlacingOrder(false);
+      // Open WhatsApp directly for fulfillment & redirect to success
+      window.open(waLink(whatsappMessage), '_blank');
+      navigate('/order-success');
+    };
+
+    // If online payment (UPI, Cards, NetBanking), invoke Razorpay Checkout
+    if (paymentMethod !== 'cod') {
+      try {
+        await openRazorpayCheckout({
+          orderId,
+          amount: total, // e.g. 550 INR (converted to 55000 paise in razorpay.js)
+          customer: {
+            fullName: address.name,
+            email: address.email || user?.email || '',
+            phone: address.phone,
+            address: address.street,
+            city: address.city,
+            pincode: address.pincode,
+          },
+          description: `Order ${orderId} - ₹${total}`,
+          onSuccess: async (razorpayResponse) => {
+            const paidPayload = {
+              ...orderPayload,
+              paymentStatus: 'Paid',
+              paymentId: razorpayResponse.razorpay_payment_id,
+              paymentMethod: `Razorpay (${paymentMethod.toUpperCase()})`,
+            };
+            await finishOrderAndRedirect(paidPayload);
+          },
+          onFailure: (err) => {
+            setPlacingOrder(false);
+            const msg = err?.description || err?.message || 'Payment was cancelled or could not be completed.';
+            alert(`Payment Notice: ${msg}\nYour cart items are safe. You can retry or choose Cash on Delivery.`);
+          },
+          onDismiss: () => {
+            setPlacingOrder(false);
+          },
+        });
+      } catch (e) {
+        setPlacingOrder(false);
+        alert('Could not open Razorpay checkout: ' + e.message);
+      }
+    } else {
+      // Cash on Delivery flow
+      const codPayload = {
+        ...orderPayload,
+        paymentStatus: 'Pending (COD)',
+        paymentMethod: 'CASH ON DELIVERY (COD)',
+      };
+      await finishOrderAndRedirect(codPayload);
+    }
   };
 
   return (
@@ -303,10 +405,12 @@ export default function CheckoutPage() {
             <span className="font-bold text-gray-900">₹{subtotal.toLocaleString('en-IN')}</span>
           </div>
 
-          <div className="flex items-center justify-between text-emerald-600">
-            <span>Discount</span>
-            <span className="font-bold">- ₹{discount.toLocaleString('en-IN')}</span>
-          </div>
+          {discount > 0 && (
+            <div className="flex items-center justify-between text-emerald-600">
+              <span>Discount ({appliedCoupon?.code || 'Coupon'})</span>
+              <span className="font-bold">- ₹{discount.toLocaleString('en-IN')}</span>
+            </div>
+          )}
 
           <div className="flex items-center justify-between text-gray-600">
             <span>Shipping</span>

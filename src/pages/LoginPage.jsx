@@ -142,7 +142,10 @@ export default function LoginPage() {
           <div className="text-center pt-4 border-t border-gray-100 space-y-3">
             <p className="text-xs sm:text-sm text-gray-600">
               New to Infinity Frames N?{' '}
-              <Link to="/signup" className="font-extrabold text-[#B38029] hover:underline">
+              <Link
+                to={redirectUrl !== '/account' ? `/signup?redirect=${encodeURIComponent(redirectUrl)}` : '/signup'}
+                className="font-extrabold text-[#B38029] hover:underline"
+              >
                 Create an Account
               </Link>
             </p>

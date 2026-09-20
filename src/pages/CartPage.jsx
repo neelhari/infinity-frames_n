@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trash2, X, Plus, Minus, Tag, ChevronRight, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function CartPage() {
   const navigate = useNavigate();
   const { cartItems, updateQuantity, removeFromCart, clearCart, subtotal } = useCart();
+  const { isAuthenticated } = useAuth();
 
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
@@ -214,7 +216,13 @@ export default function CartPage() {
                 </div>
 
                 <button
-                  onClick={() => navigate('/checkout')}
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      navigate('/login?redirect=/checkout');
+                    } else {
+                      navigate('/checkout');
+                    }
+                  }}
                   className="flex-1 bg-[#B38029] hover:bg-[#8C5E16] text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer text-xs uppercase tracking-wider"
                 >
                   <span>Proceed to Checkout</span>

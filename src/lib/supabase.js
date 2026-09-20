@@ -4,15 +4,12 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error(
-    'Supabase is not configured: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env. ' +
-    'The storefront and admin panel will not be able to read or save any data until this is fixed.'
+  throw new Error(
+    'Missing Supabase environment variables. Please ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in your .env file (locally) or in your Vercel Project Settings (production).'
   );
 }
 
-export const supabase = (supabaseUrl && supabaseAnonKey)
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null;
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 function requireClient() {
   if (!supabase) throw new Error('Supabase client is not initialized. Check your .env configuration.');
@@ -47,29 +44,47 @@ export async function isUserAdmin(userId) {
 export async function signUpCustomer({ email, password, name, phone }) {
   if (!supabase) return { success: false, message: 'Supabase client not initialized' };
   try {
+    const cleanEmail = email.trim().toLowerCase();
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: cleanEmail,
       password,
       options: {
         data: {
-          full_name: name,
-          phone: phone || '',
+          full_name: name.trim(),
+          phone: phone ? phone.trim() : '',
         },
       },
     });
-    if (error) return { success: false, message: error.message };
+    if (error) {
+      if (
+        error.message &&
+        (error.message.toLowerCase().includes('already') ||
+         error.message.toLowerCase().includes('registered') ||
+         error.message.toLowerCase().includes('exists'))
+      ) {
+        return {
+          success: false,
+          message: 'An account with this email address already exists. Please Log In.',
+        };
+      }
+      return { success: false, message: error.message };
+    }
 
-    // Also upsert profile row
+    // Safely upsert profile row if table exists
     if (data?.user) {
-      await supabase.from('profiles').upsert([
-        {
-          id: data.user.id,
-          full_name: name,
-          email: email,
-          phone: phone || null,
-          updated_at: new Date().toISOString(),
-        }
-      ]).select();
+      try {
+        await supabase.from('profiles').upsert([
+          {
+            id: data.user.id,
+            full_name: name.trim(),
+            email: cleanEmail,
+            phone: phone ? phone.trim() : null,
+            updated_at: new Date().toISOString(),
+          }
+        ]);
+      } catch (e) {
+        // Table may not exist or RLS handled
+      }
     }
 
     return { success: true, data };
@@ -81,8 +96,21 @@ export async function signUpCustomer({ email, password, name, phone }) {
 export async function signInCustomer({ email, password }) {
   if (!supabase) return { success: false, message: 'Supabase client not initialized' };
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { success: false, message: error.message };
+    const cleanEmail = email.trim().toLowerCase();
+    const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+    if (error) {
+      if (
+        error.message &&
+        (error.message.toLowerCase().includes('invalid login credentials') ||
+         error.message.toLowerCase().includes('invalid credentials'))
+      ) {
+        return {
+          success: false,
+          message: 'Invalid email or password. Please verify your credentials or create an account.',
+        };
+      }
+      return { success: false, message: error.message };
+    }
     return { success: true, data };
   } catch (err) {
     return { success: false, message: err.message };
@@ -546,6 +574,32 @@ export async function fetchOrdersByPhone(phone) {
   const { data, error } = await supabase.rpc('get_orders_by_phone', { p_phone: phone });
   if (error) return { success: false, data: [], message: error.message };
   return { success: true, data: (data || []).map(mapOrderFromDb) };
+}
+
+export async function fetchCustomerOrders({ email, phone }) {
+  if (!supabase) return { success: false, data: [], message: 'Supabase not configured' };
+  if (!email && !phone) return { success: true, data: [] };
+
+  try {
+    let query = supabase.from('orders').select('*');
+    if (email && phone) {
+      query = query.or(`customer_email.eq.${email},customer_phone.eq.${phone}`);
+    } else if (email) {
+      query = query.eq('customer_email', email);
+    } else if (phone) {
+      query = query.eq('customer_phone', phone);
+    }
+    const { data, error } = await query.order('created_at', { ascending: false });
+    if (error) {
+      // Fallback to RPC by phone if column-level or RLS restriction occurs
+      if (phone) return fetchOrdersByPhone(phone);
+      return { success: false, data: [], message: error.message };
+    }
+    return { success: true, data: (data || []).map(mapOrderFromDb) };
+  } catch (err) {
+    if (phone) return fetchOrdersByPhone(phone);
+    return { success: false, data: [], message: err.message };
+  }
 }
 
 export async function updateOrderStatusInDb(id, status) {

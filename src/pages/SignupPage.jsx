@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Mail, Lock, User, Phone, Eye, EyeOff, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { BRAND } from '../config/brand';
@@ -7,6 +7,8 @@ import { BRAND } from '../config/brand';
 export default function SignupPage() {
   const { isAuthenticated, signup } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectUrl = searchParams.get('redirect') || '/account';
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -18,9 +20,9 @@ export default function SignupPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/account', { replace: true });
+      navigate(redirectUrl, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, redirectUrl]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -32,8 +34,8 @@ export default function SignupPage() {
       setErrorMsg('Please enter a valid email address');
       return;
     }
-    if (!phone.trim() || !/^[0-9+\s-]{10,15}$/.test(phone.trim())) {
-      setErrorMsg('Please enter a valid 10-digit WhatsApp phone number');
+    if (phone.trim() && !/^[0-9+\s-]{10,15}$/.test(phone.trim())) {
+      setErrorMsg('Please enter a valid 10-digit phone number, or leave it blank.');
       return;
     }
     if (password.length < 6) {
@@ -47,7 +49,7 @@ export default function SignupPage() {
     setLoading(false);
 
     if (res.success) {
-      navigate('/account', { replace: true });
+      navigate(redirectUrl, { replace: true });
     } else {
       setErrorMsg(res.error || 'Registration failed. Please try again.');
     }
@@ -77,8 +79,16 @@ export default function SignupPage() {
         {/* Form Body */}
         <div className="p-7 sm:p-10 space-y-6">
           {errorMsg && (
-            <div className="p-4 rounded-2xl bg-red-50 text-red-700 text-xs sm:text-sm font-semibold border border-red-200 animate-fadeIn">
-              {errorMsg}
+            <div className="p-4 rounded-2xl bg-red-50 text-red-700 text-xs sm:text-sm font-semibold border border-red-200 animate-fadeIn space-y-2">
+              <p>{errorMsg}</p>
+              {errorMsg.toLowerCase().includes('already') && (
+                <Link
+                  to={redirectUrl !== '/account' ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'}
+                  className="inline-block text-xs font-bold text-[#B38029] underline"
+                >
+                  Click here to Log In with this email &rarr;
+                </Link>
+              )}
             </div>
           )}
 
@@ -120,17 +130,19 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* WhatsApp Phone */}
+            {/* WhatsApp Phone (Optional) */}
             <div>
-              <label className="block text-xs sm:text-sm font-bold text-gray-800 mb-1.5">
-                WhatsApp Mobile Number <span className="text-red-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs sm:text-sm font-bold text-gray-800">
+                  WhatsApp Mobile Number
+                </label>
+                <span className="text-[11px] text-gray-400 font-medium">Optional</span>
+              </div>
               <div className="flex items-center rounded-2xl border-2 border-gray-200 focus-within:border-[#D4AF37] focus-within:ring-4 focus-within:ring-[#D4AF37]/15 transition-all px-4 bg-white">
                 <Phone className="w-5 h-5 text-gray-400 shrink-0 mr-3" />
                 <input
                   type="tel"
-                  required
-                  placeholder="10-digit mobile number"
+                  placeholder="10-digit mobile number (optional)"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="w-full py-3.5 text-sm sm:text-base font-semibold text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-hidden"
@@ -180,7 +192,10 @@ export default function SignupPage() {
           <div className="text-center pt-4 border-t border-gray-100 space-y-3">
             <p className="text-xs sm:text-sm text-gray-600">
               Already have an account?{' '}
-              <Link to="/login" className="font-extrabold text-[#B38029] hover:underline">
+              <Link
+                to={redirectUrl !== '/account' ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'}
+                className="font-extrabold text-[#B38029] hover:underline"
+              >
                 Sign In
               </Link>
             </p>

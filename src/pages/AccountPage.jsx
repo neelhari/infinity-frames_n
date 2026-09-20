@@ -23,7 +23,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
-import { fetchOrdersByPhone } from '../lib/supabase';
+import { fetchCustomerOrders } from '../lib/supabase';
 import { BRAND, waLink } from '../config/brand';
 
 export default function AccountPage() {
@@ -47,15 +47,15 @@ export default function AccountPage() {
     type: 'Home',
   });
 
-  // Fetch real customer orders only if user has a phone number
+  // Fetch real customer orders matching authenticated user email or phone
   useEffect(() => {
-    if (!user?.phone) {
+    if (!user?.email && !user?.phone) {
       setDbOrders([]);
       return;
     }
     let active = true;
     setLoadingOrders(true);
-    fetchOrdersByPhone(user.phone).then((res) => {
+    fetchCustomerOrders({ email: user?.email, phone: user?.phone }).then((res) => {
       if (active) {
         setLoadingOrders(false);
         if (res.success && res.data) {
@@ -64,7 +64,7 @@ export default function AccountPage() {
       }
     });
     return () => { active = false; };
-  }, [user?.phone]);
+  }, [user?.email, user?.phone]);
 
   const handleAddAddress = (e) => {
     e.preventDefault();

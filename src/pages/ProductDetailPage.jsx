@@ -8,6 +8,7 @@ import { useStoreData } from '../context/StoreDataContext';
 import { uploadToCloudinary } from '../lib/cloudinary';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useAuth } from '../context/AuthContext';
 import { BRAND } from '../config/brand';
 
 export default function ProductDetailPage() {
@@ -16,6 +17,7 @@ export default function ProductDetailPage() {
   const { products } = useStoreData();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { isAuthenticated } = useAuth();
 
   // Find product by id from dynamic Supabase products
   const product = useMemo(() => {
@@ -108,7 +110,11 @@ export default function ProductDetailPage() {
   const handleBuyNow = () => {
     if (uploadingPhoto) return;
     addToCart(getCustomizedItem(), quantity);
-    navigate('/checkout');
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/checkout');
+    } else {
+      navigate('/checkout');
+    }
   };
 
   return (

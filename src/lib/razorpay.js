@@ -58,7 +58,7 @@ export async function openRazorpayCheckout({
     return;
   }
 
-  const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_TYMDeidWqhpxfL';
+  const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_Tb8FWkZ2TvUgfs';
 
   const amountInPaise = Math.round(Number(amount) * 100);
 
@@ -66,9 +66,9 @@ export async function openRazorpayCheckout({
     key: keyId,
     amount: amountInPaise,
     currency: 'INR',
-    name: BRAND.name,
+    name: BRAND.name || 'Infinity Frames N',
     description: description,
-    image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=200&q=80',
+    image: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=200&q=80',
     prefill: {
       name: customer?.fullName || '',
       email: customer?.email || '',

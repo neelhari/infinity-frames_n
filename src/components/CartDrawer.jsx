@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Tag, Plus, Minus, Sparkles } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { BRAND } from '../config/brand';
 
 export default function CartDrawer() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const {
     isCartOpen,
     closeCart,
@@ -245,7 +247,11 @@ export default function CartDrawer() {
               <button
                 onClick={() => {
                   closeCart();
-                  navigate('/checkout');
+                  if (!isAuthenticated) {
+                    navigate('/login?redirect=/checkout');
+                  } else {
+                    navigate('/checkout');
+                  }
                 }}
                 className="w-full bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-105 text-gray-950 py-3.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer"
               >

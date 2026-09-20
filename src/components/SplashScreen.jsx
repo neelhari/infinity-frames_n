@@ -25,55 +25,20 @@ export default function SplashScreen({ onComplete }) {
         isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
-      {/* Top ambient space */}
-      <div className="pt-12 text-xs font-semibold text-gray-400 tracking-wider">
-        <span>9:41</span>
-      </div>
+      {/* Top ambient space - Clean, no fake time */}
+      <div className="pt-8 sm:pt-12" />
 
-      {/* Center Brand Identity */}
+      {/* Center Brand Identity with Real Image & Mobile Proportions */}
       <div
         className={`relative z-10 flex flex-col items-center justify-center px-6 text-center max-w-sm transition-all duration-1000 ease-out transform ${
           isLoaded ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'
         }`}
       >
-        {/* Golden Infinity Heart Emblem */}
-        <div className="w-40 h-32 relative flex items-center justify-center mb-4">
-          <svg viewBox="0 0 200 120" className="w-full h-full drop-shadow-md">
-            <defs>
-              <linearGradient id="goldInfinity" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#E5C068" />
-                <stop offset="45%" stopColor="#C89B3C" />
-                <stop offset="75%" stopColor="#D4AF37" />
-                <stop offset="100%" stopColor="#9E7422" />
-              </linearGradient>
-            </defs>
-            {/* Elegant double-heart infinity curve */}
-            <path
-              d="M100,60 C80,30 40,20 20,45 C-5,70 15,105 55,100 C85,95 95,70 100,60 C105,70 115,95 145,100 C185,105 205,70 180,45 C160,20 120,30 100,60 Z"
-              fill="none"
-              stroke="url(#goldInfinity)"
-              strokeWidth="10"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-
-        {/* Brand Title */}
-        <h1 className="font-serif text-2xl font-bold tracking-[0.2em] text-[#C89B3C] mb-2 uppercase">
-          INFINITY FRAMES_N
-        </h1>
-
-        {/* Category subtitle pills */}
-        <p className="text-[11px] font-medium text-gray-500 tracking-wide leading-relaxed mb-6 max-w-xs">
-          Customized Gifts &bull; 3D Prints &bull; Photo Frames<br />
-          Lamps &bull; Keychains &bull; & More
-        </p>
-
-        {/* Signature Quote */}
-        <div className="font-serif italic text-lg text-gray-700 tracking-wide">
-          &ldquo;Turn Your Memories<br />Into Lasting Gifts&rdquo;
-        </div>
+        <img
+          src="/infinity-splash-logo.png"
+          alt="Infinity Frames N"
+          className="w-64 sm:w-72 max-w-[85vw] h-auto object-contain drop-shadow-sm"
+        />
       </div>
 
       {/* Bottom Luxury Golden Wave Decoration */}

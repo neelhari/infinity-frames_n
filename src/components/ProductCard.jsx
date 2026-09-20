@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { Heart, ShoppingBag, Zap } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { isAuthenticated } = useAuth();
 
   const isLiked = isInWishlist(product.id);
 
@@ -19,7 +21,11 @@ export default function ProductCard({ product }) {
   const handleBuyNow = (e) => {
     e.stopPropagation();
     addToCart(product);
-    navigate('/checkout');
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/checkout');
+    } else {
+      navigate('/checkout');
+    }
   };
 
   const handleCardClick = () => {
