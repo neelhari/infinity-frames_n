@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Phone, Mail, MessageCircle, Heart, ArrowUp, MapPin } from 'lucide-react';
 import { InstagramIcon } from './BrandIcons';
 import { BRAND, waLink } from '../config/brand';
+import { useStoreData } from '../context/StoreDataContext';
 
 const quickLinks = [
   { label: 'Home', path: '/' },
@@ -25,6 +26,7 @@ const policyLinks = [
 
 export default function Footer() {
   const navigate = useNavigate();
+  const { settings } = useStoreData();
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -91,14 +93,14 @@ export default function Footer() {
                 <MessageCircle className="w-4 h-4" />
               </a>
               <a
-                href={`tel:${BRAND.phone}`}
+                href={`tel:${settings?.phone || BRAND.phone}`}
                 className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#C89B3C] hover:text-[#1A1A1A] text-gray-300 flex items-center justify-center transition-colors"
                 title="Phone Support"
               >
                 <Phone className="w-4 h-4" />
               </a>
               <a
-                href={`mailto:${BRAND.email}`}
+                href={`mailto:${settings?.email || BRAND.email}`}
                 className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#C89B3C] hover:text-[#1A1A1A] text-gray-300 flex items-center justify-center transition-colors"
                 title="Email Us"
               >
@@ -168,18 +170,18 @@ export default function Footer() {
             <div className="text-xs text-gray-400 space-y-2">
               <p className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-[#C89B3C] shrink-0 mt-0.5" />
-                <span>{BRAND.address.full}</span>
+                <span>{settings?.address || BRAND.address.full}</span>
               </p>
               <p className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-[#C89B3C] shrink-0" />
-                <a href={`tel:${BRAND.phone}`} className="hover:text-white">
-                  +91 {BRAND.phone}
+                <a href={`tel:${settings?.phone || BRAND.phone}`} className="hover:text-white">
+                  +91 {settings?.phone || BRAND.phone}
                 </a>
               </p>
               <p className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#C89B3C] shrink-0" />
-                <a href={`mailto:${BRAND.email}`} className="hover:text-white">
-                  {BRAND.email}
+                <a href={`mailto:${settings?.email || BRAND.email}`} className="hover:text-white">
+                  {settings?.email || BRAND.email}
                 </a>
               </p>
             </div>

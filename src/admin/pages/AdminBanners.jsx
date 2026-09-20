@@ -232,7 +232,7 @@ export default function AdminBanners() {
                 <label className="block font-bold text-gray-800 mb-1">Navigation Target Link</label>
                 <input
                   type="text"
-                  placeholder="/shop?category=sarees"
+                  placeholder="/shop?category=moon-lamps"
                   value={link}
                   onChange={(e) => setLink(e.target.value)}
                   className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:ring-1 focus:ring-[#1A1A1A] outline-none font-mono text-[11px]"

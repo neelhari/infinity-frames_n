@@ -85,34 +85,28 @@ export function AdminAuthProvider({ children }) {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
 
-    // 1. Try real Supabase Auth first so valid JWT and admin write permissions are granted
+    // Authenticate strictly with real Supabase Auth
     const res = await signInAdmin(cleanEmail, cleanPassword);
     if (res.success && res.data?.session) {
-      setSession(res.data.session);
       const admin = await isUserAdmin(res.data.session.user.id);
-      setIsAdmin(admin);
+      if (!admin) {
+        await signOutAdmin();
+        setSession(null);
+        setIsAdmin(false);
+        return {
+          success: false,
+          message: 'Access denied: this account is not registered in the admin allowlist.',
+        };
+      }
+      setSession(res.data.session);
+      setIsAdmin(true);
       return res;
     }
 
-    // 2. Offline / local fallback if Supabase auth is unreachable
-    if (
-      (cleanEmail === 'admin@infinityframesn.com' || cleanEmail === 'harini@infinityframesn.com') &&
-      cleanPassword === 'admin123'
-    ) {
-      const mockAdminSession = {
-        user: {
-          id: 'admin-master-id',
-          email: cleanEmail,
-          user_metadata: { full_name: 'Harini Jupudy (Admin)' },
-        },
-      };
-      setSession(mockAdminSession);
-      setIsAdmin(true);
-      localStorage.setItem('infinity_admin_session', JSON.stringify(mockAdminSession));
-      return { success: true, data: mockAdminSession };
-    }
-
-    return res;
+    return {
+      success: false,
+      message: res.message || 'Invalid admin credentials. Please verify your email and password.',
+    };
   };
 
   const signOut = async () => {

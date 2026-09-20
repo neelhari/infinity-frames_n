@@ -47,7 +47,7 @@ export default function AdminDashboard() {
       color: "bg-blue-50 text-blue-700 border-blue-100",
     },
     {
-      title: "Clothing Products",
+      title: "Catalog Products",
       value: products.length,
       change: "Active Catalog",
       isPositive: true,
@@ -215,7 +215,7 @@ export default function AdminDashboard() {
                 onClick={() => navigate('/admin/products')}
                 className="w-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center justify-between transition-colors"
               >
-                <span>+ Add New Saree or Dress</span>
+                <span>+ Add New 3D Product</span>
                 <span>→</span>
               </button>
               <button

@@ -2,9 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Heart, Share2, Star, ShieldCheck, Plus, Minus,
-  Camera, Upload, Check, ChevronRight, ShoppingBag, Sparkles, Zap
+  Camera, Upload, Check, ChevronRight, ShoppingBag, Sparkles, Zap, Loader2
 } from 'lucide-react';
-import { products } from '../data/products';
+import { useStoreData } from '../context/StoreDataContext';
+import { uploadToCloudinary } from '../lib/cloudinary';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { BRAND } from '../config/brand';
@@ -12,41 +13,66 @@ import { BRAND } from '../config/brand';
 export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { products } = useStoreData();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
-  // Find product by id or default to moon lamp or photo frame
+  // Find product by id from dynamic Supabase products
   const product = useMemo(() => {
-    return products.find((p) => p.id === id) || products[0];
-  }, [id]);
+    return products.find((p) => String(p.id) === String(id)) || products[0] || {};
+  }, [id, products]);
 
   // Size, Color, Quantity, Gallery Index
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState(product.sizes?.[1] || product.sizes?.[0] || '12 cm');
-  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || 'Warm White');
+  const [selectedSize, setSelectedSize] = useState('12 cm');
+  const [selectedColor, setSelectedColor] = useState('Warm White');
   const [quantity, setQuantity] = useState(1);
+
+  // Sync variants when product changes
+  React.useEffect(() => {
+    if (product) {
+      if (product.sizes && product.sizes.length > 0) {
+        setSelectedSize(product.sizes[0]);
+      }
+      if (product.colors && product.colors.length > 0) {
+        setSelectedColor(product.colors[0]);
+      }
+    }
+  }, [product]);
 
   // Customizer Mode States
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [customName, setCustomName] = useState('Best Dad Ever');
   const [customPhoto, setCustomPhoto] = useState(null);
   const [customPhotoPreview, setCustomPhotoPreview] = useState('https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop&q=80');
+  const [customPhotoUrl, setCustomPhotoUrl] = useState('');
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [selectedFrameColor, setSelectedFrameColor] = useState('Natural Wood');
   const [selectedFontStyle, setSelectedFontStyle] = useState('Style 1');
   const [addedToast, setAddedToast] = useState(false);
 
   const inWishlist = isInWishlist(product.id);
 
-  // Handle customer image upload
-  const handlePhotoUpload = (e) => {
+  // Handle customer image upload & Cloudinary upload
+  const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setCustomPhoto(file);
+
+    // Instant local preview
     const reader = new FileReader();
     reader.onload = () => {
       setCustomPhotoPreview(reader.result);
     };
     reader.readAsDataURL(file);
+
+    // Upload to Cloudinary in background for order fulfillment
+    setUploadingPhoto(true);
+    const res = await uploadToCloudinary(file);
+    if (res.success) {
+      setCustomPhotoUrl(res.url);
+    }
+    setUploadingPhoto(false);
   };
 
   const frameColors = [
@@ -63,12 +89,15 @@ export default function ProductDetailPage() {
     selectedSize,
     selectedColor,
     customName: showCustomizer ? customName : null,
-    customPhoto: showCustomizer ? customPhotoPreview : null,
+    customPhoto: showCustomizer
+      ? (customPhotoUrl || (customPhotoPreview && customPhotoPreview.startsWith('http') ? customPhotoPreview : null))
+      : null,
     selectedFrameColor: showCustomizer ? selectedFrameColor : null,
     selectedFontStyle: showCustomizer ? selectedFontStyle : null,
   });
 
   const handleAddToCart = () => {
+    if (uploadingPhoto) return;
     addToCart(getCustomizedItem(), quantity);
     setAddedToast(true);
     setTimeout(() => {
@@ -77,6 +106,7 @@ export default function ProductDetailPage() {
   };
 
   const handleBuyNow = () => {
+    if (uploadingPhoto) return;
     addToCart(getCustomizedItem(), quantity);
     navigate('/checkout');
   };
@@ -270,18 +300,20 @@ export default function ProductDetailPage() {
             {/* Symmetrical Dual Action Buttons */}
             <div className="grid grid-cols-2 gap-2.5 pt-2">
               <button
+                disabled={uploadingPhoto}
                 onClick={handleAddToCart}
-                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold py-3.5 rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer text-xs uppercase tracking-wider"
+                className="w-full bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-900 font-bold py-3.5 rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer text-xs uppercase tracking-wider"
               >
-                <ShoppingBag className="w-4 h-4 text-gray-700" />
-                <span>Add</span>
+                {uploadingPhoto ? <Loader2 className="w-4 h-4 animate-spin text-gray-700" /> : <ShoppingBag className="w-4 h-4 text-gray-700" />}
+                <span>{uploadingPhoto ? 'Compressing...' : 'Add'}</span>
               </button>
               <button
+                disabled={uploadingPhoto}
                 onClick={handleBuyNow}
-                className="w-full bg-gradient-to-r from-[#D4AF37] to-[#B38029] hover:from-[#C89B3C] hover:to-[#8C5E16] text-white font-extrabold py-3.5 rounded-xl flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer text-xs uppercase tracking-wider"
+                className="w-full bg-gradient-to-r from-[#D4AF37] to-[#B38029] hover:from-[#C89B3C] hover:to-[#8C5E16] disabled:opacity-50 text-white font-extrabold py-3.5 rounded-xl flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer text-xs uppercase tracking-wider"
               >
-                <Zap className="w-4 h-4 fill-white" />
-                <span>Buy Now</span>
+                {uploadingPhoto ? <Loader2 className="w-4 h-4 animate-spin fill-white" /> : <Zap className="w-4 h-4 fill-white" />}
+                <span>{uploadingPhoto ? 'Please wait...' : 'Buy Now'}</span>
               </button>
             </div>
           </div>

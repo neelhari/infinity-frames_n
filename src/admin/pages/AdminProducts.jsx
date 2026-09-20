@@ -15,7 +15,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useStoreData } from '../../context/StoreDataContext';
-import ClothingProductModal from '../components/ClothingProductModal';
+import ProductModal from '../components/ProductModal';
 
 export default function AdminProducts() {
   const { products, categories, addProduct, updateProduct, deleteProduct } = useStoreData();
@@ -56,11 +56,12 @@ export default function AdminProducts() {
       window.alert(`Could not save product: ${result.message || 'Unknown error'}`);
       return false;
     }
+    setIsModalOpen(false);
     return true;
   };
 
   const handleDeleteProduct = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this clothing product?')) return;
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
     const result = await deleteProduct(id);
     if (!result.success) {
       window.alert(`Could not delete product: ${result.message || 'Unknown error'}`);
@@ -99,16 +100,16 @@ export default function AdminProducts() {
       {/* Top Action Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-2xs">
         <div>
-          <h2 className="font-serif text-2xl font-bold text-gray-900">Clothing Catalog ({products.length})</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Manage sarees, dresses, fabrics, and sizes</p>
+          <h2 className="font-serif text-2xl font-bold text-gray-900">Product Catalog ({products.length})</h2>
+          <p className="text-xs text-gray-500 mt-0.5">Manage 3D gifts, lamps, photo frames, keychains, and variants</p>
         </div>
 
         <button
           onClick={handleOpenAddModal}
-          className="bg-[#1A1A1A] hover:bg-[#0A0A0A] text-white text-xs font-bold px-5 py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all self-start sm:self-auto"
+          className="bg-[#1A1A1A] hover:bg-[#0A0A0A] text-white text-xs font-bold px-5 py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all self-start sm:self-auto cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>Add New Clothing Item</span>
+          <span>Add New 3D Gift / Product</span>
         </button>
       </div>
 
@@ -129,7 +130,7 @@ export default function AdminProducts() {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="text-xs p-2.5 rounded-xl border border-gray-200 bg-white font-semibold focus:outline-none"
+            className="text-xs p-2.5 rounded-xl border border-gray-200 bg-white font-semibold focus:outline-none cursor-pointer"
           >
             <option value="all">All Categories</option>
             {categories.map((cat) => (
@@ -153,11 +154,11 @@ export default function AdminProducts() {
                     className="rounded text-[#1A1A1A]"
                   />
                 </th>
-                <th className="p-4">Product</th>
+                <th className="p-4">Product Details</th>
                 <th className="p-4">SKU</th>
                 <th className="p-4">Category</th>
+                <th className="p-4">Customization</th>
                 <th className="p-4">Selling Price</th>
-                <th className="p-4">MRP</th>
                 <th className="p-4">Stock</th>
                 <th className="p-4 text-center">Actions</th>
               </tr>
@@ -166,7 +167,7 @@ export default function AdminProducts() {
               {filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="text-center py-12 text-gray-400 font-serif text-sm">
-                    No clothing items found matching criteria.
+                    No products found matching criteria.
                   </td>
                 </tr>
               ) : (
@@ -182,24 +183,39 @@ export default function AdminProducts() {
                     </td>
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <img src={p.image} alt={p.name} className="w-12 h-14 object-cover rounded-xl border border-gray-100 shrink-0" />
+                        <img src={p.image} alt={p.name} className="w-12 h-12 object-cover rounded-xl border border-gray-100 shrink-0" />
                         <div>
                           <div className="font-bold text-gray-900 text-xs line-clamp-1">{p.name}</div>
-                          <div className="text-[10px] text-gray-500 font-medium mt-0.5">{p.fabric || 'Pure Fabric'}</div>
+                          <div className="text-[10px] text-gray-500 font-medium mt-0.5">
+                            {p.subcategory || (p.sizes && p.sizes.length > 0 ? `${p.sizes.length} sizes` : 'Standard')}
+                          </div>
                         </div>
                       </div>
                     </td>
-                    <td className="p-4 font-mono text-gray-500 text-[11px]">{p.sku || 'SKU-1001'}</td>
+                    <td className="p-4 font-mono text-gray-500 text-[11px]">{p.sku || 'IFN-1001'}</td>
                     <td className="p-4">
                       <span className="bg-gray-100 text-gray-700 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">
                         {p.category}
                       </span>
                     </td>
-                    <td className="p-4 font-bold text-gray-900 text-sm">₹{p.price.toLocaleString('en-IN')}</td>
-                    <td className="p-4 text-gray-400 line-through">₹{(p.oldPrice || p.price + 500).toLocaleString('en-IN')}</td>
+                    <td className="p-4">
+                      {p.customizable ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200">
+                          Personalizable ({p.customType || 'photo-text'})
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-gray-400">Standard</span>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      <div className="font-bold text-gray-900 text-sm">₹{p.price.toLocaleString('en-IN')}</div>
+                      {p.oldPrice && (
+                        <div className="text-[10px] text-gray-400 line-through">₹{p.oldPrice.toLocaleString('en-IN')}</div>
+                      )}
+                    </td>
                     <td className="p-4">
                       <span className={`inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
-                        (p.stock || 10) > 3
+                        (p.stock || 10) > 5
                           ? 'bg-emerald-100 text-emerald-800'
                           : 'bg-amber-100 text-amber-800'
                       }`}>
@@ -210,21 +226,21 @@ export default function AdminProducts() {
                       <div className="flex items-center justify-center gap-1.5">
                         <button
                           onClick={() => handleOpenEditModal(p)}
-                          className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50"
+                          className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 cursor-pointer"
                           title="Edit Product"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDuplicateProduct(p)}
-                          className="p-1.5 rounded-lg text-gray-600 hover:bg-gray-100"
+                          className="p-1.5 rounded-lg text-gray-600 hover:bg-gray-100 cursor-pointer"
                           title="Duplicate Product"
                         >
                           <Copy className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDeleteProduct(p.id)}
-                          className="p-1.5 rounded-lg text-red-600 hover:bg-red-50"
+                          className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 cursor-pointer"
                           title="Delete Product"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -240,7 +256,7 @@ export default function AdminProducts() {
       </div>
 
       {/* Modal Form */}
-      <ClothingProductModal
+      <ProductModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveProduct}

@@ -4,7 +4,7 @@ import { useStoreData } from './StoreDataContext';
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const { coupons } = useStoreData();
+  const { coupons, settings } = useStoreData();
 
   const [cartItems, setCartItems] = useState(() => {
     try {
@@ -95,7 +95,8 @@ export const CartProvider = ({ children }) => {
 
   const totalItemsCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-  const freeShippingThreshold = 2000;
+  const freeShippingThreshold = Number(settings?.freeShippingThreshold) || 1499;
+  const shippingCost = Number(settings?.shippingCost) || 50;
   const isFreeShipping = subtotal >= freeShippingThreshold;
   const amountNeededForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
 
@@ -142,6 +143,7 @@ export const CartProvider = ({ children }) => {
       totalItemsCount,
       subtotal,
       freeShippingThreshold,
+      shippingCost,
       isFreeShipping,
       amountNeededForFreeShipping,
       toastMessage,

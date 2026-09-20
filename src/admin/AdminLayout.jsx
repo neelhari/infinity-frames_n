@@ -23,7 +23,7 @@ export default function AdminLayout() {
   const getPageTitle = () => {
     const path = location.pathname;
     if (path === '/admin') return 'Dashboard & Sales Overview';
-    if (path.includes('/products')) return 'Clothing Products Catalog';
+    if (path.includes('/products')) return 'Gift Products & Frames Catalog';
     if (path.includes('/categories')) return 'Store Categories & Collections';
     if (path.includes('/inventory')) return 'Inventory & Stock Management';
     if (path.includes('/orders')) return 'Customer Orders & Fulfillment';
@@ -106,12 +106,12 @@ export default function AdminLayout() {
                   </div>
                   <div className="space-y-2">
                     <div className="p-2 rounded-xl bg-gray-50 border border-gray-100">
-                      <p className="font-bold text-gray-800">New Order #AV-100242</p>
-                      <p className="text-gray-500 text-[11px]">Priya Reddy ordered Banarasi Tissue Saree • ₹3,499</p>
+                      <p className="font-bold text-gray-800">New Order #IFN-100242</p>
+                      <p className="text-gray-500 text-[11px]">Kiran Kumar ordered 3D Moon Lamp (12cm) • ₹799</p>
                     </div>
                     <div className="p-2 rounded-xl bg-amber-50 border border-amber-100 text-amber-800">
                       <p className="font-bold">Low Stock Warning</p>
-                      <p className="text-[11px]">Banarasi Petite Work Saree has only 2 items left!</p>
+                      <p className="text-[11px]">Personalized Photo Frame has only 3 items left!</p>
                     </div>
                   </div>
                 </div>
@@ -121,7 +121,7 @@ export default function AdminLayout() {
             {/* Admin Profile */}
             <div className="flex items-center gap-2 pl-2 border-l border-gray-200">
               <div className="w-8 h-8 rounded-full bg-[#1A1A1A] text-[#D4AF37] font-serif font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
-                {user?.email?.slice(0, 2)?.toUpperCase() || 'AV'}
+                {user?.email?.slice(0, 2)?.toUpperCase() || 'IF'}
               </div>
               <div className="hidden sm:block text-left min-w-0">
                 <span className="block text-xs font-bold text-gray-900 leading-none truncate max-w-[140px]">{user?.email || BRAND.ownerName}</span>

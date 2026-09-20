@@ -7,6 +7,14 @@ import {
   fetchOrders, saveOrderToSupabase, updateOrderStatusInDb,
   fetchContactMessages, updateMessageStatusInDb,
   fetchSettings, updateSettingsInDb,
+  supabase,
+  mapProductFromDb,
+  mapCategoryFromDb,
+  mapBannerFromDb,
+  mapCouponFromDb,
+  mapOrderFromDb,
+  mapSettingsFromDb,
+  mapMessageFromDb,
 } from '../lib/supabase';
 
 const StoreDataContext = createContext();
@@ -19,30 +27,123 @@ export function StoreDataProvider({ children }) {
   const [orders, setOrders] = useState([]);
   const [messages, setMessages] = useState([]);
   const [settings, setSettings] = useState({
-    storeName: '', phone: '', email: '', whatsapp: '', ownerName: '',
-    address: '', freeShippingThreshold: 2000, gstin: '', currency: '₹',
-    announcementText: 'Special Festive Offer: Flat 20% Off on Pure Silk Sarees | Use Code: AV20',
+    storeName: 'Infinity Frames N', phone: '', email: '', whatsapp: '', ownerName: '',
+    address: '', freeShippingThreshold: 1499, shippingCost: 50, gstin: '', currency: '₹',
+    announcementText: 'Special Offer: Free Delivery across India on orders above ₹1499 | Handcrafted 3D Gifts',
     announcementEnabled: true,
     announcementLink: '/shop',
   });
   const [loading, setLoading] = useState(true);
 
-  // Initial load — public-readable data (products/categories/banners/coupons/settings).
-  useEffect(() => {
-    let active = true;
-    (async () => {
+  const refetchAll = useCallback(async () => {
+    try {
       const [p, c, b, cp, s] = await Promise.all([
         fetchProducts(), fetchCategories(), fetchBanners(), fetchCoupons(), fetchSettings(),
       ]);
-      if (!active) return;
       if (p.success) setProducts(p.data);
       if (c.success) setCategories(c.data);
       if (b.success) setBanners(b.data);
       if (cp.success) setCoupons(cp.data);
       if (s.success && s.data) setSettings(s.data);
-      setLoading(false);
+    } catch (err) {
+      console.warn('StoreDataProvider refetch error:', err);
+    }
+  }, []);
+
+  // Initial load — public-readable data (products/categories/banners/coupons/settings).
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      await refetchAll();
+      if (active) setLoading(false);
     })();
     return () => { active = false; };
+  }, [refetchAll]);
+
+  // Real-time synchronization: Listen to database changes across all tables so
+  // any updates made in the admin panel immediately reflect on storefronts and across all devices
+  useEffect(() => {
+    if (!supabase) return;
+
+    const channel = supabase
+      .channel('store-realtime-channel')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'products' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setProducts((prev) => [mapProductFromDb(payload.new), ...prev.filter((p) => p.id !== payload.new.id)]);
+          } else if (payload.eventType === 'UPDATE') {
+            setProducts((prev) => prev.map((p) => (p.id === payload.new.id ? mapProductFromDb(payload.new) : p)));
+          } else if (payload.eventType === 'DELETE') {
+            setProducts((prev) => prev.filter((p) => p.id !== payload.old.id));
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'categories' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setCategories((prev) => [...prev.filter((c) => c.id !== payload.new.id), mapCategoryFromDb(payload.new)]);
+          } else if (payload.eventType === 'UPDATE') {
+            setCategories((prev) => prev.map((c) => (c.id === payload.new.id ? mapCategoryFromDb(payload.new) : c)));
+          } else if (payload.eventType === 'DELETE') {
+            setCategories((prev) => prev.filter((c) => c.id !== payload.old.id));
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'banners' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setBanners((prev) => [...prev.filter((b) => b.id !== payload.new.id), mapBannerFromDb(payload.new)]);
+          } else if (payload.eventType === 'UPDATE') {
+            setBanners((prev) => prev.map((b) => (b.id === payload.new.id ? mapBannerFromDb(payload.new) : b)));
+          } else if (payload.eventType === 'DELETE') {
+            setBanners((prev) => prev.filter((b) => b.id !== payload.old.id));
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'coupons' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setCoupons((prev) => [mapCouponFromDb(payload.new), ...prev.filter((c) => c.id !== payload.new.id)]);
+          } else if (payload.eventType === 'UPDATE') {
+            setCoupons((prev) => prev.map((c) => (c.id === payload.new.id ? mapCouponFromDb(payload.new) : c)));
+          } else if (payload.eventType === 'DELETE') {
+            setCoupons((prev) => prev.filter((c) => c.id !== payload.old.id));
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'settings' },
+        (payload) => {
+          if (payload.new) {
+            setSettings(mapSettingsFromDb(payload.new));
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setOrders((prev) => [mapOrderFromDb(payload.new), ...prev.filter((o) => o.id !== payload.new.id)]);
+          } else if (payload.eventType === 'UPDATE') {
+            setOrders((prev) => prev.map((o) => (o.id === payload.new.id ? mapOrderFromDb(payload.new) : o)));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Orders & contact messages are admin-only (blocked by RLS for anon visitors),
@@ -187,6 +288,7 @@ export function StoreDataProvider({ children }) {
         messages,
         settings,
         loading,
+        refetchAll,
         refreshOrders,
         refreshMessages,
         addProduct,
@@ -196,6 +298,7 @@ export function StoreDataProvider({ children }) {
         updateCategory,
         deleteCategory,
         addOrder,
+        saveOrder: addOrder,
         updateOrderStatus,
         updateMessageStatus,
         addBanner,

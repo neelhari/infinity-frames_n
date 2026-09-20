@@ -5,11 +5,13 @@ import {
   CreditCard, Smartphone, Banknote, Building2, Plus
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useStoreData } from '../context/StoreDataContext';
 import { BRAND, waLink } from '../config/brand';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { cartItems, subtotal, clearCart } = useCart();
+  const { cartItems, subtotal, clearCart, appliedCoupon, discountAmount } = useCart();
+  const { saveOrder, settings } = useStoreData();
 
   // Address state
   const [address, setAddress] = useState({
@@ -27,12 +29,50 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState('upi'); // 'upi', 'card', 'cod', 'netbanking'
   const [placingOrder, setPlacingOrder] = useState(false);
 
-  const discount = 300;
-  const shipping = subtotal > 1499 ? 0 : 50;
+  const freeShippingThreshold = Number(settings?.freeShippingThreshold) || 1499;
+  const shippingCost = Number(settings?.shippingCost) || 50;
+  const discount = discountAmount || 0;
+  const shipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
   const total = Math.max(0, subtotal - discount + (cartItems.length > 0 ? shipping : 0));
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     setPlacingOrder(true);
+    const orderId = `IFN-${Date.now().toString().slice(-6)}`;
+
+    // Prepare order payload for Supabase database
+    const orderPayload = {
+      id: orderId,
+      customerName: address.name,
+      customerPhone: address.phone,
+      customerEmail: address.email || '',
+      address: `${address.street}, ${address.city} - ${address.pincode}, ${address.state}`,
+      city: address.city,
+      state: address.state,
+      pincode: address.pincode,
+      items: cartItems.map((it) => ({
+        id: it.id,
+        name: it.name,
+        price: it.price,
+        quantity: it.quantity,
+        image: it.image || '',
+        customName: it.customName || null,
+        customPhoto: it.customPhoto || null,
+        selectedSize: it.selectedSize || null,
+        selectedColor: it.selectedColor || null,
+        selectedFrameColor: it.selectedFrameColor || null,
+        selectedFontStyle: it.selectedFontStyle || null,
+      })),
+      subtotal: subtotal,
+      deliveryCharge: shipping,
+      totalAmount: total,
+      paymentMethod: paymentMethod.toUpperCase(),
+      paymentStatus: 'Pending',
+      status: 'Pending',
+      couponCode: appliedCoupon?.code || null,
+    };
+
+    // Save directly to Supabase
+    await saveOrder(orderPayload);
 
     // Format WhatsApp invoice
     const orderItemsSummary = cartItems
@@ -45,7 +85,7 @@ export default function CheckoutPage() {
       )
       .join('\n\n');
 
-    const whatsappMessage = `*NEW ORDER - INFINITY FRAMES N*\n\n` +
+    const whatsappMessage = `*NEW ORDER (${orderId}) - INFINITY FRAMES N*\n\n` +
       `*Customer:* ${address.name}\n` +
       `*Phone:* ${address.phone}\n` +
       `*Address:* ${address.street}, ${address.city} - ${address.pincode}\n\n` +
@@ -54,13 +94,11 @@ export default function CheckoutPage() {
       `*Payment Method:* ${paymentMethod.toUpperCase()}\n\n` +
       `Please confirm my custom order!`;
 
-    setTimeout(() => {
-      clearCart();
-      setPlacingOrder(false);
-      // Open WhatsApp directly for fulfillment
-      window.open(waLink(whatsappMessage), '_blank');
-      navigate('/order-success');
-    }, 1000);
+    clearCart();
+    setPlacingOrder(false);
+    // Open WhatsApp directly for fulfillment
+    window.open(waLink(whatsappMessage), '_blank');
+    navigate('/order-success');
   };
 
   return (

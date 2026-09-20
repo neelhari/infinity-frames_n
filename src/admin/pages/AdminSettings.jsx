@@ -11,10 +11,10 @@ export default function AdminSettings() {
     email: '',
     ownerName: '',
     address: '',
-    freeShippingThreshold: 2000,
+    freeShippingThreshold: 1499,
     gstin: '',
     currency: '₹',
-    announcementText: 'Special Festive Offer: Flat 20% Off on Pure Silk Sarees | Use Code: AV20',
+    announcementText: 'Special Offer: Free Shipping on all orders above ₹1499 | Handcrafted 3D Gifts & Frames',
     announcementEnabled: true,
     announcementLink: '/shop',
     ...settings,
@@ -110,7 +110,7 @@ export default function AdminSettings() {
               <label className="block font-bold text-gray-800 mb-1">Announcement Message Text</label>
               <input
                 type="text"
-                placeholder="e.g. ✨ FESTIVE SALE: Flat 20% OFF on all Pure Silk Sarees! Use Code: AV20"
+                placeholder="e.g. ✨ Special Offer: Free Shipping on all orders above ₹1499 | Use Code: INFINITY10"
                 value={formData.announcementText || ''}
                 onChange={(e) => setFormData({ ...formData, announcementText: e.target.value })}
                 className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:ring-1 focus:ring-[#1A1A1A] outline-none"
@@ -121,7 +121,7 @@ export default function AdminSettings() {
               <label className="block font-bold text-gray-800 mb-1">Target Link (Optional)</label>
               <input
                 type="text"
-                placeholder="/shop?category=sarees"
+                placeholder="/shop?category=photo-frames"
                 value={formData.announcementLink || ''}
                 onChange={(e) => setFormData({ ...formData, announcementLink: e.target.value })}
                 className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:ring-1 focus:ring-[#1A1A1A] outline-none font-mono text-[11px]"
@@ -135,7 +135,7 @@ export default function AdminSettings() {
                 <div className="flex items-center gap-2 truncate">
                   <span className="bg-[#D4AF37] text-[#1A1A1A] text-[9px] uppercase font-black px-1.5 py-0.5 rounded shrink-0">Announcement</span>
                   <span className="truncate font-medium">
-                    {formData.announcementText || 'Special Festive Offer: Flat 20% Off on Pure Silk Sarees | Use Code: AV20'}
+                    {formData.announcementText || 'Special Offer: Free Shipping on all orders above ₹1499 | Handcrafted 3D Gifts & Frames'}
                   </span>
                 </div>
                 <span className="text-[10px] bg-white/20 hover:bg-white/30 text-white font-bold px-2 py-0.5 rounded ml-2 shrink-0 transition-colors">

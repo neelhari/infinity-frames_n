@@ -1,5 +1,5 @@
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'aalaya_vastra';
+const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'infinity_frames';
 
 if (!CLOUD_NAME) {
   console.error(
@@ -10,12 +10,22 @@ if (!CLOUD_NAME) {
 /**
  * Returns optimized Cloudinary URL for media asset
  */
+/**
+ * Returns optimized Cloudinary URL for media asset.
+ * If given an existing Cloudinary URL without compression, injects f_auto,q_auto.
+ */
 export function buildCloudinaryUrl(publicId, options = {}) {
   if (!publicId) return '';
-  if (publicId.startsWith('http://') || publicId.startsWith('https://') || publicId.startsWith('/')) {
+  if (publicId.startsWith('http://') || publicId.startsWith('https://')) {
+    if (publicId.includes('res.cloudinary.com') && publicId.includes('/image/upload/') && !publicId.includes('f_auto')) {
+      return publicId.replace('/image/upload/', '/image/upload/f_auto,q_auto,w_1200,c_limit/');
+    }
     return publicId;
   }
-  const width = options.width ? `w_${options.width}` : '';
+  if (publicId.startsWith('/')) {
+    return publicId;
+  }
+  const width = options.width ? `w_${options.width}` : 'w_1200';
   const height = options.height ? `h_${options.height}` : '';
   const crop = options.crop ? `c_${options.crop}` : 'c_limit';
   const quality = options.quality ? `q_${options.quality}` : 'q_auto';
@@ -23,6 +33,19 @@ export function buildCloudinaryUrl(publicId, options = {}) {
 
   const transformations = [crop, width, height, quality, format].filter(Boolean).join(',');
   return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${transformations}/${publicId}`;
+}
+
+/**
+ * Returns an optimized image URL for any image source.
+ * Injects f_auto,q_auto for Cloudinary URLs, or returns the URL directly.
+ */
+export function getOptimizedImageUrl(url, { width = 800, quality = 'auto' } = {}) {
+  if (!url) return '';
+  if (url.includes('res.cloudinary.com') && url.includes('/image/upload/')) {
+    if (url.includes('f_auto') || url.includes('q_auto')) return url;
+    return url.replace('/image/upload/', `/image/upload/f_auto,q_${quality},w_${width},c_limit/`);
+  }
+  return url;
 }
 
 /**
@@ -55,10 +78,18 @@ export async function uploadToCloudinary(file) {
       return { success: false, message };
     }
     let finalUrl = data.secure_url;
-    // Automatic Cloudinary video compression & web optimization:
-    // q_auto: automatic optimal compression bitrate
-    // vc_auto: modern web video codec (H.264 / VP9 / AV1)
-    // w_720: limit resolution to 720p HD to cut video size by 70-85%
+    // Automatic Cloudinary compression & web optimization:
+    // For images:
+    // - f_auto: automatic modern format delivery (WebP / AVIF) based on browser support
+    // - q_auto: smart perceptual compression (reduces 5-10MB mobile uploads to ~100-200KB with zero visible loss)
+    // - w_1200,c_limit: caps image width to 1200px max, never upscales smaller images
+    if (resourceType === 'image' && finalUrl && finalUrl.includes('/image/upload/')) {
+      finalUrl = finalUrl.replace('/image/upload/', '/image/upload/f_auto,q_auto,w_1200,c_limit/');
+    }
+    // For videos:
+    // - q_auto: automatic optimal compression bitrate
+    // - vc_auto: modern web video codec (H.264 / VP9 / AV1)
+    // - w_720: limit resolution to 720p HD to cut video size by 70-85%
     if (resourceType === 'video' && finalUrl && finalUrl.includes('/video/upload/')) {
       finalUrl = finalUrl.replace('/video/upload/', '/video/upload/q_auto,vc_auto,w_720/');
     }

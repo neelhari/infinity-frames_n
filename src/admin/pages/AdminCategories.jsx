@@ -60,7 +60,7 @@ export default function AdminCategories() {
     if (!name.trim() || saving || uploadingImage) return;
 
     setSaving(true);
-    const categoryImage = image || editingCat?.image || '/products/saree-placeholder.png';
+    const categoryImage = image || editingCat?.image || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop&q=80';
 
     const result = editingCat
       ? await updateCategory(editingCat.id, {
@@ -152,7 +152,7 @@ export default function AdminCategories() {
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <img
-                          src={cat.image || '/products/saree-placeholder.png'}
+                          src={cat.image || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop&q=80'}
                           alt={cat.name}
                           className="w-12 h-12 object-cover rounded-xl border border-gray-100 shrink-0"
                         />
@@ -219,7 +219,7 @@ export default function AdminCategories() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Handloom Sarees"
+                  placeholder="e.g. Moon Lamps or Photo Frames"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none"
@@ -230,7 +230,7 @@ export default function AdminCategories() {
                 <label className="block font-bold text-gray-800 mb-1">Tagline / Short Description</label>
                 <input
                   type="text"
-                  placeholder="e.g. Timeless Weaves & Elegant Drapes"
+                  placeholder="e.g. Turn Your Memories Into Lasting Gifts"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none"

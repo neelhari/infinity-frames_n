@@ -1,18 +1,20 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Search, ShoppingBag, Star, Heart, SlidersHorizontal } from 'lucide-react';
-import { products } from '../data/products';
-import { categories } from '../data/categories';
+import { useStoreData } from '../context/StoreDataContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 
 export default function ProductsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const categoryParam = searchParams.get('category') || 'photo-frames';
+  const categoryParam = searchParams.get('category');
+  const { products, categories } = useStoreData();
   
-  const currentCategory = categories.find((c) => c.id === categoryParam) || categories[2]; // defaults to photo-frames
-  const availableChips = currentCategory?.subcategories || ['All', 'Wooden', 'Acrylic', 'LED Frames'];
+  const currentCategory = categories.find((c) => c.id === categoryParam) || null;
+  const availableChips = currentCategory?.subcategories && currentCategory.subcategories.length > 0
+    ? ['All', ...currentCategory.subcategories]
+    : ['All'];
 
   const [activeChip, setActiveChip] = useState('All');
   const { addToCart, totalItemsCount } = useCart();
@@ -26,7 +28,7 @@ export default function ProductsPage() {
       if (activeChip === 'All') return true;
       return p.subcategory?.toLowerCase().includes(activeChip.toLowerCase());
     });
-  }, [categoryParam, activeChip]);
+  }, [products, categoryParam, activeChip]);
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-24 font-sans">

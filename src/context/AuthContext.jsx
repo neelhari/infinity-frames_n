@@ -19,37 +19,6 @@ export function AuthProvider({ children }) {
     }
   });
 
-  const [registeredUsers, setRegisteredUsers] = useState(() => {
-    try {
-      const saved = localStorage.getItem('infinity_registered_users');
-      return saved ? JSON.parse(saved) : [
-        {
-          id: 'usr_harini',
-          name: 'Harini Jupudy',
-          email: 'harini@infinityframesn.com',
-          phone: '9390299611',
-          password: 'password123',
-          addresses: [
-            {
-              id: 'addr_1',
-              type: 'Home',
-              name: 'Harini Jupudy',
-              phone: '9390299611',
-              addressLine: 'Door No 4-12, Main Bazaar Road',
-              city: 'Rajahmundry',
-              state: 'Andhra Pradesh',
-              pincode: '533101',
-              isDefault: true,
-            }
-          ],
-          createdAt: '2026-01-15T10:00:00.000Z',
-        }
-      ];
-    } catch {
-      return [];
-    }
-  });
-
   useEffect(() => {
     if (user) {
       localStorage.setItem('infinity_user', JSON.stringify(user));
@@ -57,10 +26,6 @@ export function AuthProvider({ children }) {
       localStorage.removeItem('infinity_user');
     }
   }, [user]);
-
-  useEffect(() => {
-    localStorage.setItem('infinity_registered_users', JSON.stringify(registeredUsers));
-  }, [registeredUsers]);
 
   // Listen to Supabase Auth State Changes
   useEffect(() => {
@@ -95,7 +60,7 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  // 1. Sign Up / Create Account
+  // 1. Sign Up / Create Account via real Supabase Auth
   const signup = async ({ name, email, password, phone = '' }) => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
@@ -104,57 +69,34 @@ export function AuthProvider({ children }) {
       return { success: false, error: 'Name, Email, and Password are required.' };
     }
 
-    // Call real Supabase Auth Sign Up first
-    let supabaseUserId = null;
-    try {
-      const supaRes = await signUpCustomer({
-        email: cleanEmail,
-        password,
-        name: name.trim(),
-        phone: cleanPhone,
-      });
+    const supaRes = await signUpCustomer({
+      email: cleanEmail,
+      password,
+      name: name.trim(),
+      phone: cleanPhone,
+    });
 
-      if (!supaRes.success) {
-        // If error contains user already registered
-        if (supaRes.message && (supaRes.message.includes('already') || supaRes.message.includes('registered'))) {
-          return { success: false, error: 'An account with this email address already exists. Please Log In.' };
-        }
-      } else if (supaRes.data?.user?.id) {
-        supabaseUserId = supaRes.data.user.id;
+    if (!supaRes.success) {
+      if (supaRes.message && (supaRes.message.includes('already') || supaRes.message.includes('registered'))) {
+        return { success: false, error: 'An account with this email address already exists. Please Log In.' };
       }
-    } catch (e) {
-      console.warn('Supabase signup notice:', e);
+      return { success: false, error: supaRes.message || 'Failed to create account.' };
     }
 
     const newUser = {
-      id: supabaseUserId || `usr_${Date.now()}`,
+      id: supaRes.data?.user?.id || `usr_${Date.now()}`,
       name: name.trim(),
       email: cleanEmail,
       phone: cleanPhone,
-      password: password,
-      addresses: [
-        {
-          id: `addr_${Date.now()}`,
-          type: 'Home',
-          name: name.trim(),
-          phone: cleanPhone || '9390299611',
-          addressLine: 'Main Bazaar',
-          city: 'Rajahmundry',
-          state: 'Andhra Pradesh',
-          pincode: '533101',
-          isDefault: true,
-        }
-      ],
+      addresses: [],
       createdAt: new Date().toISOString(),
     };
 
-    setRegisteredUsers((prev) => [...prev.filter((u) => u.email !== cleanEmail), newUser]);
     setUser(newUser);
-
     return { success: true, user: newUser };
   };
 
-  // 2. Login with Email & Password
+  // 2. Login with Email & Password via real Supabase Auth
   const login = async ({ email, password }) => {
     const cleanEmail = email.trim().toLowerCase();
 
@@ -162,45 +104,25 @@ export function AuthProvider({ children }) {
       return { success: false, error: 'Please enter both Email and Password.' };
     }
 
-    // Try Supabase Auth First
-    try {
-      const supaRes = await signInCustomer({ email: cleanEmail, password });
-      if (supaRes.success && supaRes.data?.user) {
-        const u = supaRes.data.user;
-        const loggedUser = {
-          id: u.id,
-          name: u.user_metadata?.full_name || cleanEmail.split('@')[0],
-          email: u.email,
-          phone: u.user_metadata?.phone || '',
-          addresses: [],
-        };
-        setUser(loggedUser);
-        return { success: true, user: loggedUser };
-      } else if (supaRes.message && !supaRes.message.includes('fetch')) {
-        // Return clear Supabase message
-        if (supaRes.message.includes('Invalid login credentials')) {
-          return { success: false, error: 'Invalid email or password. Please check and try again.' };
-        }
+    const supaRes = await signInCustomer({ email: cleanEmail, password });
+    if (!supaRes.success || !supaRes.data?.user) {
+      const msg = supaRes.message || '';
+      if (msg.includes('Invalid login credentials')) {
+        return { success: false, error: 'Invalid email or password. Please check and try again.' };
       }
-    } catch (e) {
-      console.warn('Supabase login error check:', e);
+      return { success: false, error: msg || 'Login failed. Please check your credentials.' };
     }
 
-    // Fallback: Check local registered users
-    const found = registeredUsers.find((u) => u.email.toLowerCase() === cleanEmail);
-    if (!found) {
-      return {
-        success: false,
-        error: 'No account found with this email address. Please Create an Account first.',
-      };
-    }
-
-    if (found.password !== password) {
-      return { success: false, error: 'Incorrect password. Please try again or click Forgot Password.' };
-    }
-
-    setUser(found);
-    return { success: true, user: found };
+    const u = supaRes.data.user;
+    const loggedUser = {
+      id: u.id,
+      name: u.user_metadata?.full_name || cleanEmail.split('@')[0],
+      email: u.email,
+      phone: u.user_metadata?.phone || '',
+      addresses: [],
+    };
+    setUser(loggedUser);
+    return { success: true, user: loggedUser };
   };
 
   // 3. Send Password Reset Email
@@ -255,7 +177,6 @@ export function AuthProvider({ children }) {
     setUser((prev) => {
       if (!prev) return null;
       const updated = { ...prev, ...updates };
-      setRegisteredUsers((all) => all.map((u) => (u.id === prev.id ? updated : u)));
       return updated;
     });
   };
@@ -282,9 +203,6 @@ export function AuthProvider({ children }) {
         localStorage.setItem('infinity_user', JSON.stringify(updated));
       } catch (e) {
         console.warn('LocalStorage save error:', e);
-      }
-      if (prev?.id) {
-        setRegisteredUsers((all) => all.map((u) => (u.id === prev.id ? updated : u)));
       }
       return updated;
     });

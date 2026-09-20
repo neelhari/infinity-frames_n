@@ -133,7 +133,7 @@ export async function updateCustomerPasswordInSupabase(newPassword) {
 // ============================================================================
 // Mapping helpers — DB uses snake_case columns, the app uses camelCase.
 // ============================================================================
-function mapProductFromDb(row) {
+export function mapProductFromDb(row) {
   if (!row) return row;
   return {
     id: row.id,
@@ -147,17 +147,19 @@ function mapProductFromDb(row) {
     discount: row.discount || null,
     stock: row.stock ?? 0,
     inStock: (row.stock ?? 0) > 0,
-    fabric: row.fabric || '',
-    material: row.material || '',
-    occasion: row.occasion || '',
-    careInstructions: row.care_instructions || '',
+    customizable: !!row.customizable,
+    customType: row.custom_type || (row.customizable ? 'photo-text' : null),
     sizes: row.sizes || [],
+    colors: row.colors || [],
+    materials: row.materials || [],
+    frameColors: row.frame_colors || [],
+    fontStyles: row.font_styles || [],
     description: row.description || '',
     image: row.image || (row.images && row.images[0]) || '',
     images: row.images || [],
     video: row.video || null,
     videoUrl: row.video_url || null,
-    rating: row.rating !== null && row.rating !== undefined ? Number(row.rating) : 4.5,
+    rating: row.rating !== null && row.rating !== undefined ? Number(row.rating) : 4.8,
     reviewsCount: row.reviews_count ?? 0,
     isNew: !!row.is_new,
     isFeatured: !!row.is_featured,
@@ -176,11 +178,13 @@ function mapProductToDb(p) {
   if (p.costPrice !== undefined) row.cost_price = p.costPrice === '' || p.costPrice === null ? null : Number(p.costPrice);
   if (p.discount !== undefined) row.discount = p.discount;
   if (p.stock !== undefined) row.stock = Number(p.stock) || 0;
-  if (p.fabric !== undefined) row.fabric = p.fabric;
-  if (p.material !== undefined) row.material = p.material;
-  if (p.occasion !== undefined) row.occasion = p.occasion;
-  if (p.careInstructions !== undefined) row.care_instructions = p.careInstructions;
+  if (p.customizable !== undefined) row.customizable = Boolean(p.customizable);
+  if (p.customType !== undefined) row.custom_type = p.customType;
   if (p.sizes !== undefined) row.sizes = p.sizes;
+  if (p.colors !== undefined) row.colors = p.colors;
+  if (p.materials !== undefined) row.materials = p.materials;
+  if (p.frameColors !== undefined) row.frame_colors = p.frameColors;
+  if (p.fontStyles !== undefined) row.font_styles = p.fontStyles;
   if (p.description !== undefined) row.description = p.description;
   if (p.image !== undefined) row.image = p.image;
   if (p.images !== undefined) row.images = p.images;
@@ -193,7 +197,7 @@ function mapProductToDb(p) {
   return row;
 }
 
-function mapCategoryFromDb(row) {
+export function mapCategoryFromDb(row) {
   if (!row) return row;
   return {
     id: row.id,
@@ -224,7 +228,7 @@ function mapCategoryToDb(c) {
   return row;
 }
 
-function mapBannerFromDb(row) {
+export function mapBannerFromDb(row) {
   if (!row) return row;
   return {
     id: row.id,
@@ -246,7 +250,7 @@ function mapBannerToDb(b) {
   return row;
 }
 
-function mapCouponFromDb(row) {
+export function mapCouponFromDb(row) {
   if (!row) return row;
   return {
     id: row.id,
@@ -270,7 +274,7 @@ function mapCouponToDb(c) {
   return row;
 }
 
-function mapOrderFromDb(row) {
+export function mapOrderFromDb(row) {
   if (!row) return row;
   const paymentMethodStr = row.payment_method || '';
   let extractedPaymentId = row.payment_id || null;
@@ -331,7 +335,7 @@ function mapOrderToDb(o) {
   };
 }
 
-function mapSettingsFromDb(row) {
+export function mapSettingsFromDb(row) {
   if (!row) return null;
   return {
     storeName: row.store_name || '',
@@ -343,7 +347,7 @@ function mapSettingsFromDb(row) {
     freeShippingThreshold: Number(row.free_shipping_threshold) || 0,
     gstin: row.gstin || '',
     currency: row.currency || '₹',
-    announcementText: row.announcement_text ?? 'Special Festive Offer: Flat 20% Off on Pure Silk Sarees | Use Code: AV20',
+    announcementText: row.announcement_text ?? 'Special Offer: Free Delivery across India on orders above ₹1499 | Handcrafted 3D Gifts',
     announcementEnabled: row.announcement_enabled !== undefined ? Boolean(row.announcement_enabled) : true,
     announcementLink: row.announcement_link || '/shop',
   };
@@ -366,7 +370,7 @@ function mapSettingsToDb(s) {
   return row;
 }
 
-function mapMessageFromDb(row) {
+export function mapMessageFromDb(row) {
   if (!row) return row;
   return {
     id: row.id,
@@ -596,7 +600,7 @@ export async function updateMessageStatusInDb(id, status) {
 export async function fetchSettings() {
   let localSaved = null;
   try {
-    const raw = localStorage.getItem('aalaya_store_settings');
+    const raw = localStorage.getItem('infinity_frames_store_settings');
     if (raw) localSaved = JSON.parse(raw);
   } catch (e) {
     // ignore
@@ -610,9 +614,11 @@ export async function fetchSettings() {
     const { data, error } = await supabase.from('settings').select('*').eq('id', 1).maybeSingle();
     if (!error && data) {
       const mapped = mapSettingsFromDb(data);
-      // Merge with any offline/local overrides if saved
-      const merged = localSaved ? { ...mapped, ...localSaved } : mapped;
-      return { success: true, data: merged };
+      // Persist latest database settings to local storage cache for offline fallback
+      try {
+        localStorage.setItem('infinity_frames_store_settings', JSON.stringify(mapped));
+      } catch (e) {}
+      return { success: true, data: mapped };
     }
   } catch (err) {
     console.warn('Supabase fetchSettings error:', err);
@@ -625,10 +631,10 @@ export async function fetchSettings() {
 export async function updateSettingsInDb(updates) {
   // Always persist locally first so changes take effect immediately across all screens
   try {
-    const raw = localStorage.getItem('aalaya_store_settings');
+    const raw = localStorage.getItem('infinity_frames_store_settings');
     const prev = raw ? JSON.parse(raw) : {};
     const merged = { ...prev, ...updates };
-    localStorage.setItem('aalaya_store_settings', JSON.stringify(merged));
+    localStorage.setItem('infinity_frames_store_settings', JSON.stringify(merged));
   } catch (e) {
     console.warn('LocalStorage save error:', e);
   }
@@ -646,14 +652,20 @@ export async function updateSettingsInDb(updates) {
       .select()
       .maybeSingle();
 
-    if (!error && data) {
-      return { success: true, data: mapSettingsFromDb(data) };
+    if (error) {
+      console.error('Supabase settings update error:', error.message);
+      return { success: false, message: error.message };
     }
-    // If RLS blocked the write (e.g. mock admin), fallback gracefully
-    console.info('Supabase cloud update notice (using synced state):', error?.message || 'RLS handled');
-    return { success: true, data: updates };
+    if (data) {
+      const mapped = mapSettingsFromDb(data);
+      try {
+        localStorage.setItem('infinity_frames_store_settings', JSON.stringify(mapped));
+      } catch (e) {}
+      return { success: true, data: mapped };
+    }
+    return { success: false, message: 'No data returned from settings update.' };
   } catch (err) {
-    console.warn('Supabase updateSettingsInDb fallback:', err);
-    return { success: true, data: updates };
+    console.error('Supabase updateSettingsInDb error:', err);
+    return { success: false, message: err.message || 'Error updating settings in database.' };
   }
 }

@@ -192,15 +192,59 @@ export default function AdminOrders() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <span className="font-extrabold uppercase text-gray-900 text-[10px] tracking-wider">Ordered Items</span>
               {selectedOrder.items?.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 font-medium">
-                  <div>
-                    <span className="font-bold text-gray-900 block">{item.name}</span>
-                    <span className="text-[10px] text-gray-500">Qty: {item.quantity}</span>
+                <div key={idx} className="p-3 bg-gray-50 rounded-xl border border-gray-100 font-medium space-y-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      {item.image && (
+                        <img src={item.image} alt={item.name} className="w-12 h-12 object-cover rounded-lg border border-gray-200 shrink-0" />
+                      )}
+                      <div>
+                        <span className="font-bold text-gray-900 block text-xs">{item.name}</span>
+                        <span className="text-[10px] text-gray-500">Qty: {item.quantity} &bull; Unit: ₹{item.price}</span>
+                      </div>
+                    </div>
+                    <span className="font-extrabold text-gray-900 text-sm">₹{(item.price * item.quantity).toLocaleString('en-IN')}</span>
                   </div>
-                  <span className="font-extrabold text-gray-900">₹{(item.price * item.quantity).toLocaleString('en-IN')}</span>
+
+                  {/* Customization Details (Custom Photo, Engraved Text, Frame, Size) */}
+                  {(item.customPhoto || item.customName || item.selectedSize || item.selectedColor || item.selectedFrameColor || item.selectedFontStyle) && (
+                    <div className="pt-2 border-t border-gray-200/60 bg-white p-2.5 rounded-lg text-[11px] space-y-1.5">
+                      <div className="font-bold text-amber-900 flex items-center gap-1">
+                        <span>✨ Custom Personalization:</span>
+                      </div>
+
+                      {item.customPhoto && (
+                        <div className="flex items-center gap-2">
+                          <img src={item.customPhoto} alt="Customer Upload" className="w-10 h-10 object-cover rounded border border-gray-300" />
+                          <a
+                            href={item.customPhoto}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-blue-600 hover:underline font-bold text-[10px]"
+                          >
+                            📷 View / Download Customer Photo
+                          </a>
+                        </div>
+                      )}
+
+                      {item.customName && (
+                        <div className="text-gray-800">
+                          <span className="font-bold text-gray-500">Custom Text / Name: </span>
+                          <span className="font-bold text-gray-900 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">"{item.customName}"</span>
+                        </div>
+                      )}
+
+                      <div className="flex flex-wrap gap-2 text-[10px] text-gray-600">
+                        {item.selectedSize && <span><span className="font-bold">Size:</span> {item.selectedSize}</span>}
+                        {item.selectedColor && <span><span className="font-bold">Light/Color:</span> {item.selectedColor}</span>}
+                        {item.selectedFrameColor && <span><span className="font-bold">Frame:</span> {item.selectedFrameColor}</span>}
+                        {item.selectedFontStyle && <span><span className="font-bold">Font:</span> {item.selectedFontStyle}</span>}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

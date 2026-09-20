@@ -2,25 +2,24 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, X, Sparkles, SlidersHorizontal } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
-import { products } from '../data/products';
-
-const quickCategories = [
-  { id: 'all', label: 'All Gifts', image: '/categories/cat_more.jpg' },
-  { id: 'customized-gifts', label: 'Customized', image: '/categories/cat_gift_box.jpg' },
-  { id: 'moon-lamps', label: 'Moon Lamps', image: '/categories/cat_moon_lamp.jpg' },
-  { id: 'photo-frames', label: 'Photo Frames', image: '/categories/cat_photo_frame.jpg' },
-  { id: 'lithophane-products', label: 'Lithophanes', image: '/categories/cat_lithophane.jpg' },
-  { id: 'acrylic-led', label: 'Acrylic LED', image: '/categories/cat_acrylic_led.jpg' },
-  { id: 'devotional-lamps', label: 'Devotional', image: '/categories/cat_devotional.jpg' },
-  { id: 'keychains', label: 'Keychains', image: '/categories/cat_keychain.jpg' },
-];
+import { useStoreData } from '../context/StoreDataContext';
 
 export default function CategoriesPage() {
+  const { products, categories } = useStoreData();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCategory = searchParams.get('category') || 'all';
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const dynamicCategories = [
+    { id: 'all', label: 'All Gifts', image: '/categories/cat_more.jpg' },
+    ...categories.map((c) => ({
+      id: c.id,
+      label: c.name,
+      image: c.image || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&auto=format&fit=crop&q=80',
+    }))
+  ];
 
   // Sync with URL if query param changes
   useEffect(() => {
@@ -65,16 +64,16 @@ export default function CategoriesPage() {
 
       return matchesCategory && matchesQuery;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [products, selectedCategory, searchQuery]);
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-24 font-sans">
       
-      {/* 1. HORIZONTAL SCROLLING CATEGORY ICONS (Exact same icons & sizes as Homepage) */}
+      {/* 1. HORIZONTAL SCROLLING CATEGORY ICONS */}
       <section className="bg-white border-b border-gray-100 py-3 shadow-2xs sticky top-[53px] sm:top-[61px] z-30">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-3 sm:gap-4 overflow-x-auto hide-scroll px-3.5 sm:px-6">
-            {quickCategories.map((cat) => {
+            {dynamicCategories.map((cat) => {
               const isSelected = selectedCategory === cat.id;
               return (
                 <button

@@ -1,14 +1,17 @@
 -- ============================================================================
--- Aalaya Vastra — Production database schema
+-- Infinity Frames N — Production Database Schema
 -- Run this ONCE in Supabase Dashboard → SQL Editor → New Query → Run.
 -- Safe to re-run: uses IF NOT EXISTS / ON CONFLICT DO NOTHING throughout.
 -- ============================================================================
+
+-- Enable UUID extension if not already enabled
+create extension if not exists "uuid-ossp";
 
 -- ----------------------------------------------------------------------------
 -- 1. ADMIN ALLOWLIST
 -- Only users whose auth.users id appears in this table can write to the
 -- store tables below. Creating a Supabase Auth account is NOT enough on its
--- own — you must also add a row here (see bottom of this file).
+-- own — you must also add a row here.
 -- ----------------------------------------------------------------------------
 create table if not exists admin_users (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -87,7 +90,7 @@ create trigger on_auth_user_created
   for each row execute procedure public.handle_new_user();
 
 -- ----------------------------------------------------------------------------
--- 2. PRODUCTS
+-- 2. PRODUCTS (Infinity Frames N 3D Gifts, Photo Frames, Lamps & Decor)
 -- ----------------------------------------------------------------------------
 create table if not exists products (
   id text primary key default gen_random_uuid()::text,
@@ -100,17 +103,19 @@ create table if not exists products (
   cost_price numeric,
   discount text,
   stock integer not null default 0,
-  fabric text,
-  material text,
-  occasion text,
-  care_instructions text,
+  customizable boolean not null default false,
+  custom_type text, -- 'photo', 'text', 'photo-text', '3d-model'
   sizes text[] not null default '{}',
+  colors text[] not null default '{}',
+  materials text[] not null default '{}',
+  frame_colors text[] not null default '{}',
+  font_styles text[] not null default '{}',
   description text,
   image text,
   images text[] not null default '{}',
   video text,
   video_url text,
-  rating numeric default 4.5,
+  rating numeric default 4.8,
   reviews_count integer default 0,
   is_new boolean not null default false,
   is_featured boolean not null default false,
@@ -118,7 +123,19 @@ create table if not exists products (
   updated_at timestamptz not null default now()
 );
 
+-- Ensure all columns exist if table was previously created
+alter table products add column if not exists customizable boolean not null default false;
+alter table products add column if not exists custom_type text;
+alter table products add column if not exists sizes text[] not null default '{}';
+alter table products add column if not exists colors text[] not null default '{}';
+alter table products add column if not exists materials text[] not null default '{}';
+alter table products add column if not exists frame_colors text[] not null default '{}';
+alter table products add column if not exists font_styles text[] not null default '{}';
+alter table products add column if not exists video text;
+alter table products add column if not exists video_url text;
+
 create index if not exists idx_products_category on products(category);
+create index if not exists idx_products_featured on products(is_featured);
 
 alter table products enable row level security;
 
@@ -202,8 +219,7 @@ create policy "coupons admin write" on coupons for all
 
 -- ----------------------------------------------------------------------------
 -- 6. ORDERS
--- Customers (anon) may only INSERT their own order — never read/update/delete.
--- Only admins can view or change fulfillment status.
+-- Items jsonb stores customPhoto, customName, selectedSize, selectedColor, etc.
 -- ----------------------------------------------------------------------------
 create table if not exists orders (
   id text primary key,
@@ -219,17 +235,16 @@ create table if not exists orders (
   delivery_charge numeric not null default 0,
   total_amount numeric not null default 0,
   payment_method text,
+  payment_id text,
   payment_status text not null default 'Pending',
   status text not null default 'Pending',
   coupon_code text,
   created_at timestamptz not null default now()
 );
 
--- Optional column for Razorpay payment reference ID
-alter table orders add column if not exists payment_id text;
-
 create index if not exists idx_orders_created_at on orders(created_at desc);
 create index if not exists idx_orders_status on orders(status);
+create index if not exists idx_orders_phone on orders(customer_phone);
 
 alter table orders enable row level security;
 
@@ -246,38 +261,30 @@ create policy "orders admin update" on orders for update
 drop policy if exists "orders admin delete" on orders;
 create policy "orders admin delete" on orders for delete using (is_admin());
 
--- Customer "My Orders" lookup — there's no real per-customer login (the
--- storefront account system is a demo OTP, not Supabase Auth), so RLS can't
--- key off auth.uid() for shoppers. This function returns only rows matching
--- the phone number the caller supplies, which is far narrower than exposing
--- the whole table to the anon key. It's still phone-guessable in principle;
--- that's an accepted tradeoff at this store's scale without real customer auth.
+-- Allow customers to look up their own orders by phone (Storefront Tracking)
 create or replace function get_orders_by_phone(p_phone text)
 returns setof orders
 language sql
-stable
 security definer
 set search_path = public
 as $$
-  select * from orders where customer_phone = p_phone order by created_at desc;
+  select * from orders
+  where regexp_replace(customer_phone, '\D', '', 'g') = regexp_replace(p_phone, '\D', '', 'g')
+  order by created_at desc;
 $$;
 
-grant execute on function get_orders_by_phone(text) to anon, authenticated;
-
 -- ----------------------------------------------------------------------------
--- 7. CONTACT MESSAGES
+-- 7. CONTACT / INQUIRY MESSAGES
 -- ----------------------------------------------------------------------------
 create table if not exists contact_messages (
-  id uuid primary key default gen_random_uuid(),
+  id text primary key default gen_random_uuid()::text,
   name text not null,
-  phone text,
   email text,
+  phone text,
   message text not null,
   status text not null default 'New',
   created_at timestamptz not null default now()
 );
-
-create index if not exists idx_contact_messages_created_at on contact_messages(created_at desc);
 
 alter table contact_messages enable row level security;
 
@@ -291,33 +298,26 @@ drop policy if exists "contact_messages admin update" on contact_messages;
 create policy "contact_messages admin update" on contact_messages for update
   using (is_admin()) with check (is_admin());
 
-drop policy if exists "contact_messages admin delete" on contact_messages;
-create policy "contact_messages admin delete" on contact_messages for delete using (is_admin());
-
 -- ----------------------------------------------------------------------------
--- 8. SETTINGS (singleton row)
+-- 8. STORE SETTINGS (Singleton row, id = 1)
 -- ----------------------------------------------------------------------------
 create table if not exists settings (
-  id smallint primary key default 1 check (id = 1),
-  store_name text,
-  phone text,
-  email text,
+  id integer primary key check (id = 1),
+  store_name text not null,
+  phone text not null,
+  email text not null,
   whatsapp text,
   owner_name text,
   address text,
-  free_shipping_threshold numeric not null default 2000,
+  free_shipping_threshold numeric not null default 1499,
   gstin text,
   currency text not null default '₹',
-  announcement_text text default 'Special Festive Offer: Flat 20% Off on Pure Silk Sarees | Use Code: AV20',
-  announcement_enabled boolean default true,
+  announcement_text text,
+  announcement_enabled boolean not null default true,
   announcement_link text default '/shop',
+  created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
-
--- Migration columns for existing settings table
-alter table settings add column if not exists announcement_text text default 'Special Festive Offer: Flat 20% Off on Pure Silk Sarees | Use Code: AV20';
-alter table settings add column if not exists announcement_enabled boolean default true;
-alter table settings add column if not exists announcement_link text default '/shop';
 
 alter table settings enable row level security;
 
@@ -326,10 +326,10 @@ create policy "settings public read" on settings for select using (true);
 
 drop policy if exists "settings admin write" on settings;
 create policy "settings admin write" on settings for all
-  using (true) with check (true);
+  using (is_admin()) with check (is_admin());
 
 -- ----------------------------------------------------------------------------
--- 9. updated_at auto-touch triggers
+-- 9. UPDATED_AT TRIGGER
 -- ----------------------------------------------------------------------------
 create or replace function touch_updated_at()
 returns trigger
@@ -352,52 +352,55 @@ create trigger trg_settings_updated_at
   for each row execute function touch_updated_at();
 
 -- ============================================================================
--- 10. SEED DATA — carries over what's currently hardcoded in the app so the
--- storefront isn't empty the moment it switches from localStorage to Supabase.
+-- 10. SEED DATA — Infinity Frames N initial categories, products, and settings
 -- ============================================================================
 insert into categories (id, name, tagline, description, image, banner_image, item_count, featured, subcategories) values
-  ('sarees', 'Sarees', 'Timeless Weaves & Elegant Drapes', 'Banarasi Tissue, Petiti Work, Manipuri Kota, Tassar with Gold & Silver lines, Mangalagiri Pattu, and Checks Silk Sarees.', '/products/saree-placeholder.png', '/products/saree-placeholder.png', '6 Collections', true, array['Banarasi Tissue','Banarasi Petiti Work','Manipuri Kota','Tassar (Gold & Silver Lines)','Mangalagiri Pattu Digital Print','Checks Silk']),
-  ('dresses', 'Dresses', 'Modern & Everyday Ethnic Wear', 'Mulchanderi 3-piece sets with embroidery, A-Line dresses, and pure cotton Jandani frocks and 3-piece sets.', '/products/dress-placeholder.png', '/products/dress-placeholder.png', '4 Collections', true, array['Mulchanderi 3-Piece Embroidery','Mulchanderi 3-Piece A-Line','Jandani Pure Cotton Frock','Jandani Pure Cotton 3-Piece Set']),
-  ('fabrics', 'Fabrics', 'Quality Unstitched Fabric Pieces', 'Premium unstitched silk, tissue, and mulchanderi fabric pieces for custom tailoring.', '/products/generic-product.png', '/products/generic-product.png', 'Custom Cut Pieces', true, array['Pure Silk Fabric','Tissue Cut Pieces','Mulmul Cotton','Chanderi Fabric']),
-  ('blouse-pieces', 'Blouse Pieces', 'Designer Matching Blouse Fabrics', 'Embroidered and zari-work blouse pieces to perfectly complement your saree.', '/products/generic-product.png', '/products/generic-product.png', 'Matching Cuts', true, array['Embroidered Blouses','Heavy Zari Work','Cotton Cut Pieces']),
-  ('new-arrivals', 'New Arrivals', 'Freshly Curated Ethnic Styles', 'Discover our newest Banarasi weaves, Mulchanderi dress sets, and seasonal releases.', '/products/saree-placeholder.png', '/products/saree-placeholder.png', 'Just Added', true, array['Banarasi Tissue','Mulchanderi Sets','Jandani Frocks'])
+  ('customized-gifts', 'Customized Gifts', 'Turn Your Memories Into Lasting Gifts', 'Personalized engraved frames, custom nameplates, anniversary gifts, and bespoke 3D tokens.', 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=1200&auto=format&fit=crop&q=80', '8 Products', true, array['Photo Gifts', 'Couple Gifts', 'Anniversary Specials', 'Name Engravings']),
+  ('3d-printed-products', '3D Printed Products', 'Precision 3D Engineering & Art', 'Intricately 3D-printed miniature sculptures, architectural models, and artistic desktop accents.', 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=1200&auto=format&fit=crop&q=80', '6 Products', true, array['Custom Models', 'Desktop Decor', 'Figurines', 'Architectural Scale']),
+  ('photo-frames', 'Photo Frames', 'Preserve Precious Moments', 'Handcrafted wooden frames, acrylic glass stands, and illuminated LED night frames.', 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=1200&auto=format&fit=crop&q=80', '8 Products', true, array['All', 'Wooden', 'Acrylic', 'LED Frames']),
+  ('lithophane-products', 'Lithophane Products', 'Light-Activated 3D Photography', 'Carved lithophane portraits that magically reveal your photographs when illuminated with light.', 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=500&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=1200&auto=format&fit=crop&q=80', '4 Products', true, array['Curved Lithophanes', 'Night Lamp Lithophanes', 'Flat Backlit Lithophanes']),
+  ('customized-lamps', 'Customized Lamps', 'Warm Illuminated Memories', 'Warm-glow acrylic silhouette lamps, 3D photo cylinder lamps, and touch-sensor bedside lamps.', 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=500&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=1200&auto=format&fit=crop&q=80', '5 Products', true, array['Acrylic Night Lamps', 'Photo Cylinders', 'Rotating Lamps']),
+  ('moon-lamps', 'Moon Lamps', 'Bring the Moon into Your Room', 'True-to-scale 3D lunar surface texture lamps with dual warm/cool glow and touch control.', 'https://images.unsplash.com/photo-1532767153582-b1a0e5145009?w=500&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1532767153582-b1a0e5145009?w=1200&auto=format&fit=crop&q=80', '3 Products', true, array['10cm Moon Lamp', '12cm Moon Lamp', '15cm 16-Color RGB']),
+  ('devotional-lamps', 'Devotional Lamps', 'Sacred Divine Illumination', 'Intricately etched spiritual and deity silhouette lamps with golden divine aura lighting.', 'https://images.unsplash.com/photo-1609743522653-52354461eb27?w=500&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1609743522653-52354461eb27?w=1200&auto=format&fit=crop&q=80', '5 Products', true, array['Shiva Mandir Lamps', 'Ganesha LED Lamps', 'Balaji Lithophanes']),
+  ('keychains', 'Keychains', 'Carry Memories Everywhere', 'Personalized 3D-embossed name keychains, calendar date tags, and miniature lithophane charms.', 'https://images.unsplash.com/photo-1614036417651-efe5912149d8?w=500&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1614036417651-efe5912149d8?w=1200&auto=format&fit=crop&q=80', '6 Products', true, array['Couple Keychains', 'Photo Keychains', 'Name Keychains', 'Glow in Dark']),
+  ('glow-in-dark', 'Glow-in-the-Dark / Radium', 'Luminescent Magic After Dark', 'Special photoluminescent 3D printed artifacts, night-glow stars, and glowing figurines.', 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80', '4 Products', true, array['Radium Figures', 'Night Wall Decor', 'Glow Keychains']),
+  ('aquarium-decorations', 'Aquarium Decorations', 'Non-Toxic Custom Underwater Worlds', '100% fish-safe, non-toxic PLA 3D printed aquatic caves, pirate shipwrecks, and castles.', 'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=1200&auto=format&fit=crop&q=80', '5 Products', true, array['Aquatic Caves', 'Sunken Ships', 'Coral Castles']),
+  ('customized-models', 'Customized Models', 'Bespoke 3D Prototypes & Replicas', 'Precision custom 3D modeling from your CAD files, sketches, or reference photos.', 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=1200&auto=format&fit=crop&q=80', 'Custom', true, array['Architectural Miniatures', 'Engineering Prototypes', 'Figurines']),
+  ('wholesale-bulk', 'Wholesale & Bulk Orders', 'Corporate Gifting & Event Giveaways', 'Bulk custom merchandise, event mementos, return gifts, and branded corporate desk accessories.', 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=1200&auto=format&fit=crop&q=80', 'Inquiry Based', true, array['Wedding Giveaways', 'Corporate Gifts', 'Bulk 3D Prints'])
 on conflict (id) do nothing;
 
-insert into products (id, name, category, subcategory, price, old_price, discount, is_new, is_featured, rating, reviews_count, image, images, description, stock, fabric) values
-  ('av-sar-01', 'Banarasi Tissue Saree', 'sarees', 'Banarasi Tissue', 2499, 3499, '29% OFF', true, true, 4.8, 12, '/products/saree-placeholder.png', array['/products/saree-placeholder.png'], 'Placeholder listing — awaiting real photos, price, and description from client.', 10, 'Banarasi Tissue'),
-  ('av-sar-02', 'Banarasi Petite Work Saree', 'sarees', 'Banarasi', 2699, 3799, '29% OFF', true, true, 4.7, 9, '/products/saree-placeholder.png', array['/products/saree-placeholder.png'], 'Placeholder listing — awaiting real photos, price, and description from client.', 10, 'Banarasi'),
-  ('av-sar-03', 'Manipuri Kota Saree', 'sarees', 'Manipuri Kota', 1899, 2599, '27% OFF', true, false, 4.6, 7, '/products/saree-placeholder.png', array['/products/saree-placeholder.png'], 'Placeholder listing — awaiting real photos, price, and description from client.', 10, 'Kota'),
-  ('av-sar-04', 'Tassar Saree with Gold & Silver Lines', 'sarees', 'Tassar', 2199, 2999, '27% OFF', true, true, 4.8, 14, '/products/saree-placeholder.png', array['/products/saree-placeholder.png'], 'Placeholder listing — awaiting real photos, price, and description from client.', 10, 'Tassar Silk'),
-  ('av-sar-05', 'Mangalagiri Pattu Digital Print Saree', 'sarees', 'Mangalagiri Pattu', 1699, 2299, '26% OFF', true, false, 4.5, 6, '/products/saree-placeholder.png', array['/products/saree-placeholder.png'], 'Placeholder listing — awaiting real photos, price, and description from client.', 10, 'Mangalagiri Pattu'),
-  ('av-sar-06', 'Checks Silk Saree', 'sarees', 'Checks Silk', 1999, 2799, '29% OFF', false, false, 4.6, 8, '/products/saree-placeholder.png', array['/products/saree-placeholder.png'], 'Placeholder listing — awaiting real photos, price, and description from client.', 10, 'Silk'),
-  ('av-dr-01', 'Mulchanderi 3-Piece Dress with Embroidery (A-Line)', 'dresses', 'Mulchanderi Sets', 1799, 2499, '28% OFF', true, true, 4.7, 10, '/products/dress-placeholder.png', array['/products/dress-placeholder.png'], 'Placeholder listing — awaiting real photos, price, and description from client.', 10, 'Mulchanderi'),
-  ('av-dr-02', 'Mulchanderi 3-Piece Dress (A-Line)', 'dresses', 'Mulchanderi Sets', 1499, 2099, '29% OFF', true, false, 4.6, 5, '/products/dress-placeholder.png', array['/products/dress-placeholder.png'], 'Placeholder listing — awaiting real photos, price, and description from client.', 10, 'Mulchanderi'),
-  ('av-dr-03', 'Jandani Frock - Pure Cotton', 'dresses', 'Jandani Cotton', 999, 1399, '29% OFF', true, true, 4.8, 11, '/products/dress-placeholder.png', array['/products/dress-placeholder.png'], 'Placeholder listing — awaiting real photos, price, and description from client.', 10, 'Pure Cotton'),
-  ('av-dr-04', 'Jandani 3-Piece Set - Pure Cotton', 'dresses', 'Jandani Cotton', 1299, 1799, '28% OFF', false, false, 4.5, 4, '/products/dress-placeholder.png', array['/products/dress-placeholder.png'], 'Placeholder listing — awaiting real photos, price, and description from client.', 10, 'Pure Cotton')
+insert into products (id, name, category, subcategory, price, old_price, discount, is_new, is_featured, rating, reviews_count, image, images, description, stock, customizable, custom_type, sizes, colors, materials, frame_colors, font_styles) values
+  ('ifn-moon-01', 'Moon Lamp (3D Printed)', 'moon-lamps', '12cm Moon Lamp', 799, 1199, '33% OFF', true, true, 4.8, 210, 'https://images.unsplash.com/photo-1532767153582-b1a0e5145009?w=600&auto=format&fit=crop&q=80', array['https://images.unsplash.com/photo-1532767153582-b1a0e5145009?w=800&auto=format&fit=crop&q=80', 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800&auto=format&fit=crop&q=80'], 'Creates a soothing and magical ambiance. Perfect for home decor, gifting and kids rooms. Features touch sensor brightness and warm/cool light toggle.', 25, true, 'photo-text', array['10 cm', '12 cm', '15 cm'], array['Warm White', 'Cool White', '16-Color RGB'], array['PLA Eco 3D Filament'], array[]::text[], array[]::text[]),
+  ('ifn-frame-01', 'Personalized Photo Frame with Name', 'photo-frames', 'Wooden', 499, 799, '37% OFF', true, true, 4.8, 124, 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600&auto=format&fit=crop&q=80', array['https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80'], 'Handcrafted personalized wooden photo frame customized with your custom name, memorable quote, and high-resolution photo print.', 40, true, 'photo-text', array['6x8 inch', '8x10 inch'], array[]::text[], array['Solid Pine Wood'], array['Natural Wood', 'Walnut', 'Black', 'White'], array['Style 1', 'Style 2', 'Style 3']),
+  ('ifn-frame-02', 'Collage Photo Frame (12 Photos)', 'photo-frames', 'Wooden', 899, 1299, '31% OFF', false, true, 4.7, 98, 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=600&auto=format&fit=crop&q=80', array['https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=800&auto=format&fit=crop&q=80'], 'Cherish a full year of memories in one beautiful collage. Accommodates 12 individual photos with high-grade UV-resistant matte finish.', 15, true, 'photo', array['12x18 inch'], array[]::text[], array['Engineered Wood'], array['Natural Wood', 'Walnut', 'Black', 'White'], array[]::text[]),
+  ('ifn-frame-03', 'LED Photo Frame with Remote', 'photo-frames', 'LED Frames', 1199, 1699, '29% OFF', true, true, 4.6, 76, 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&auto=format&fit=crop&q=80', array['https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&auto=format&fit=crop&q=80'], 'Warm back-illuminated LED frame complete with remote control for dimming and mode switching. Ideal for bedside night lights.', 20, true, 'photo-text', array['8x10 inch', '10x12 inch'], array['Warm White LED', 'Cool White LED'], array['Acrylic + Solid Wood Base'], array[]::text[], array['Style 1', 'Style 2']),
+  ('ifn-frame-04', 'Acrylic Photo Frame (With Stand)', 'photo-frames', 'Acrylic', 699, 999, '30% OFF', false, false, 4.7, 63, 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600&auto=format&fit=crop&q=80', array['https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80'], 'Crystal-clear frameless acrylic block with metallic magnetic stand. Elegant modern desk display for office and home.', 35, true, 'photo-text', array['6x8 inch', '8x10 inch'], array[]::text[], array['Cast Acrylic Glass'], array[]::text[], array[]::text[]),
+  ('ifn-key-01', 'Couple Keychain (Set of 2)', 'keychains', 'Couple Keychains', 299, 499, '40% OFF', true, true, 4.9, 152, 'https://images.unsplash.com/photo-1614036417651-efe5912149d8?w=600&auto=format&fit=crop&q=80', array['https://images.unsplash.com/photo-1614036417651-efe5912149d8?w=800&auto=format&fit=crop&q=80'], 'Interlocking dual heart 3D keychains. Laser-engraved with your initials or custom photo token.', 50, true, 'photo-text', array['Standard'], array['Red & White', 'Black & Gold', 'Glow Green'], array['Durable PLA 3D Print'], array[]::text[], array[]::text[]),
+  ('ifn-litho-01', 'Lithophane Night Lamp (Backlit Photo)', 'lithophane-products', 'Night Lamp Lithophanes', 899, 1299, '31% OFF', true, true, 4.9, 88, 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&auto=format&fit=crop&q=80', array['https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800&auto=format&fit=crop&q=80'], 'Carved with ultra-fine 0.1mm 3D layers. Appears as a white relief sculpture by day, and reveals a lifelike glowing photograph when lit.', 18, true, 'photo', array['Curved Medium', 'Curved Large'], array['Warm Golden Glow'], array['High-Density White PLA'], array[]::text[], array[]::text[]),
+  ('ifn-devo-01', 'Lord Shiva 3D Devotional Lamp', 'devotional-lamps', 'Shiva Mandir Lamps', 699, 999, '30% OFF', false, true, 4.8, 110, 'https://images.unsplash.com/photo-1609743522653-52354461eb27?w=600&auto=format&fit=crop&q=80', array['https://images.unsplash.com/photo-1609743522653-52354461eb27?w=800&auto=format&fit=crop&q=80'], 'Sacred 3D illuminated lamp featuring the Divine Adiyogi / Lord Shiva with warm om-glow lighting for prayer rooms and study tables.', 22, false, null, array['Standard 7-inch'], array['Warm Golden Glow', 'Cyan Blue'], array['Laser Acrylic + Wood LED Base'], array[]::text[], array[]::text[])
 on conflict (id) do nothing;
 
 insert into banners (id, title, image, link, active, sort_order) values
-  ('b1', 'Banarasi Silk Sarees', '/slider/image copy 2.png', '/shop?category=sarees', true, 1),
-  ('b2', 'Festive Dress Collection', '/slider/image copy 3.png', '/shop?category=dresses', true, 2)
+  ('b1', 'Turn Memories Into Lasting 3D Gifts', 'https://images.unsplash.com/photo-1532767153582-b1a0e5145009?w=1200&auto=format&fit=crop&q=80', '/shop?category=moon-lamps', true, 1),
+  ('b2', 'Handcrafted Wooden & LED Photo Frames', 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=1200&auto=format&fit=crop&q=80', '/shop?category=photo-frames', true, 2),
+  ('b3', 'Magic Lithophane Photo Lamps', 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=1200&auto=format&fit=crop&q=80', '/shop?category=lithophane-products', true, 3)
 on conflict (id) do nothing;
 
 insert into coupons (id, code, type, discount_value, min_order, max_discount, active) values
-  ('c1', 'AV10', 'percentage', 10, 1999, 500, true),
-  ('c2', 'WELCOME500', 'fixed', 500, 2999, null, true)
+  ('c1', 'INFINITY10', 'percentage', 10, 999, 300, true),
+  ('c2', 'WELCOME100', 'fixed', 100, 799, null, true)
 on conflict (id) do nothing;
 
-insert into settings (id, store_name, phone, email, whatsapp, owner_name, address, free_shipping_threshold, gstin, currency) values
-  (1, 'Aalaya Vastra', '9999999999', 'contact@aalayavastra.com', '9999999999', 'Owner', 'Rajahmundry, Andhra Pradesh', 2000, '37AAAAA0000A1Z5', '₹')
+insert into settings (id, store_name, phone, email, whatsapp, owner_name, address, free_shipping_threshold, gstin, currency, announcement_text, announcement_enabled, announcement_link) values
+  (1, 'Infinity Frames N', '9494066914', 'infinityframesn@gmail.com', '919494066914', 'Naresh Kukkala', 'Near Bheemeswara Swami Temple, Opp Mandalam Ravichattu, 1st Floor, Drakshramam - 533262, Ramchandrapuram Mandal, Dr. B.R. Ambedkar Konaseema District', 1499, '', '₹', 'Special Offer: Free Delivery across India on orders above ₹1499 | Handcrafted 3D Gifts', true, '/shop')
 on conflict (id) do nothing;
 
 -- ============================================================================
--- 11. LAST STEP — grant yourself admin access (do this manually, once):
+-- 11. GRANT ADMIN ACCESS
 --
---   1. Go to Authentication → Users → Add user (create your own email + password).
---   2. Copy that user's UUID.
---   3. Run:
---        insert into admin_users (id, email) values ('<paste-uuid-here>', '<your-email>');
---
--- Until you do this, you can log in at /admin/login but every write will be
--- rejected by RLS (is_admin() returns false) — that's expected and correct.
+--   1. Go to Supabase Dashboard → Authentication → Users → Add user:
+--      Create your admin email + password (e.g. admin@infinityframesn.com).
+--   2. Copy that user's UUID from the Users list.
+--   3. In SQL Editor, run:
+--        insert into admin_users (id, email) values ('<paste-uuid-here>', 'admin@infinityframesn.com');
 -- ============================================================================

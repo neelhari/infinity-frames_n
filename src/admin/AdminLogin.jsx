@@ -42,11 +42,11 @@ export default function AdminLogin() {
   };
 
   const handleQuickFill = async () => {
-    setEmail('admin@infinityframesn.com');
-    setPassword('admin123');
+    setEmail('infinityframesn@gmail.com');
+    setPassword('Karna@6301');
     setError('');
     setSubmitting(true);
-    const result = await signIn('admin@infinityframesn.com', 'admin123');
+    const result = await signIn('infinityframesn@gmail.com', 'Karna@6301');
     setSubmitting(false);
 
     if (result.success) {
@@ -61,7 +61,7 @@ export default function AdminLogin() {
       <div className="w-full max-w-sm bg-white rounded-3xl border border-gray-100 shadow-xl p-7 sm:p-8 space-y-6">
         <div className="text-center space-y-2">
           <div className="w-14 h-14 rounded-full bg-[#1A1A1A] text-[#D4AF37] font-serif font-bold text-lg flex items-center justify-center mx-auto shadow-sm">
-            {BRAND.name?.slice(0, 2)?.toUpperCase() || 'AV'}
+            {BRAND.name?.slice(0, 2)?.toUpperCase() || 'IF'}
           </div>
           <h1 className="font-serif text-xl sm:text-2xl font-bold text-[#1A1A1A]">Admin Sign In</h1>
           <p className="text-[11px] text-gray-500">{BRAND.name} Store CMS — Authorized access only</p>
