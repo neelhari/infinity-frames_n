@@ -39,6 +39,7 @@ import FaqPage from './pages/FaqPage';
 import PolicyPage from './pages/PolicyPage';
 import NotFoundPage from './pages/NotFoundPage';
 import SplashScreen from './components/SplashScreen';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Admin CMS Panel
 import AdminLogin from './admin/AdminLogin';
@@ -67,10 +68,23 @@ function ScrollAndAosReset() {
 }
 
 function AppContent() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    try {
+      return !sessionStorage.getItem('ifn_splash_dismissed');
+    } catch {
+      return false;
+    }
+  });
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
   const showFooter = !isAdminRoute && location.pathname !== '/checkout';
+
+  const handleSplashComplete = () => {
+    try {
+      sessionStorage.setItem('ifn_splash_dismissed', 'true');
+    } catch {}
+    setShowSplash(false);
+  };
 
   useEffect(() => {
     AOS.init({
@@ -83,8 +97,8 @@ function AppContent() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white font-sans antialiased text-gray-900 selection:bg-[#D4AF37] selection:text-white">
-      {/* Splash Screen Animation */}
-      {showSplash && !isAdminRoute && <SplashScreen onComplete={() => setShowSplash(false)} />}
+      {/* Splash Screen Animation (first visit only) */}
+      {showSplash && !isAdminRoute && <SplashScreen onComplete={handleSplashComplete} />}
 
       <ScrollAndAosReset />
 
@@ -169,18 +183,20 @@ function AppContent() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <StoreDataProvider>
-        <AuthProvider>
-          <CartProvider>
-            <WishlistProvider>
-              <UIProvider>
-                <AppContent />
-              </UIProvider>
-            </WishlistProvider>
-          </CartProvider>
-        </AuthProvider>
-      </StoreDataProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <StoreDataProvider>
+          <AuthProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <UIProvider>
+                  <AppContent />
+                </UIProvider>
+              </WishlistProvider>
+            </CartProvider>
+          </AuthProvider>
+        </StoreDataProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }

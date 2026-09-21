@@ -6,15 +6,15 @@ export default function SplashScreen({ onComplete }) {
 
   useEffect(() => {
     // Smooth entrance animation
-    const loadTimer = setTimeout(() => setIsLoaded(true), 40);
+    const loadTimer = setTimeout(() => setIsLoaded(true), 20);
 
-    // Fade out splash screen after displaying
-    const fadeTimer = setTimeout(() => setIsFadingOut(true), 1900);
+    // Fade out splash screen after displaying briefly
+    const fadeTimer = setTimeout(() => setIsFadingOut(true), 900);
 
     // Complete transition and unmount
     const completeTimer = setTimeout(() => {
       if (onComplete) onComplete();
-    }, 2400);
+    }, 1250);
 
     return () => {
       clearTimeout(loadTimer);

@@ -68,10 +68,9 @@ export function HeroBannerSkeleton() {
   return (
     <div className="relative w-full h-[220px] sm:h-[300px] md:h-[380px] lg:h-[440px] bg-stone-900 flex items-center overflow-hidden border-b border-stone-800">
       <Shimmer className="absolute inset-0 w-full h-full opacity-30" />
-      <div className="relative z-10 max-w-7xl mx-auto w-full px-5 sm:px-10 md:px-14 space-y-3">
-        <Shimmer className="h-7 sm:h-10 md:h-12 w-3/5 max-w-md rounded-xl bg-white/20" />
-        <Shimmer className="h-3.5 sm:h-4 md:h-5 w-2/5 max-w-sm rounded-md bg-white/10" />
-        <div className="pt-2">
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-5 sm:px-10 md:px-14 space-y-4">
+        <Shimmer className="h-8 sm:h-11 md:h-14 w-3/5 max-w-md rounded-xl bg-white/20" />
+        <div className="pt-1">
           <Shimmer className="h-8 sm:h-10 w-28 sm:w-32 rounded-xl bg-white/20" gold />
         </div>
       </div>

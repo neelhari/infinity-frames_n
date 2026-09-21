@@ -10,11 +10,11 @@ export default function AdminBanners() {
   const [editingBanner, setEditingBanner] = useState(null);
 
   const getTargetLabel = (targetLink) => {
-    if (!targetLink || targetLink === '/shop') return 'All Products';
+    if (!targetLink || typeof targetLink !== 'string' || targetLink === '/shop') return 'All Products';
     if (targetLink === '/categories') return 'All Categories';
     if (targetLink.includes('category=')) {
       const catId = targetLink.split('category=')[1]?.split('&')[0];
-      const found = categories?.find((c) => c.id === catId);
+      const found = categories?.find((c) => c?.id === catId);
       if (found) return found.name;
     }
     return targetLink;

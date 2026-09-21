@@ -100,7 +100,9 @@ export default function HomePage() {
     }
   };
 
-  const currentBanner = displayBanners[activeSlide] || displayBanners[0];
+  const currentBanner = (displayBanners && displayBanners.length > 0)
+    ? (displayBanners[activeSlide % displayBanners.length] || displayBanners[0])
+    : { title: 'Custom 3D Gifts', image: '/categories/cat_moon_lamp.jpg', link: '/shop' };
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-20 text-gray-900 font-sans">
@@ -112,37 +114,32 @@ export default function HomePage() {
         onTouchEnd={handleTouchEnd}
         className="w-full relative overflow-hidden bg-stone-950 text-white select-none group border-b border-stone-800"
       >
-        {loading && banners.length === 0 ? (
+        {loading && (!banners || banners.length === 0) ? (
           <HeroBannerSkeleton />
         ) : (
           <div className="relative w-full h-[220px] sm:h-[300px] md:h-[380px] lg:h-[440px] flex items-center">
             {/* Full-Width Background Banner Graphic */}
             <div className="absolute inset-0 w-full h-full overflow-hidden">
               <img
-                src={currentBanner.image || '/categories/cat_moon_lamp.jpg'}
-                alt={currentBanner.title}
+                src={currentBanner?.image || '/categories/cat_moon_lamp.jpg'}
+                alt={currentBanner?.title || 'Hero Banner'}
                 className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-101"
               />
               {/* Premium dark gradient overlay ensuring crisp readability across any image */}
               <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/25 pointer-events-none" />
             </div>
 
-            {/* Content Container - Single Line Title, Single Line Text, and Button */}
-            <div className="relative z-10 max-w-7xl mx-auto w-full px-5 sm:px-10 md:px-14 flex flex-col justify-center items-start space-y-2 sm:space-y-3">
-              {/* Single Line Title */}
-              <h1 className="font-serif text-lg sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-white tracking-tight truncate max-w-3xl drop-shadow-md">
-                {currentBanner.title}
+            {/* Content Container - Only Heading and Button */}
+            <div className="relative z-10 max-w-7xl mx-auto w-full px-5 sm:px-10 md:px-14 flex flex-col justify-center items-start space-y-3 sm:space-y-4">
+              {/* Heading */}
+              <h1 className="font-serif text-xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white tracking-tight truncate max-w-3xl drop-shadow-md">
+                {currentBanner?.title || 'Custom 3D Printed Gifts'}
               </h1>
 
-              {/* Down: Single Line Text Field */}
-              <p className="text-xs sm:text-sm md:text-base text-gray-200 truncate max-w-2xl font-normal drop-shadow-sm">
-                {currentBanner.subtitle || currentBanner.tagline || 'Turn your cherished memories into illuminated lithophanes, moon lamps, and custom engraved frames.'}
-              </p>
-
-              {/* Button */}
-              <div className="pt-1.5 sm:pt-2">
+              {/* Action Button */}
+              <div className="pt-1">
                 <button
-                  onClick={() => navigate(currentBanner.link || '/shop')}
+                  onClick={() => navigate(currentBanner?.link || '/shop')}
                   className="bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-110 text-gray-950 font-black text-[11px] sm:text-xs md:text-sm px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl shadow-lg transition-transform hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5"
                 >
                   <span>Shop Now</span>
