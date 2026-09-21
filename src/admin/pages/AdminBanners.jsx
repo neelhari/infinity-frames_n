@@ -5,9 +5,20 @@ import { uploadToCloudinary } from '../../lib/cloudinary';
 import { Shimmer } from '../../components/Shimmer';
 
 export default function AdminBanners() {
-  const { banners, addBanner, updateBanner, deleteBanner, loading } = useStoreData();
+  const { banners, categories, addBanner, updateBanner, deleteBanner, loading } = useStoreData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState(null);
+
+  const getTargetLabel = (targetLink) => {
+    if (!targetLink || targetLink === '/shop') return 'All Products';
+    if (targetLink === '/categories') return 'All Categories';
+    if (targetLink.includes('category=')) {
+      const catId = targetLink.split('category=')[1]?.split('&')[0];
+      const found = categories?.find((c) => c.id === catId);
+      if (found) return found.name;
+    }
+    return targetLink;
+  };
 
   // Form fields
   const [title, setTitle] = useState('');
@@ -182,8 +193,11 @@ export default function AdminBanners() {
             <div className="p-5 flex items-center justify-between gap-4">
               <div className="min-w-0">
                 <h3 className="font-serif text-base font-bold text-gray-900 truncate">{b.title}</h3>
-                <p className="text-[11px] text-gray-500 font-mono mt-0.5 truncate flex items-center gap-1">
-                  <span>Target: {b.link}</span>
+                <p className="text-[11px] text-gray-500 mt-1 truncate flex items-center gap-1.5">
+                  <span className="text-gray-400">Target Category:</span>
+                  <span className="font-semibold text-gray-800 bg-gray-100 px-2.5 py-0.5 rounded-md text-[10.5px]">
+                    {getTargetLabel(b.link)}
+                  </span>
                 </p>
               </div>
 
@@ -235,7 +249,7 @@ export default function AdminBanners() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Traditional Banarasi Silk Festival"
+                  placeholder="e.g. Magic Lithophane Photo Lamps"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:ring-1 focus:ring-[#1A1A1A] outline-none"
@@ -243,14 +257,29 @@ export default function AdminBanners() {
               </div>
 
               <div>
-                <label className="block font-bold text-gray-800 mb-1">Navigation Target Link</label>
-                <input
-                  type="text"
-                  placeholder="/shop?category=moon-lamps"
+                <label className="block font-bold text-gray-800 mb-1">Target Category / Destination *</label>
+                <select
                   value={link}
                   onChange={(e) => setLink(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:ring-1 focus:ring-[#1A1A1A] outline-none font-mono text-[11px]"
-                />
+                  className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:ring-1 focus:ring-[#1A1A1A] outline-none bg-white text-gray-900 font-medium text-xs cursor-pointer"
+                >
+                  <option value="/shop">All Products (Shop All)</option>
+                  <option value="/categories">Browse All Categories</option>
+                  {categories && categories.length > 0 && (
+                    <optgroup label="Store Categories">
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={`/shop?category=${cat.id}`}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {/* Preserve existing custom link if not matching predefined options */}
+                  {link && link !== '/shop' && link !== '/categories' && !categories?.some((c) => `/shop?category=${c.id}` === link) && (
+                    <option value={link}>Custom: {link}</option>
+                  )}
+                </select>
+                <p className="text-[10.5px] text-gray-400 mt-1">When shoppers click "Shop Now" on this banner, they will open this category.</p>
               </div>
 
               <div className="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-100">
