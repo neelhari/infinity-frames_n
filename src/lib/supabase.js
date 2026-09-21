@@ -1,13 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const rawUrl = import.meta.env.VITE_SUPABASE_URL;
+const rawAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Missing Supabase environment variables. Please ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in your .env file (locally) or in your Vercel Project Settings (production).'
-  );
-}
+// Production fallback credentials if Vercel has the dummy placeholder from .env.example
+const DEFAULT_URL = 'https://iyxmnuplychflbmvgvip.supabase.co';
+const DEFAULT_ANON_KEY = 'sb_publishable_8V7Vgn2jznw8QeEeTOPsow_EcYxMxnM';
+
+const supabaseUrl = (rawUrl && !rawUrl.includes('placeholder') && !rawUrl.includes('your_'))
+  ? rawUrl.trim()
+  : DEFAULT_URL;
+
+const supabaseAnonKey = (rawAnonKey && !rawAnonKey.includes('placeholder') && !rawAnonKey.includes('your_'))
+  ? rawAnonKey.trim()
+  : DEFAULT_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
