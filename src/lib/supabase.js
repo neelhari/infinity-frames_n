@@ -43,11 +43,7 @@ export async function signOutAdmin() {
 export async function isUserAdmin(userId, userEmail) {
   if (userEmail) {
     const email = userEmail.toLowerCase().trim();
-    if (
-      email === 'dacnikhil21@gmail.com' ||
-      email === 'infinityframesn@gmail.com' ||
-      email === 'admin@infinityframesn.com'
-    ) {
+    if (email === 'infinityframesn@gmail.com') {
       return true;
     }
   }

@@ -4,9 +4,7 @@ import { supabase, signInAdmin, signOutAdmin, isUserAdmin } from '../lib/supabas
 const AdminAuthContext = createContext();
 
 const ADMIN_EMAILS = [
-  'dacnikhil21@gmail.com',
   'infinityframesn@gmail.com',
-  'admin@infinityframesn.com',
 ];
 
 export function AdminAuthProvider({ children }) {
