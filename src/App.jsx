@@ -39,7 +39,6 @@ import FaqPage from './pages/FaqPage';
 import PolicyPage from './pages/PolicyPage';
 import NotFoundPage from './pages/NotFoundPage';
 import SplashScreen from './components/SplashScreen';
-import ErrorBoundary from './components/ErrorBoundary';
 
 // Admin CMS Panel
 import AdminLogin from './admin/AdminLogin';
@@ -183,20 +182,18 @@ function AppContent() {
 
 export default function App() {
   return (
-    <ErrorBoundary>
-      <BrowserRouter>
-        <StoreDataProvider>
-          <AuthProvider>
-            <CartProvider>
-              <WishlistProvider>
-                <UIProvider>
-                  <AppContent />
-                </UIProvider>
-              </WishlistProvider>
-            </CartProvider>
-          </AuthProvider>
-        </StoreDataProvider>
-      </BrowserRouter>
-    </ErrorBoundary>
+    <BrowserRouter>
+      <StoreDataProvider>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <UIProvider>
+                <AppContent />
+              </UIProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
+      </StoreDataProvider>
+    </BrowserRouter>
   );
 }
