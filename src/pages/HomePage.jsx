@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
-  ChevronRight, Sparkles, ShieldCheck, Truck, Award
+  ChevronRight, ChevronLeft, ShieldCheck, Truck, Award
 } from 'lucide-react';
 import { useStoreData } from '../context/StoreDataContext';
 import ProductCard from '../components/ProductCard';
@@ -105,60 +105,81 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-20 text-gray-900 font-sans">
       
-      {/* 1. HERO BANNER - MYNTRA-STYLE TOUCH SWIPE CAROUSEL */}
+      {/* 1. HERO BANNER - FULL-WIDTH MODERN E-COMMERCE CAROUSEL */}
       <section
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="w-full relative overflow-hidden bg-gradient-to-r from-[#18140F] via-[#2A2116] to-[#120F0C] text-white rounded-none border-b border-amber-950/30 select-none cursor-grab active:cursor-grabbing"
+        className="w-full relative overflow-hidden bg-stone-950 text-white select-none group border-b border-stone-800"
       >
         {loading && banners.length === 0 ? (
           <HeroBannerSkeleton />
         ) : (
-          <div className="w-full relative min-h-[220px] sm:min-h-[280px] max-w-7xl mx-auto px-4 sm:px-8 py-5 sm:py-7 flex items-center justify-between transition-opacity duration-300">
-            {/* Subtle Ambient Radial Glow */}
-            <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.22)_0%,transparent_70%)] pointer-events-none" />
+          <div className="relative w-full h-[220px] sm:h-[300px] md:h-[380px] lg:h-[440px] flex items-center">
+            {/* Full-Width Background Banner Graphic */}
+            <div className="absolute inset-0 w-full h-full overflow-hidden">
+              <img
+                src={currentBanner.image || '/categories/cat_moon_lamp.jpg'}
+                alt={currentBanner.title}
+                className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-101"
+              />
+              {/* Premium dark gradient overlay ensuring crisp readability across any image */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/25 pointer-events-none" />
+            </div>
 
-            {/* Left Content */}
-            <div className="relative z-10 w-[62%] sm:w-3/5 space-y-2 sm:space-y-3">
-              <span className="inline-flex items-center gap-1.5 text-[9.5px] sm:text-xs font-black uppercase tracking-wider text-[#E5C068]">
-                <Sparkles className="w-3 h-3 text-[#D4AF37]" />
-                <span>{currentBanner.badge || 'Custom 3D Gifts'}</span>
-              </span>
-
-              <h1 className="font-serif text-lg sm:text-2xl md:text-3xl font-extrabold leading-snug tracking-tight text-white line-clamp-2">
+            {/* Content Container - Single Line Title, Single Line Text, and Button */}
+            <div className="relative z-10 max-w-7xl mx-auto w-full px-5 sm:px-10 md:px-14 flex flex-col justify-center items-start space-y-2 sm:space-y-3">
+              {/* Single Line Title */}
+              <h1 className="font-serif text-lg sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-white tracking-tight truncate max-w-3xl drop-shadow-md">
                 {currentBanner.title}
               </h1>
 
-              <p className="text-[11px] sm:text-xs text-gray-300 line-clamp-2 hidden sm:block">
+              {/* Down: Single Line Text Field */}
+              <p className="text-xs sm:text-sm md:text-base text-gray-200 truncate max-w-2xl font-normal drop-shadow-sm">
                 {currentBanner.subtitle || currentBanner.tagline || 'Turn your cherished memories into illuminated lithophanes, moon lamps, and custom engraved frames.'}
               </p>
 
-              <div className="pt-1">
+              {/* Button */}
+              <div className="pt-1.5 sm:pt-2">
                 <button
                   onClick={() => navigate(currentBanner.link || '/shop')}
-                  className="bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-110 text-gray-950 font-black text-[11px] sm:text-xs px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg shadow-md transition-transform hover:scale-105 active:scale-95 cursor-pointer"
+                  className="bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-110 text-gray-950 font-black text-[11px] sm:text-xs md:text-sm px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl shadow-lg transition-transform hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5"
                 >
-                  Shop Now
+                  <span>Shop Now</span>
+                  <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            {/* Right Glowing 3D Moon Lamp / Banner Image */}
-            <div className="relative z-10 w-[36%] sm:w-2/5 flex justify-end items-center pr-1 sm:pr-4">
-              <div className="relative group">
-                <div className="absolute inset-0 rounded-full bg-amber-400/20 blur-xl animate-pulse" />
-                <img
-                  src={currentBanner.image || '/categories/cat_moon_lamp.jpg'}
-                  alt={currentBanner.title}
-                  className="relative z-10 w-28 h-28 sm:w-40 sm:h-40 md:w-44 md:h-44 object-cover rounded-full shadow-2xl border-2 border-amber-300/30 transition-transform duration-500 hover:scale-105"
-                />
-              </div>
-            </div>
-
-            {/* Minimalist Dot Indicators (Myntra-style) */}
+            {/* Desktop Navigation Chevrons on Hover */}
             {displayBanners.length > 1 && (
-              <div className="absolute bottom-2.5 inset-x-0 z-20 flex justify-center items-center gap-1.5">
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    prevSlide();
+                  }}
+                  className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-black/75 text-white items-center justify-center backdrop-blur-xs transition-all opacity-0 group-hover:opacity-100 cursor-pointer shadow-lg"
+                  aria-label="Previous Slide"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    nextSlide();
+                  }}
+                  className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-black/75 text-white items-center justify-center backdrop-blur-xs transition-all opacity-0 group-hover:opacity-100 cursor-pointer shadow-lg"
+                  aria-label="Next Slide"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </>
+            )}
+
+            {/* Minimalist Dot Indicators */}
+            {displayBanners.length > 1 && (
+              <div className="absolute bottom-3 inset-x-0 z-20 flex justify-center items-center gap-1.5 sm:gap-2">
                 {displayBanners.map((_, idx) => (
                   <button
                     key={idx}
@@ -168,8 +189,8 @@ export default function HomePage() {
                     }}
                     className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
                       activeSlide === idx
-                        ? 'w-6 bg-[#D4AF37]'
-                        : 'w-1.5 bg-white/40 hover:bg-white/70'
+                        ? 'w-6 sm:w-8 bg-[#D4AF37]'
+                        : 'w-1.5 sm:w-2 bg-white/40 hover:bg-white/70'
                     }`}
                     aria-label={`Go to slide ${idx + 1}`}
                   />

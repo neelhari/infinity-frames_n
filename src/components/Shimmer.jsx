@@ -66,18 +66,13 @@ export function CategoryCircleSkeleton() {
  */
 export function HeroBannerSkeleton() {
   return (
-    <div className="w-full relative min-h-[220px] sm:min-h-[280px] max-w-7xl mx-auto px-4 sm:px-8 py-5 sm:py-7 flex items-center justify-between">
-      <div className="w-[62%] sm:w-3/5 space-y-3">
-        <Shimmer className="h-3.5 w-24 rounded-full bg-white/10" gold />
-        <Shimmer className="h-7 sm:h-9 w-4/5 rounded-lg bg-white/15" />
-        <Shimmer className="h-4 w-3/5 rounded-md bg-white/10 hidden sm:block" />
+    <div className="relative w-full h-[220px] sm:h-[300px] md:h-[380px] lg:h-[440px] bg-stone-900 flex items-center overflow-hidden border-b border-stone-800">
+      <Shimmer className="absolute inset-0 w-full h-full opacity-30" />
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-5 sm:px-10 md:px-14 space-y-3">
+        <Shimmer className="h-7 sm:h-10 md:h-12 w-3/5 max-w-md rounded-xl bg-white/20" />
+        <Shimmer className="h-3.5 sm:h-4 md:h-5 w-2/5 max-w-sm rounded-md bg-white/10" />
         <div className="pt-2">
-          <Shimmer className="h-8 sm:h-9 w-28 rounded-lg bg-white/20" gold />
-        </div>
-      </div>
-      <div className="w-[36%] sm:w-2/5 flex justify-end items-center pr-1 sm:pr-4">
-        <div className="w-28 h-28 sm:w-40 sm:h-40 md:w-44 md:h-44 rounded-full overflow-hidden bg-white/10">
-          <Shimmer className="w-full h-full" gold />
+          <Shimmer className="h-8 sm:h-10 w-28 sm:w-32 rounded-xl bg-white/20" gold />
         </div>
       </div>
     </div>
