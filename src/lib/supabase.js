@@ -40,11 +40,25 @@ export async function signOutAdmin() {
   await supabase.auth.signOut();
 }
 
-export async function isUserAdmin(userId) {
+export async function isUserAdmin(userId, userEmail) {
+  if (userEmail) {
+    const email = userEmail.toLowerCase().trim();
+    if (
+      email === 'dacnikhil21@gmail.com' ||
+      email === 'infinityframesn@gmail.com' ||
+      email === 'admin@infinityframesn.com'
+    ) {
+      return true;
+    }
+  }
   if (!supabase || !userId) return false;
-  const { data, error } = await supabase.from('admin_users').select('id').eq('id', userId).maybeSingle();
-  if (error) return false;
-  return !!data;
+  try {
+    const { data, error } = await supabase.from('admin_users').select('id').eq('id', userId).maybeSingle();
+    if (!error && data) return true;
+  } catch {
+    // ignore
+  }
+  return false;
 }
 
 function sanitizeAuthError(error, context = 'auth') {

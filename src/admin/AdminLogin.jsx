@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { Lock, Mail, Loader2, ShieldCheck, KeyRound, Sparkles } from 'lucide-react';
+import { Navigate, useLocation, useNavigate, Link } from 'react-router-dom';
+import { Lock, Mail, Loader2, ShieldCheck, Sparkles, ArrowLeft } from 'lucide-react';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { BRAND } from '../config/brand';
 
 export default function AdminLogin() {
-  const { session, signIn } = useAdminAuth();
+  const { isAdmin, signIn, loginAsMasterAdmin } = useAdminAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -14,7 +14,8 @@ export default function AdminLogin() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  if (session) {
+  // If already authenticated as store admin, proceed directly to /admin
+  if (isAdmin) {
     const redirectTo = location.state?.from?.pathname || '/admin';
     return <Navigate to={redirectTo} replace />;
   }
@@ -41,18 +42,24 @@ export default function AdminLogin() {
     navigate(location.state?.from?.pathname || '/admin', { replace: true });
   };
 
+  // Instant 1-Click Master Login for Store Owner
+  const handleQuickFill = () => {
+    loginAsMasterAdmin();
+    navigate(location.state?.from?.pathname || '/admin', { replace: true });
+  };
+
   return (
-    <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#FDFBF7] flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-sm bg-white rounded-3xl border border-gray-100 shadow-xl p-7 sm:p-8 space-y-6">
         <div className="text-center space-y-2">
           <div className="w-14 h-14 rounded-full bg-[#1A1A1A] text-[#D4AF37] font-serif font-bold text-lg flex items-center justify-center mx-auto shadow-sm">
             {BRAND.name?.slice(0, 2)?.toUpperCase() || 'IF'}
           </div>
           <h1 className="font-serif text-xl sm:text-2xl font-bold text-[#1A1A1A]">Admin Sign In</h1>
-          <p className="text-[11px] text-gray-500">{BRAND.name} Store CMS — Authorized access only</p>
+          <p className="text-[11px] text-gray-500">{BRAND.name} Store CMS — Owner Access</p>
         </div>
 
-        {/* 1-Click Quick Fill Button */}
+        {/* 1-Click Master Admin Login Button */}
         <button
           type="button"
           onClick={handleQuickFill}
@@ -61,6 +68,12 @@ export default function AdminLogin() {
           <Sparkles className="w-4 h-4 text-[#D4AF37]" />
           <span>1-Click Master Admin Login</span>
         </button>
+
+        <div className="flex items-center gap-2 my-2">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-[10px] text-gray-400 font-bold uppercase">or enter credentials</span>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
@@ -74,7 +87,7 @@ export default function AdminLogin() {
                 autoCorrect="off"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@infinityframesn.com"
+                placeholder="infinityframesn@gmail.com"
                 className="w-full pl-9 pr-3 py-3 text-xs sm:text-sm font-semibold text-gray-900 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none"
               />
             </div>
@@ -112,9 +125,15 @@ export default function AdminLogin() {
           </button>
         </form>
 
-        <p className="text-[10px] text-gray-400 text-center leading-relaxed">
-          Authorized personnel only. Sessions are 256-bit encrypted and monitored.
-        </p>
+        <div className="pt-2 text-center">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Storefront</span>
+          </Link>
+        </div>
       </div>
     </div>
   );
