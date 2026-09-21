@@ -47,37 +47,43 @@ function sanitizeAuthError(error, context = 'auth') {
   // Log full raw technical details to browser console for developers
   console.error(`[Supabase Auth ${context} error]:`, error);
 
-  const msg = (error.message || '').toLowerCase();
+  const rawMsg = (error.message || error.msg || error.error_description || error.description || '').toLowerCase();
+  const errorCode = (error.code || error.error_code || '').toLowerCase();
 
-  if (msg.includes('already') || msg.includes('registered') || msg.includes('exists')) {
+  if (rawMsg.includes('already') || rawMsg.includes('registered') || rawMsg.includes('exists') || errorCode.includes('already')) {
     return 'An account with this email address already exists. Please Log In.';
   }
 
-  if (msg.includes('rate limit') || error.code === 'over_email_send_rate_limit' || error.status === 429) {
-    return 'Too many attempts. Please wait a moment and try again.';
+  if (
+    rawMsg.includes('rate limit') ||
+    errorCode.includes('rate_limit') ||
+    errorCode === 'over_email_send_rate_limit' ||
+    error.status === 429
+  ) {
+    return 'Email signup rate limit reached. To fix this permanently, disable "Confirm email" in your Supabase Auth settings.';
   }
 
-  if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
+  if (rawMsg.includes('invalid login credentials') || rawMsg.includes('invalid credentials')) {
     return 'Invalid email or password. Please verify your credentials or create an account.';
   }
 
-  if (msg.includes('email not confirmed')) {
+  if (rawMsg.includes('email not confirmed')) {
     return 'Please check your email inbox to confirm your email, or reset your password.';
   }
 
-  if (msg.includes('password') && (msg.includes('short') || msg.includes('least 6') || msg.includes('weak'))) {
+  if (rawMsg.includes('password') && (rawMsg.includes('short') || rawMsg.includes('least 6') || rawMsg.includes('weak'))) {
     return 'Password must be at least 6 characters long.';
   }
 
-  if (msg.includes('api key') || msg.includes('jwt') || msg.includes('unauthorized') || msg.includes('not initialized')) {
-    return 'Unable to connect to account service. Please refresh the page and try again.';
+  if (rawMsg.includes('api key') || rawMsg.includes('jwt') || rawMsg.includes('unauthorized') || rawMsg.includes('not initialized')) {
+    return 'Unable to connect to account service. Please check your Supabase API credentials in Vercel.';
   }
 
-  if (msg.includes('network') || msg.includes('fetch') || msg.includes('failed to fetch')) {
+  if (rawMsg.includes('network') || rawMsg.includes('fetch') || rawMsg.includes('failed to fetch')) {
     return 'Network connection issue. Please check your internet connection.';
   }
 
-  return 'Unable to complete your request. Please try again in a moment.';
+  return error.message || error.msg || 'Unable to complete your request. Please try again.';
 }
 
 export async function signUpCustomer({ email, password, name, phone }) {
