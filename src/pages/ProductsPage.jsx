@@ -4,12 +4,13 @@ import { ArrowLeft, Search, ShoppingBag, Star, Heart, SlidersHorizontal } from '
 import { useStoreData } from '../context/StoreDataContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { ProductCardSkeleton } from '../components/Shimmer';
 
 export default function ProductsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const categoryParam = searchParams.get('category');
-  const { products, categories } = useStoreData();
+  const { products, categories, loading } = useStoreData();
   
   const currentCategory = categories.find((c) => c.id === categoryParam) || null;
   const availableChips = currentCategory?.subcategories && currentCategory.subcategories.length > 0
@@ -94,13 +95,19 @@ export default function ProductsPage() {
 
       {/* 3. PRODUCT GRID (Screen 4: 2-Column Clean Cards) */}
       <div className="max-w-3xl mx-auto px-4 py-4">
-        {filteredProducts.length === 0 ? (
+        {loading && products.length === 0 ? (
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : filteredProducts.length === 0 ? (
           <div className="text-center py-16 text-gray-500">
             <p className="font-serif text-base font-bold text-gray-800 mb-1">No products found in this filter</p>
             <p className="text-xs text-gray-400 mb-4">Try selecting another filter chip or view all products</p>
             <button
               onClick={() => setActiveChip('All')}
-              className="bg-[#B38029] text-white text-xs font-bold px-4 py-2 rounded-xl"
+              className="bg-[#B38029] text-white text-xs font-bold px-4 py-2 rounded-xl cursor-pointer"
             >
               Show All Products
             </button>

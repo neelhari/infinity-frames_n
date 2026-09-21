@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingCart, Eye, CheckCircle2, Clock, Truck, XCircle, Search, Filter, Loader2 } from 'lucide-react';
 import { useStoreData } from '../../context/StoreDataContext';
+import { TableSkeleton } from '../../components/Shimmer';
 
 export default function AdminOrders() {
   const { orders, updateOrderStatus, refreshOrders } = useStoreData();
@@ -71,20 +72,18 @@ export default function AdminOrders() {
                 <th className="p-4 text-center">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 font-medium">
-              {loading ? (
-                <tr>
-                  <td colSpan="7" className="text-center py-12 text-gray-400">
-                    <Loader2 className="w-5 h-5 animate-spin mx-auto" />
-                  </td>
-                </tr>
-              ) : filteredOrders.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="text-center py-12 text-gray-400 font-serif text-sm">
-                    No orders yet.
-                  </td>
-                </tr>
-              ) : filteredOrders.map((ord) => (
+            {loading ? (
+              <TableSkeleton rows={5} cols={7} />
+            ) : (
+              <tbody className="divide-y divide-gray-100 font-medium">
+                {filteredOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="text-center py-12 text-gray-400 font-serif text-sm">
+                      No orders yet.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredOrders.map((ord) => (
                 <tr key={ord.id} className="hover:bg-gray-50/80 transition-colors">
                   <td className="p-4 font-bold text-[#1A1A1A] text-sm">{ord.id}</td>
                   <td className="p-4">
@@ -143,8 +142,10 @@ export default function AdminOrders() {
                     </button>
                   </td>
                 </tr>
-              ))}
-            </tbody>
+              ))
+            )}
+          </tbody>
+        )}
           </table>
         </div>
       </div>

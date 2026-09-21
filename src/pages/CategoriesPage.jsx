@@ -2,10 +2,11 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, X, Sparkles, SlidersHorizontal } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import { ProductCardSkeleton } from '../components/Shimmer';
 import { useStoreData } from '../context/StoreDataContext';
 
 export default function CategoriesPage() {
-  const { products, categories } = useStoreData();
+  const { products, categories, loading } = useStoreData();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCategory = searchParams.get('category') || 'all';
 
@@ -149,7 +150,13 @@ export default function CategoriesPage() {
 
       {/* 3. DIRECTLY THE PRODUCT CARDS (SIDE-BY-SIDE 2-COLUMN GRID ON MOBILE) */}
       <section className="max-w-7xl mx-auto px-3.5 sm:px-6 py-2">
-        {filteredProducts.length > 0 ? (
+        {loading && products.length === 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />

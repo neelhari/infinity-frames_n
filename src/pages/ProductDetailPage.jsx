@@ -10,11 +10,12 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
 import { BRAND, waLink } from '../config/brand';
+import { ProductDetailSkeleton } from '../components/Shimmer';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { products } = useStoreData();
+  const { products, loading } = useStoreData();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
@@ -92,6 +93,14 @@ export default function ProductDetailPage() {
       navigate('/checkout');
     }
   };
+
+  if (loading && (!product || !product.name)) {
+    return (
+      <div className="min-h-screen bg-[#FAF9F6] pb-28 font-sans">
+        <ProductDetailSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-28 font-sans">

@@ -65,3 +65,39 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+/* Premium Shimmer Loading Animation (Buffer before DB load) */
+@keyframes shimmerWave {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    #F3F4F6 0%,
+    #FAFAFA 25%,
+    #E5E7EB 50%,
+    #FAFAFA 75%,
+    #F3F4F6 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerWave 1.6s ease-in-out infinite;
+}
+
+.animate-shimmer-gold {
+  background: linear-gradient(
+    90deg,
+    #FBF6ED 0%,
+    #FFFDF9 25%,
+    #F1E3C8 50%,
+    #FFFDF9 75%,
+    #FBF6ED 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerWave 1.6s ease-in-out infinite;
+}

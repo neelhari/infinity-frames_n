@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Image as ImageIcon, Plus, Trash2, Edit3, CheckCircle2, Upload, ExternalLink, Eye, EyeOff } from 'lucide-react';
 import { useStoreData } from '../../context/StoreDataContext';
 import { uploadToCloudinary } from '../../lib/cloudinary';
+import { Shimmer } from '../../components/Shimmer';
 
 export default function AdminBanners() {
-  const { banners, addBanner, updateBanner, deleteBanner } = useStoreData();
+  const { banners, addBanner, updateBanner, deleteBanner, loading } = useStoreData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState(null);
 
@@ -133,7 +134,20 @@ export default function AdminBanners() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {banners.map((b) => (
+        {loading && banners.length === 0 ? (
+          Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-3xl border border-gray-100 shadow-2xs overflow-hidden flex flex-col justify-between">
+              <div className="relative aspect-[2.1/1] bg-gray-100 overflow-hidden">
+                <Shimmer className="w-full h-full" />
+              </div>
+              <div className="p-5 space-y-3">
+                <Shimmer className="h-5 w-3/4 rounded-md" />
+                <Shimmer className="h-3 w-1/2 rounded-md" />
+              </div>
+            </div>
+          ))
+        ) : (
+          banners.map((b) => (
           <div key={b.id} className="bg-white rounded-3xl border border-gray-100 shadow-2xs overflow-hidden flex flex-col justify-between group">
             <div className="relative aspect-[2.1/1] bg-gray-100 overflow-hidden">
               <img
@@ -193,7 +207,7 @@ export default function AdminBanners() {
               </div>
             </div>
           </div>
-        ))}
+        )))}
       </div>
 
       {/* CREATE & EDIT MODAL */}

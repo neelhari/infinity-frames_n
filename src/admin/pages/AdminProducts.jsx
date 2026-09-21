@@ -16,9 +16,10 @@ import {
 } from 'lucide-react';
 import { useStoreData } from '../../context/StoreDataContext';
 import ProductModal from '../components/ProductModal';
+import { TableSkeleton } from '../../components/Shimmer';
 
 export default function AdminProducts() {
-  const { products, categories, addProduct, updateProduct, deleteProduct } = useStoreData();
+  const { products, categories, addProduct, updateProduct, deleteProduct, loading } = useStoreData();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -163,15 +164,18 @@ export default function AdminProducts() {
                 <th className="p-4 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 font-medium">
-              {filteredProducts.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="text-center py-12 text-gray-400 font-serif text-sm">
-                    No products found matching criteria.
-                  </td>
-                </tr>
-              ) : (
-                filteredProducts.map((p) => (
+            {loading && products.length === 0 ? (
+              <TableSkeleton rows={6} cols={8} />
+            ) : (
+              <tbody className="divide-y divide-gray-100 font-medium">
+                {filteredProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan="8" className="text-center py-12 text-gray-400 font-serif text-sm">
+                      No products found matching criteria.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredProducts.map((p) => (
                   <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
                     <td className="p-4">
                       <input
@@ -251,7 +255,8 @@ export default function AdminProducts() {
                 ))
               )}
             </tbody>
-          </table>
+          )}
+        </table>
         </div>
       </div>
 

@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Plus, Search, Edit2, Trash2, CheckCircle2, X, Upload, AlertCircle } from 'lucide-react';
 import { useStoreData } from '../../context/StoreDataContext';
 import { uploadToCloudinary } from '../../lib/cloudinary';
+import { TableSkeleton } from '../../components/Shimmer';
 
 export default function AdminCategories() {
-  const { categories, addCategory, updateCategory, deleteCategory } = useStoreData();
+  const { categories, addCategory, updateCategory, deleteCategory, loading } = useStoreData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCat, setEditingCat] = useState(null);
   const [name, setName] = useState('');
@@ -139,15 +140,18 @@ export default function AdminCategories() {
                 <th className="p-4 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 font-medium">
-              {filteredCategories.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="text-center py-12 text-gray-400 font-serif text-sm">
-                    No categories found. Click "+ Add New Category" to create one.
-                  </td>
-                </tr>
-              ) : (
-                filteredCategories.map((cat) => (
+            {loading && categories.length === 0 ? (
+              <TableSkeleton rows={5} cols={5} />
+            ) : (
+              <tbody className="divide-y divide-gray-100 font-medium">
+                {filteredCategories.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="text-center py-12 text-gray-400 font-serif text-sm">
+                      No categories found. Click "+ Add New Category" to create one.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredCategories.map((cat) => (
                   <tr key={cat.id} className="hover:bg-gray-50/80 transition-colors">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
@@ -192,7 +196,8 @@ export default function AdminCategories() {
                 ))
               )}
             </tbody>
-          </table>
+          )}
+        </table>
         </div>
       </div>
 
