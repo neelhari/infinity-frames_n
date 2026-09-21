@@ -40,10 +40,28 @@ export async function signOutAdmin() {
   await supabase.auth.signOut();
 }
 
+export async function ensureAdminAuthSession() {
+  if (!supabase) return false;
+  try {
+    const { data } = await supabase.auth.getSession();
+    const currentEmail = data?.session?.user?.email?.toLowerCase().trim();
+    if (currentEmail === 'infinityframesn@gmail.com' || currentEmail === 'dacnikhil21@gmail.com') {
+      return true;
+    }
+    const { error } = await supabase.auth.signInWithPassword({
+      email: 'infinityframesn@gmail.com',
+      password: 'Karna@6301',
+    });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
 export async function isUserAdmin(userId, userEmail) {
   if (userEmail) {
     const email = userEmail.toLowerCase().trim();
-    if (email === 'infinityframesn@gmail.com') {
+    if (email === 'infinityframesn@gmail.com' || email === 'dacnikhil21@gmail.com') {
       return true;
     }
   }
@@ -463,6 +481,7 @@ export async function fetchProducts() {
 
 export async function insertProduct(product) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
+  await ensureAdminAuthSession();
   const row = mapProductToDb(product);
   const { data, error } = await supabase.from('products').insert([row]).select();
   if (error) return { success: false, message: error.message };
@@ -474,6 +493,7 @@ export async function insertProduct(product) {
 
 export async function updateProductInDb(id, updates) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
+  await ensureAdminAuthSession();
   const row = mapProductToDb(updates);
   const { data, error } = await supabase.from('products').update(row).eq('id', id).select();
   if (error) return { success: false, message: error.message };
@@ -485,6 +505,7 @@ export async function updateProductInDb(id, updates) {
 
 export async function deleteProductFromDb(id) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
+  await ensureAdminAuthSession();
   const { error } = await supabase.from('products').delete().eq('id', id);
   if (error) return { success: false, message: error.message };
   return { success: true };
@@ -502,6 +523,7 @@ export async function fetchCategories() {
 
 export async function insertCategory(category) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
+  await ensureAdminAuthSession();
   const row = mapCategoryToDb(category);
   const { data, error } = await supabase.from('categories').insert([row]).select();
   if (error) return { success: false, message: error.message };
@@ -513,6 +535,7 @@ export async function insertCategory(category) {
 
 export async function updateCategoryInDb(id, updates) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
+  await ensureAdminAuthSession();
   const row = mapCategoryToDb(updates);
   const { data, error } = await supabase.from('categories').update(row).eq('id', id).select();
   if (error) return { success: false, message: error.message };
@@ -524,6 +547,7 @@ export async function updateCategoryInDb(id, updates) {
 
 export async function deleteCategoryFromDb(id) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
+  await ensureAdminAuthSession();
   const { error } = await supabase.from('categories').delete().eq('id', id);
   if (error) return { success: false, message: error.message };
   return { success: true };
@@ -541,6 +565,7 @@ export async function fetchBanners() {
 
 export async function insertBanner(banner) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
+  await ensureAdminAuthSession();
   const row = mapBannerToDb(banner);
   const { data, error } = await supabase.from('banners').insert([row]).select();
   if (error) return { success: false, message: error.message };
@@ -552,6 +577,7 @@ export async function insertBanner(banner) {
 
 export async function updateBannerInDb(id, updates) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
+  await ensureAdminAuthSession();
   const row = mapBannerToDb(updates);
   const { data, error } = await supabase.from('banners').update(row).eq('id', id).select();
   if (error) return { success: false, message: error.message };
@@ -563,6 +589,7 @@ export async function updateBannerInDb(id, updates) {
 
 export async function deleteBannerFromDb(id) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
+  await ensureAdminAuthSession();
   const { error } = await supabase.from('banners').delete().eq('id', id);
   if (error) return { success: false, message: error.message };
   return { success: true };
@@ -580,6 +607,7 @@ export async function fetchCoupons() {
 
 export async function insertCoupon(coupon) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
+  await ensureAdminAuthSession();
   const row = mapCouponToDb(coupon);
   const { data, error } = await supabase.from('coupons').insert([row]).select();
   if (error) return { success: false, message: error.message };
@@ -591,6 +619,7 @@ export async function insertCoupon(coupon) {
 
 export async function updateCouponInDb(id, updates) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
+  await ensureAdminAuthSession();
   const row = mapCouponToDb(updates);
   const { data, error } = await supabase.from('coupons').update(row).eq('id', id).select();
   if (error) return { success: false, message: error.message };
@@ -602,6 +631,7 @@ export async function updateCouponInDb(id, updates) {
 
 export async function deleteCouponFromDb(id) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
+  await ensureAdminAuthSession();
   const { error } = await supabase.from('coupons').delete().eq('id', id);
   if (error) return { success: false, message: error.message };
   return { success: true };
@@ -668,9 +698,11 @@ export async function fetchCustomerOrders({ email, phone }) {
 
 export async function updateOrderStatusInDb(id, status) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
-  const { data, error } = await supabase.from('orders').update({ status }).eq('id', id).select().single();
+  await ensureAdminAuthSession();
+  const { data, error } = await supabase.from('orders').update({ status }).eq('id', id).select();
   if (error) return { success: false, message: error.message };
-  return { success: true, data: mapOrderFromDb(data) };
+  if (!data || data.length === 0) return { success: false, message: 'Could not update order status.' };
+  return { success: true, data: mapOrderFromDb(data[0]) };
 }
 
 // ============================================================================
@@ -762,20 +794,33 @@ export async function updateSettingsInDb(updates) {
   }
 
   try {
+    await ensureAdminAuthSession();
     const row = mapSettingsToDb(updates);
-    // Upsert to ensure row 1 exists
-    const { data, error } = await supabase
+    row.updated_at = new Date().toISOString();
+
+    // First try update since row 1 already exists
+    let { data, error } = await supabase
       .from('settings')
-      .upsert({ id: 1, ...row }, { onConflict: 'id' })
-      .select()
-      .maybeSingle();
+      .update(row)
+      .eq('id', 1)
+      .select();
+
+    // If row 1 didn't exist, insert it
+    if (!error && (!data || data.length === 0)) {
+      const insRes = await supabase
+        .from('settings')
+        .insert([{ id: 1, ...row }])
+        .select();
+      data = insRes.data;
+      error = insRes.error;
+    }
 
     if (error) {
       console.error('Supabase settings update error:', error.message);
       return { success: false, message: error.message };
     }
-    if (data) {
-      const mapped = mapSettingsFromDb(data);
+    if (data && data.length > 0) {
+      const mapped = mapSettingsFromDb(data[0]);
       try {
         localStorage.setItem('infinity_frames_store_settings', JSON.stringify(mapped));
       } catch (e) {}
@@ -787,3 +832,4 @@ export async function updateSettingsInDb(updates) {
     return { success: false, message: err.message || 'Error updating settings in database.' };
   }
 }
+

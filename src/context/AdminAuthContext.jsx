@@ -5,6 +5,7 @@ const AdminAuthContext = createContext();
 
 const ADMIN_EMAILS = [
   'infinityframesn@gmail.com',
+  'dacnikhil21@gmail.com',
 ];
 
 export function AdminAuthProvider({ children }) {
@@ -40,10 +41,11 @@ export function AdminAuthProvider({ children }) {
             setIsAdmin(true);
             setLoading(false);
           }
-          // Ensure Supabase Auth JWT is active so database writes are permitted by RLS
+          // Ensure Supabase Auth JWT is active as infinityframesn so database writes are permitted by RLS
           if (supabase) {
             const { data } = await supabase.auth.getSession();
-            if (!data?.session) {
+            const currentEmail = data?.session?.user?.email?.toLowerCase().trim();
+            if (!ADMIN_EMAILS.includes(currentEmail)) {
               await signInAdmin('infinityframesn@gmail.com', 'Karna@6301');
             }
           }

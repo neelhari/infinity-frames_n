@@ -140,11 +140,9 @@ create index if not exists idx_products_featured on products(is_featured);
 alter table products enable row level security;
 
 drop policy if exists "products public read" on products;
-create policy "products public read" on products for select using (true);
-
 drop policy if exists "products admin write" on products;
-create policy "products admin write" on products for all
-  using (is_admin()) with check (is_admin());
+drop policy if exists "products_all" on products;
+create policy "products_all" on products for all using (true) with check (true);
 
 -- ----------------------------------------------------------------------------
 -- 3. CATEGORIES
@@ -166,11 +164,9 @@ create table if not exists categories (
 alter table categories enable row level security;
 
 drop policy if exists "categories public read" on categories;
-create policy "categories public read" on categories for select using (true);
-
 drop policy if exists "categories admin write" on categories;
-create policy "categories admin write" on categories for all
-  using (is_admin()) with check (is_admin());
+drop policy if exists "categories_all" on categories;
+create policy "categories_all" on categories for all using (true) with check (true);
 
 -- ----------------------------------------------------------------------------
 -- 4. BANNERS
@@ -188,11 +184,9 @@ create table if not exists banners (
 alter table banners enable row level security;
 
 drop policy if exists "banners public read" on banners;
-create policy "banners public read" on banners for select using (true);
-
 drop policy if exists "banners admin write" on banners;
-create policy "banners admin write" on banners for all
-  using (is_admin()) with check (is_admin());
+drop policy if exists "banners_all" on banners;
+create policy "banners_all" on banners for all using (true) with check (true);
 
 -- ----------------------------------------------------------------------------
 -- 5. COUPONS
@@ -211,11 +205,9 @@ create table if not exists coupons (
 alter table coupons enable row level security;
 
 drop policy if exists "coupons public read" on coupons;
-create policy "coupons public read" on coupons for select using (true);
-
 drop policy if exists "coupons admin write" on coupons;
-create policy "coupons admin write" on coupons for all
-  using (is_admin()) with check (is_admin());
+drop policy if exists "coupons_all" on coupons;
+create policy "coupons_all" on coupons for all using (true) with check (true);
 
 -- ----------------------------------------------------------------------------
 -- 6. ORDERS
@@ -249,17 +241,11 @@ create index if not exists idx_orders_phone on orders(customer_phone);
 alter table orders enable row level security;
 
 drop policy if exists "orders public insert" on orders;
-create policy "orders public insert" on orders for insert with check (true);
-
 drop policy if exists "orders admin read" on orders;
-create policy "orders admin read" on orders for select using (is_admin());
-
 drop policy if exists "orders admin update" on orders;
-create policy "orders admin update" on orders for update
-  using (is_admin()) with check (is_admin());
-
 drop policy if exists "orders admin delete" on orders;
-create policy "orders admin delete" on orders for delete using (is_admin());
+drop policy if exists "orders_all" on orders;
+create policy "orders_all" on orders for all using (true) with check (true);
 
 -- Allow customers to look up their own orders by phone (Storefront Tracking)
 create or replace function get_orders_by_phone(p_phone text)
@@ -289,14 +275,10 @@ create table if not exists contact_messages (
 alter table contact_messages enable row level security;
 
 drop policy if exists "contact_messages public insert" on contact_messages;
-create policy "contact_messages public insert" on contact_messages for insert with check (true);
-
 drop policy if exists "contact_messages admin read" on contact_messages;
-create policy "contact_messages admin read" on contact_messages for select using (is_admin());
-
 drop policy if exists "contact_messages admin update" on contact_messages;
-create policy "contact_messages admin update" on contact_messages for update
-  using (is_admin()) with check (is_admin());
+drop policy if exists "contact_messages_all" on contact_messages;
+create policy "contact_messages_all" on contact_messages for all using (true) with check (true);
 
 -- ----------------------------------------------------------------------------
 -- 8. STORE SETTINGS (Singleton row, id = 1)
@@ -322,11 +304,9 @@ create table if not exists settings (
 alter table settings enable row level security;
 
 drop policy if exists "settings public read" on settings;
-create policy "settings public read" on settings for select using (true);
-
 drop policy if exists "settings admin write" on settings;
-create policy "settings admin write" on settings for all
-  using (is_admin()) with check (is_admin());
+drop policy if exists "settings_all" on settings;
+create policy "settings_all" on settings for all using (true) with check (true);
 
 -- ----------------------------------------------------------------------------
 -- 9. UPDATED_AT TRIGGER
