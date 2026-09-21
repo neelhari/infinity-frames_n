@@ -5,6 +5,16 @@ import ProductCard from '../components/ProductCard';
 import { ProductCardSkeleton } from '../components/Shimmer';
 import { useStoreData } from '../context/StoreDataContext';
 
+const categoryThumbnails = {
+  'photo-frames': '/categories/cat_photo_frame.jpg',
+  'moon-lamps': '/categories/cat_moon_lamp.jpg',
+  'lithophane-products': '/categories/cat_lithophane.jpg',
+  'keychains': '/categories/cat_keychain.jpg',
+  'customized-gifts': '/categories/cat_gift_box.jpg',
+  'devotional-lamps': '/categories/cat_devotional.jpg',
+  'customized-lamps': '/categories/cat_acrylic_led.jpg',
+};
+
 export default function CategoriesPage() {
   const { products, categories, loading } = useStoreData();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -18,7 +28,7 @@ export default function CategoriesPage() {
     ...categories.map((c) => ({
       id: c.id,
       label: c.name,
-      image: c.image || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&auto=format&fit=crop&q=80',
+      image: categoryThumbnails[c.id] || c.image || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&auto=format&fit=crop&q=80',
     }))
   ];
 

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Heart, Share2, Star, ShieldCheck, Plus, Minus,
   Camera, Upload, Check, ShoppingBag, Zap, Loader2, MessageCircle, X,
-  Maximize2, ZoomIn, ZoomOut
+  Maximize2, ZoomIn, ZoomOut, Sparkles, Truck
 } from 'lucide-react';
 import { useStoreData } from '../context/StoreDataContext';
 import { uploadToCloudinary } from '../lib/cloudinary';
@@ -170,111 +170,154 @@ export default function ProductDetailPage() {
   const currentImageSrc = images[selectedImage] || product.image || '/placeholder.png';
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] pb-28 font-sans">
-      <div className="max-w-xl mx-auto">
-        {/* 1. Main Photo Gallery with Touch Swipe & Zoom Button */}
-        <div
-          onTouchStart={handleGalleryTouchStart}
-          onTouchMove={handleGalleryTouchMove}
-          onTouchEnd={handleGalleryTouchEnd}
-          className="relative w-full aspect-square bg-gray-100 overflow-hidden shadow-xs select-none"
-        >
-          <img
-            src={currentImageSrc}
-            alt={product.name}
-            className="w-full h-full object-cover cursor-zoom-in"
-            onClick={() => setIsZoomOpen(true)}
-          />
-
-          {/* Floating Back Button with Smart Fallback */}
-          <button
-            onClick={handleBack}
-            className="absolute top-3 left-3 z-10 w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-gray-800 hover:bg-white transition-all cursor-pointer"
-            title="Go Back"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-
-          {/* Floating Action Buttons: Zoom, Wishlist & Share */}
-          <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
-            <button
-              onClick={() => setIsZoomOpen(true)}
-              className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-gray-800 hover:bg-white transition-all cursor-pointer"
-              title="Tap to Zoom (Inspect 3D Details)"
-            >
-              <Maximize2 className="w-4 h-4 text-gray-700" />
-            </button>
-            <button
-              onClick={() => toggleWishlist(product)}
-              className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-gray-800 hover:bg-white transition-all cursor-pointer"
-              title="Wishlist"
-            >
-              <Heart
-                className={`w-4 h-4 ${inWishlist ? 'fill-rose-500 text-rose-500' : 'text-gray-700'}`}
-              />
-            </button>
-            <button
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({
-                    title: product.name,
-                    text: product.description,
-                    url: window.location.href,
-                  });
-                }
-              }}
-              className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-gray-800 hover:bg-white transition-all cursor-pointer"
-              title="Share"
-            >
-              <Share2 className="w-4 h-4 text-gray-700" />
-            </button>
-          </div>
-
-          {/* Dot Indicators */}
-          {product.images && product.images.length > 1 && (
-            <div className="absolute bottom-3 inset-x-0 flex justify-center gap-1.5">
-              {product.images.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedImage(idx)}
-                  className={`h-2 rounded-full transition-all ${
-                    selectedImage === idx ? 'w-6 bg-[#B38029]' : 'w-2 bg-white/70'
-                  }`}
-                />
-              ))}
-            </div>
+    <div className="min-h-screen bg-[#FAF9F6] pb-28 md:pb-16 font-sans">
+      <div className="max-w-xl md:max-w-6xl xl:max-w-7xl mx-auto md:px-6 lg:px-8 md:py-6">
+        {/* Desktop Breadcrumbs Navigation */}
+        <div className="hidden md:flex items-center gap-2 text-xs text-gray-500 mb-6 font-medium">
+          <button onClick={() => navigate('/')} className="hover:text-[#B38029] cursor-pointer">Home</button>
+          <span>/</span>
+          <button onClick={() => navigate('/shop')} className="hover:text-[#B38029] cursor-pointer">Shop</button>
+          {product.category && (
+            <>
+              <span>/</span>
+              <button onClick={() => navigate(`/shop?category=${product.category}`)} className="hover:text-[#B38029] capitalize cursor-pointer">
+                {product.category.replace(/-/g, ' ')}
+              </button>
+            </>
           )}
+          <span>/</span>
+          <span className="text-gray-900 font-bold truncate max-w-[280px]">{product.name}</span>
         </div>
 
-        {/* Thumbnail Strip */}
-        {product.images && product.images.length > 1 && (
-          <div className="flex items-center gap-2 px-4 py-2.5 overflow-x-auto hide-scroll bg-white border-b border-gray-100">
-            {product.images.map((img, i) => (
-              <button
-                key={i}
-                onClick={() => setSelectedImage(i)}
-                className={`w-14 h-14 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
-                  selectedImage === i ? 'border-[#B38029]' : 'border-transparent'
-                }`}
-              >
-                <img src={img} alt="" className="w-full h-full object-cover" />
-              </button>
-            ))}
-          </div>
-        )}
+        {/* 2-Column Responsive Layout: Mobile (1-Col) | Desktop (2-Col) */}
+        <div className="md:grid md:grid-cols-12 md:gap-8 lg:gap-12 items-start">
+          {/* LEFT COLUMN: Main Gallery & Highlights (col-span-12 md:col-span-7) */}
+          <div className="md:col-span-7 md:sticky md:top-24 space-y-4">
+            {/* 1. Main Photo Gallery with Touch Swipe & Zoom Button */}
+            <div
+              onTouchStart={handleGalleryTouchStart}
+              onTouchMove={handleGalleryTouchMove}
+              onTouchEnd={handleGalleryTouchEnd}
+              className="relative w-full aspect-square bg-gray-100 overflow-hidden shadow-xs md:rounded-3xl md:border md:border-gray-200 select-none group"
+            >
+              <img
+                src={currentImageSrc}
+                alt={product.name}
+                className="w-full h-full object-cover cursor-zoom-in group-hover:scale-102 transition-transform duration-300"
+                onClick={() => setIsZoomOpen(true)}
+              />
 
-        {/* 2. Product Info */}
-        <div className="p-4 sm:p-5 space-y-4 bg-white border-b border-gray-100">
-          <div>
-            <div className="flex items-start justify-between gap-2">
-              <h1 className="font-serif text-lg sm:text-xl font-bold text-gray-900 leading-snug">
-                {product.name}
-              </h1>
-              <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 shrink-0 flex items-center gap-1 mt-0.5">
-                <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                <span>Original</span>
-              </span>
+              {/* Floating Back Button with Smart Fallback (Mobile Only) */}
+              <button
+                onClick={handleBack}
+                className="md:hidden absolute top-3 left-3 z-10 w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-gray-800 hover:bg-white transition-all cursor-pointer"
+                title="Go Back"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+
+              {/* Floating Action Buttons: Zoom, Wishlist & Share */}
+              <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+                <button
+                  onClick={() => setIsZoomOpen(true)}
+                  className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-gray-800 hover:bg-white transition-all cursor-pointer"
+                  title="Tap to Zoom (Inspect 3D Details)"
+                >
+                  <Maximize2 className="w-4 h-4 text-gray-700" />
+                </button>
+                <button
+                  onClick={() => toggleWishlist(product)}
+                  className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-gray-800 hover:bg-white transition-all cursor-pointer"
+                  title="Wishlist"
+                >
+                  <Heart
+                    className={`w-4 h-4 ${inWishlist ? 'fill-rose-500 text-rose-500' : 'text-gray-700'}`}
+                  />
+                </button>
+                <button
+                  onClick={() => {
+                    if (navigator.share) {
+                      navigator.share({
+                        title: product.name,
+                        text: product.description,
+                        url: window.location.href,
+                      });
+                    }
+                  }}
+                  className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-gray-800 hover:bg-white transition-all cursor-pointer"
+                  title="Share"
+                >
+                  <Share2 className="w-4 h-4 text-gray-700" />
+                </button>
+              </div>
+
+              {/* Dot Indicators */}
+              {product.images && product.images.length > 1 && (
+                <div className="absolute bottom-3 inset-x-0 flex justify-center gap-1.5">
+                  {product.images.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedImage(idx)}
+                      className={`h-2 rounded-full transition-all ${
+                        selectedImage === idx ? 'w-6 bg-[#B38029]' : 'w-2 bg-white/70'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
+
+            {/* Thumbnail Strip */}
+            {product.images && product.images.length > 1 && (
+              <div className="flex items-center gap-2.5 px-4 md:px-0 py-2.5 overflow-x-auto hide-scroll bg-white md:bg-transparent border-b md:border-b-0 border-gray-100">
+                {product.images.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedImage(i)}
+                    className={`w-16 h-16 rounded-2xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer shadow-xs ${
+                      selectedImage === i ? 'border-[#B38029] ring-2 ring-[#B38029]/20' : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Desktop Craftsmanship Badges */}
+            <div className="hidden md:grid grid-cols-3 gap-3 pt-2 text-center text-xs">
+              <div className="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-2xs space-y-1">
+                <Sparkles className="w-4 h-4 text-[#D4AF37] mx-auto" />
+                <p className="font-bold text-gray-900 text-[11px]">0.12mm Precision</p>
+                <p className="text-[10px] text-gray-400">Micro-relief 3D slicing</p>
+              </div>
+              <div className="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-2xs space-y-1">
+                <ShieldCheck className="w-4 h-4 text-[#D4AF37] mx-auto" />
+                <p className="font-bold text-gray-900 text-[11px]">Drakshramam Studio</p>
+                <p className="text-[10px] text-gray-400">Crafted by Naresh</p>
+              </div>
+              <div className="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-2xs space-y-1">
+                <Truck className="w-4 h-4 text-emerald-600 mx-auto" />
+                <p className="font-bold text-gray-900 text-[11px]">Express Delivery</p>
+                <p className="text-[10px] text-gray-400">100% transit safe</p>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: Details, Personalization & Desktop Actions (col-span-12 md:col-span-5) */}
+          <div className="md:col-span-5 space-y-4 md:space-y-5 md:bg-white md:p-6 md:rounded-3xl md:border md:border-gray-100 md:shadow-xs">
+            {/* 2. Product Info */}
+            <div className="p-4 sm:p-5 md:p-0 space-y-4 bg-white md:bg-transparent border-b md:border-b-0 border-gray-100">
+              <div>
+                <div className="flex items-start justify-between gap-2">
+                  <h1 className="font-serif text-lg sm:text-2xl font-bold text-gray-900 leading-snug">
+                    {product.name}
+                  </h1>
+                  <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 shrink-0 flex items-center gap-1 mt-0.5">
+                    <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                    <span>Original</span>
+                  </span>
+                </div>
 
             {/* Rating */}
             <div className="flex items-center gap-1.5 mt-1 text-xs text-gray-600">
@@ -444,7 +487,7 @@ export default function ProductDetailPage() {
         )}
 
         {/* 4. Quantity & Total in view */}
-        <div className="p-4 sm:p-5 bg-white space-y-4">
+        <div className="p-4 sm:p-5 md:p-0 bg-white md:bg-transparent space-y-4">
           <div className="flex items-center justify-between">
             <span className="font-bold text-xs text-gray-800">Quantity</span>
             <div className="flex items-center gap-3 bg-gray-100 p-1.5 rounded-xl">
@@ -467,14 +510,14 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* 5. Fixed Bottom Action Bar */}
-        <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-100 p-3.5 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-          <div className="max-w-xl mx-auto flex items-center gap-3">
+        {/* Desktop Action Buttons (Inside Right Column on Desktop) */}
+        <div className="hidden md:flex flex-col gap-3 pt-4 border-t border-gray-100">
+          <div className="flex items-center gap-3">
             <button
               type="button"
               disabled={uploadingPhoto}
               onClick={handleAddToCart}
-              className="flex-1 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-900 font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer text-xs uppercase tracking-wider"
+              className="flex-1 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-900 font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer text-xs uppercase tracking-wider active:scale-98"
             >
               {uploadingPhoto ? <Loader2 className="w-4 h-4 animate-spin text-gray-700" /> : <ShoppingBag className="w-4 h-4 text-gray-700" />}
               <span>{uploadingPhoto ? 'Uploading...' : 'Add to Cart'}</span>
@@ -484,14 +527,47 @@ export default function ProductDetailPage() {
               type="button"
               disabled={uploadingPhoto}
               onClick={handleBuyNow}
-              className="flex-1 bg-[#B38029] hover:bg-[#8C5E16] disabled:opacity-50 text-white font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer text-xs uppercase tracking-wider"
+              className="flex-1 bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-105 disabled:opacity-50 text-gray-950 font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer text-xs uppercase tracking-wider active:scale-98"
             >
-              {uploadingPhoto ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Zap className="w-4 h-4 fill-white text-white" />}
+              {uploadingPhoto ? <Loader2 className="w-4 h-4 animate-spin text-gray-950" /> : <Zap className="w-4 h-4 fill-gray-950 text-gray-950" />}
               <span>{uploadingPhoto ? 'Please wait...' : 'Buy Now'}</span>
             </button>
           </div>
+
+          {/* Desktop Trust Note */}
+          <div className="flex items-center justify-between text-[11px] text-gray-500 pt-1 px-1">
+            <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> 100% Secure Order</span>
+            <span className="flex items-center gap-1"><Truck className="w-3.5 h-3.5 text-[#B38029]" /> Free Express Courier over ₹1499</span>
+          </div>
         </div>
       </div>
+    </div>
+
+    {/* 5. Fixed Bottom Action Bar (Mobile Only: md:hidden) */}
+    <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-100 p-3.5 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+      <div className="max-w-xl mx-auto flex items-center gap-3">
+        <button
+          type="button"
+          disabled={uploadingPhoto}
+          onClick={handleAddToCart}
+          className="flex-1 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-900 font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer text-xs uppercase tracking-wider"
+        >
+          {uploadingPhoto ? <Loader2 className="w-4 h-4 animate-spin text-gray-700" /> : <ShoppingBag className="w-4 h-4 text-gray-700" />}
+          <span>{uploadingPhoto ? 'Uploading...' : 'Add to Cart'}</span>
+        </button>
+
+        <button
+          type="button"
+          disabled={uploadingPhoto}
+          onClick={handleBuyNow}
+          className="flex-1 bg-[#B38029] hover:bg-[#8C5E16] disabled:opacity-50 text-white font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer text-xs uppercase tracking-wider"
+        >
+          {uploadingPhoto ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Zap className="w-4 h-4 fill-white text-white" />}
+          <span>{uploadingPhoto ? 'Please wait...' : 'Buy Now'}</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
       {/* Toast notification */}
       {addedToast && (

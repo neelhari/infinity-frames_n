@@ -8,6 +8,17 @@ import ProductCard from '../components/ProductCard';
 import { HeroBannerSkeleton, CategoryCircleSkeleton, ProductCardSkeleton } from '../components/Shimmer';
 import { BRAND } from '../config/brand';
 
+const categoryThumbnails = {
+  'photo-frames': '/categories/cat_photo_frame.jpg',
+  'moon-lamps': '/categories/cat_moon_lamp.jpg',
+  'lithophane-products': '/categories/cat_lithophane.jpg',
+  'keychains': '/categories/cat_keychain.jpg',
+  'customized-gifts': '/categories/cat_gift_box.jpg',
+  'devotional-lamps': '/categories/cat_devotional.jpg',
+  'customized-lamps': '/categories/cat_acrylic_led.jpg',
+  '3d-printed-products': 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=200&auto=format&fit=crop&q=80',
+};
+
 export default function HomePage() {
   const navigate = useNavigate();
   const { products, categories, banners, loading } = useStoreData();
@@ -197,7 +208,7 @@ export default function HomePage() {
                 >
                   <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden shadow-xs group-hover:shadow-md group-hover:scale-108 transition-all duration-200 bg-white">
                     <img
-                      src={cat.image || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&auto=format&fit=crop&q=80'}
+                      src={categoryThumbnails[cat.id] || cat.image || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&auto=format&fit=crop&q=80'}
                       alt={cat.name}
                       className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-300"
                     />
