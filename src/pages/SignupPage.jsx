@@ -69,7 +69,7 @@ export default function SignupPage() {
               Create Customer Account
             </h1>
             <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
-              Save your 3D custom frames, manage addresses in Drakshramam and across India, and receive order status alerts on WhatsApp.
+              Save your 3D custom frames, manage delivery addresses across India, and receive order status alerts on WhatsApp.
             </p>
           </div>
 

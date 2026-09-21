@@ -107,7 +107,7 @@ export default function CartPage() {
                     {/* Variations if present */}
                     {(item.selectedSize || item.selectedColor || item.selectedFrameColor) && (
                       <p className="text-[10.5px] text-gray-400 mt-0.5 truncate">
-                        {[item.selectedSize, item.selectedColor, item.selectedFrameColor].filter(Boolean).join(' &bull; ')}
+                        {[item.selectedSize, item.selectedColor, item.selectedFrameColor].filter(Boolean).join(' • ')}
                       </p>
                     )}
 

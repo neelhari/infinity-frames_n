@@ -203,7 +203,7 @@ export default function AdminOrders() {
                       )}
                       <div>
                         <span className="font-bold text-gray-900 block text-xs">{item.name}</span>
-                        <span className="text-[10px] text-gray-500">Qty: {item.quantity} &bull; Unit: ₹{item.price}</span>
+                        <span className="text-[10px] text-gray-500">Qty: {item.quantity} • Unit: ₹{item.price}</span>
                       </div>
                     </div>
                     <span className="font-extrabold text-gray-900 text-sm">₹{(item.price * item.quantity).toLocaleString('en-IN')}</span>

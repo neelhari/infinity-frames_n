@@ -445,7 +445,7 @@ export default function CheckoutPage() {
                     className="accent-[#B38029] mt-0.5"
                   />
                   <div className="flex-1">
-                    <p className="font-bold text-gray-900">{addr.name} &bull; <span className="font-normal text-gray-600">{addr.phone}</span></p>
+                    <p className="font-bold text-gray-900">{addr.name} • <span className="font-normal text-gray-600">{addr.phone}</span></p>
                     <p className="text-gray-600 mt-0.5">{addr.addressLine}, {addr.city} - {addr.pincode}</p>
                   </div>
                 </div>
