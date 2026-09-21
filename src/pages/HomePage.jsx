@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
-  ChevronRight, ChevronLeft, ShieldCheck, Truck, Award
+  ChevronRight, ChevronLeft, Sparkles, ShieldCheck, Truck, Award
 } from 'lucide-react';
 import { useStoreData } from '../context/StoreDataContext';
 import ProductCard from '../components/ProductCard';
