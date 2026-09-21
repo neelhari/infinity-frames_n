@@ -69,7 +69,7 @@ export default function AdminCategories() {
           image: categoryImage,
         })
       : await addCategory({
-          id: name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+          id: name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || (`cat-${Date.now()}`),
           name: name.trim(),
           tagline: description.trim(),
           image: categoryImage,
