@@ -130,15 +130,6 @@ export function AdminAuthProvider({ children }) {
     }
   };
 
-  const loginAsMasterAdmin = () => {
-    const adminObj = { email: 'infinityframesn@gmail.com', role: 'admin' };
-    setIsAdmin(true);
-    setUser(adminObj);
-    localStorage.setItem('infinity_admin_auth', 'true');
-    localStorage.setItem('infinity_admin_user', JSON.stringify(adminObj));
-    return { success: true };
-  };
-
   const signOut = async () => {
     localStorage.removeItem('infinity_admin_auth');
     localStorage.removeItem('infinity_admin_user');
@@ -159,7 +150,6 @@ export function AdminAuthProvider({ children }) {
         user,
         loading,
         signIn,
-        loginAsMasterAdmin,
         signOut,
         supabaseConfigured: true,
       }}

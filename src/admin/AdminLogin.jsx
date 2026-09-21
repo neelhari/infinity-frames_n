@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Navigate, useLocation, useNavigate, Link } from 'react-router-dom';
-import { Lock, Mail, Loader2, ShieldCheck, Sparkles, ArrowLeft } from 'lucide-react';
+import { Lock, Mail, Loader2, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { BRAND } from '../config/brand';
 
 export default function AdminLogin() {
-  const { isAdmin, signIn, loginAsMasterAdmin } = useAdminAuth();
+  const { isAdmin, signIn } = useAdminAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -36,15 +36,9 @@ export default function AdminLogin() {
     setSubmitting(false);
 
     if (!result.success) {
-      setError(result.message || 'Sign in failed. Check your email and password.');
+      setError(result.message || 'Invalid admin credentials.');
       return;
     }
-    navigate(location.state?.from?.pathname || '/admin', { replace: true });
-  };
-
-  // Instant 1-Click Master Login for Store Owner
-  const handleQuickFill = () => {
-    loginAsMasterAdmin();
     navigate(location.state?.from?.pathname || '/admin', { replace: true });
   };
 
@@ -56,28 +50,12 @@ export default function AdminLogin() {
             {BRAND.name?.slice(0, 2)?.toUpperCase() || 'IF'}
           </div>
           <h1 className="font-serif text-xl sm:text-2xl font-bold text-[#1A1A1A]">Admin Sign In</h1>
-          <p className="text-[11px] text-gray-500">{BRAND.name} Store CMS — Owner Access</p>
-        </div>
-
-        {/* 1-Click Master Admin Login Button */}
-        <button
-          type="button"
-          onClick={handleQuickFill}
-          className="w-full bg-[#FAF5EE] hover:bg-[#F3EAE0] border border-[#D4AF37]/50 text-[#1A1A1A] py-2.5 px-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
-        >
-          <Sparkles className="w-4 h-4 text-[#D4AF37]" />
-          <span>1-Click Master Admin Login</span>
-        </button>
-
-        <div className="flex items-center gap-2 my-2">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-[10px] text-gray-400 font-bold uppercase">or enter credentials</span>
-          <div className="flex-1 h-px bg-gray-200" />
+          <p className="text-[11px] text-gray-500">{BRAND.name} Store CMS — Authorized Access Only</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block font-bold text-gray-800 mb-1">Email</label>
+            <label className="block font-bold text-gray-800 mb-1">Email Address</label>
             <div className="relative">
               <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -87,7 +65,7 @@ export default function AdminLogin() {
                 autoCorrect="off"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="infinityframesn@gmail.com"
+                placeholder="admin@infinityframesn.com"
                 className="w-full pl-9 pr-3 py-3 text-xs sm:text-sm font-semibold text-gray-900 rounded-xl border border-gray-200 focus:border-[#1A1A1A] focus:outline-none"
               />
             </div>
@@ -121,7 +99,7 @@ export default function AdminLogin() {
             className="w-full bg-[#1A1A1A] hover:bg-[#0A0A0A] disabled:opacity-60 text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer text-xs sm:text-sm"
           >
             {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
-            <span>{submitting ? 'Signing In...' : 'Sign In as Admin'}</span>
+            <span>{submitting ? 'Signing In...' : 'Sign In'}</span>
           </button>
         </form>
 
