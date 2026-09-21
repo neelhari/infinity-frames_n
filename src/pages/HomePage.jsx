@@ -117,7 +117,7 @@ export default function HomePage() {
         {loading && (!banners || banners.length === 0) ? (
           <HeroBannerSkeleton />
         ) : (
-          <div className="relative w-full h-[220px] sm:h-[300px] md:h-[380px] lg:h-[440px] flex items-center">
+          <div className="relative w-full h-[230px] sm:h-[310px] md:h-[390px] lg:h-[450px] flex items-end pb-7 sm:pb-9 md:pb-12">
             {/* Full-Width Background Banner Graphic */}
             <div className="absolute inset-0 w-full h-full overflow-hidden">
               <img
@@ -125,25 +125,26 @@ export default function HomePage() {
                 alt={currentBanner?.title || 'Hero Banner'}
                 className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-101"
               />
-              {/* Premium dark gradient overlay ensuring crisp readability across any image */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/25 pointer-events-none" />
+              {/* Refined gradient overlay allowing background photo full visibility while keeping text crisp */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent pointer-events-none" />
             </div>
 
-            {/* Content Container - Only Heading and Button */}
-            <div className="relative z-10 max-w-7xl mx-auto w-full px-5 sm:px-10 md:px-14 flex flex-col justify-center items-start space-y-3 sm:space-y-4">
-              {/* Heading */}
-              <h1 className="font-serif text-xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white tracking-tight truncate max-w-3xl drop-shadow-md">
+            {/* Content Container - Heading and Button positioned lower for maximum photo visibility */}
+            <div className="relative z-10 max-w-7xl mx-auto w-full px-5 sm:px-10 md:px-14 flex flex-col justify-end items-start space-y-2.5 sm:space-y-3.5">
+              {/* Heading (slightly refined font size with clean mobile wrapping) */}
+              <h1 className="font-serif text-[17px] sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-white tracking-tight line-clamp-2 md:truncate max-w-3xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] leading-snug">
                 {currentBanner?.title || 'Custom 3D Printed Gifts'}
               </h1>
 
               {/* Action Button */}
-              <div className="pt-1">
+              <div>
                 <button
                   onClick={() => navigate(currentBanner?.link || '/shop')}
-                  className="bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-110 text-gray-950 font-black text-[11px] sm:text-xs md:text-sm px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl shadow-lg transition-transform hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5"
+                  className="bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-110 text-gray-950 font-black text-[11px] sm:text-xs md:text-sm px-4.5 sm:px-6 py-2 sm:py-2.5 rounded-xl shadow-lg transition-transform hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5"
                 >
                   <span>Shop Now</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </button>
               </div>
             </div>
