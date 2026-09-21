@@ -117,7 +117,7 @@ export default function WishlistPage() {
                       </Link>
 
                       <button
-                        onClick={() => addToCart(product, 1, { size: 'Standard', color: 'Default' })}
+                        onClick={() => addToCart(product, 1)}
                         className="w-full py-2 px-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                       >
                         <ShoppingBag className="w-3.5 h-3.5" />

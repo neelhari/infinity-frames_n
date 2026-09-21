@@ -8,8 +8,9 @@ import { ProductCardSkeleton } from '../components/Shimmer';
 
 export default function ProductsPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get('category');
+  const searchParam = searchParams.get('search') || searchParams.get('q') || '';
   const { products, categories, loading } = useStoreData();
   
   const currentCategory = categories.find((c) => c.id === categoryParam) || null;
@@ -18,18 +19,50 @@ export default function ProductsPage() {
     : ['All'];
 
   const [activeChip, setActiveChip] = useState('All');
-  const { addToCart, totalItemsCount } = useCart();
+  const { addToCart, totalItemsCount, openCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
-  // Filter products by category and active chip
+  // Filter products by category, search query, and active chip
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       const matchCat = categoryParam ? p.category === categoryParam : true;
       if (!matchCat) return false;
+
+      if (searchParam) {
+        const q = searchParam.toLowerCase().trim();
+        const matchSearch =
+          p.name?.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q) ||
+          p.category?.toLowerCase().includes(q) ||
+          p.subcategory?.toLowerCase().includes(q) ||
+          (Array.isArray(p.materials) && p.materials.some((m) => m.toLowerCase().includes(q))) ||
+          (Array.isArray(p.sizes) && p.sizes.some((s) => s.toLowerCase().includes(q)));
+        if (!matchSearch) return false;
+      }
+
       if (activeChip === 'All') return true;
       return p.subcategory?.toLowerCase().includes(activeChip.toLowerCase());
     });
-  }, [products, categoryParam, activeChip]);
+  }, [products, categoryParam, searchParam, activeChip]);
+
+  const clearSearch = () => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete('search');
+    newParams.delete('q');
+    setSearchParams(newParams);
+  };
+
+  const handleBack = () => {
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
+
+  const headerTitle = searchParam
+    ? `Results for "${searchParam}"`
+    : currentCategory?.name || 'All Products';
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-24 font-sans">
@@ -38,27 +71,37 @@ export default function ProductsPage() {
         <div className="max-w-3xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <button
-              onClick={() => navigate(-1)}
+              onClick={handleBack}
               className="p-1 rounded-full hover:bg-gray-100 text-gray-700 transition-colors cursor-pointer"
               aria-label="Back"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <h1 className="font-serif text-base sm:text-lg font-bold text-gray-900 tracking-wide truncate">
-              {currentCategory?.name || 'All Products'}
+              {headerTitle}
             </h1>
           </div>
 
           <div className="flex items-center gap-2">
+            {searchParam && (
+              <button
+                onClick={clearSearch}
+                className="text-[11px] font-bold text-[#B38029] bg-[#FAF5EB] px-2.5 py-1 rounded-lg border border-[#D4AF37]/30 hover:bg-amber-100 transition-colors cursor-pointer"
+              >
+                Clear Search
+              </button>
+            )}
             <button
-              onClick={() => navigate('/shop')}
-              className="p-1.5 text-gray-700 hover:text-[#B38029] rounded-full hover:bg-gray-100 transition-colors"
+              onClick={() => navigate('/categories')}
+              className="p-1.5 text-gray-700 hover:text-[#B38029] rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+              title="Categories"
             >
               <Search className="w-5 h-5" />
             </button>
             <button
-              onClick={() => navigate('/cart')}
-              className="relative p-1.5 text-gray-700 hover:text-[#B38029] rounded-full hover:bg-gray-100 transition-colors"
+              onClick={openCart || (() => navigate('/cart'))}
+              className="relative p-1.5 text-gray-700 hover:text-[#B38029] rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+              title="View Cart"
             >
               <ShoppingBag className="w-5 h-5" />
               {totalItemsCount > 0 && (

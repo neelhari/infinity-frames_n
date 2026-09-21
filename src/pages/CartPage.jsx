@@ -6,25 +6,40 @@ import { useAuth } from '../context/AuthContext';
 
 export default function CartPage() {
   const navigate = useNavigate();
-  const { cartItems, updateQuantity, removeFromCart, clearCart, subtotal } = useCart();
+  const {
+    cartItems,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
+    subtotal,
+    appliedCoupon,
+    applyCoupon,
+    removeCoupon,
+    discountAmount,
+    freeShippingThreshold = 1499,
+    shippingCost = 50,
+  } = useCart();
   const { isAuthenticated } = useAuth();
 
   const [couponInput, setCouponInput] = useState('');
-  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponMsg, setCouponMsg] = useState('');
   const [couponOpen, setCouponOpen] = useState(false);
 
-  // Discount math
-  const discount = appliedCoupon ? Math.min(300, Math.round(subtotal * 0.15)) : 0;
-  const shipping = subtotal > 1499 ? 0 : 50;
-  const total = Math.max(0, subtotal - discount + (cartItems.length > 0 ? shipping : 0));
+  // Math aligned with StoreDataContext & CartContext
+  const discount = discountAmount || 0;
+  const isFreeShipping = subtotal >= freeShippingThreshold;
+  const shipping = cartItems.length > 0 ? (isFreeShipping ? 0 : shippingCost) : 0;
+  const total = Math.max(0, subtotal - discount + shipping);
 
   const handleApplyCoupon = (e) => {
     e.preventDefault();
     if (!couponInput.trim()) return;
-    if (couponInput.toUpperCase() === 'INFINITY10' || couponInput.toUpperCase() === 'WELCOME') {
-      setAppliedCoupon(couponInput.toUpperCase());
+    const res = applyCoupon(couponInput.trim());
+    if (res.success) {
+      setCouponMsg(`Coupon ${res.coupon.code} applied!`);
+      setCouponInput('');
     } else {
-      window.alert('Invalid Coupon Code. Try: INFINITY10');
+      setCouponMsg(res.message);
     }
   };
 
@@ -79,7 +94,7 @@ export default function CartPage() {
             <div className="space-y-3">
               {cartItems.map((item) => (
                 <div
-                  key={item.id}
+                  key={item.itemKey || item.id}
                   className="bg-white rounded-2xl p-3.5 border border-gray-100 shadow-2xs flex items-center gap-3 relative group"
                 >
                   {/* Thumbnail Image (uploaded custom photo or product image) */}
@@ -98,9 +113,9 @@ export default function CartPage() {
                     </h3>
                     
                     {/* Custom text tag if present */}
-                    {item.customName && (
+                    {(item.customName || item.customText) && (
                       <span className="inline-block bg-amber-50 text-[#8C5E16] text-[10px] font-bold px-2 py-0.5 rounded-md mt-0.5 truncate max-w-full">
-                        Text: &ldquo;{item.customName}&rdquo;
+                        Text: &ldquo;{item.customName || item.customText}&rdquo;
                       </span>
                     )}
 
@@ -114,20 +129,20 @@ export default function CartPage() {
                     {/* Price & Quantity Stepper */}
                     <div className="flex items-center justify-between mt-2">
                       <span className="font-serif text-sm font-bold text-gray-900">
-                        ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                        ₹{((item.price || 0) * (item.quantity || 1)).toLocaleString('en-IN')}
                       </span>
 
                       {/* Stepper (Screen 7) */}
                       <div className="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-lg">
                         <button
-                          onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                          onClick={() => updateQuantity(item.itemKey || item.id, Math.max(1, (item.quantity || 1) - 1))}
                           className="text-gray-600 hover:text-black font-bold text-xs cursor-pointer"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
-                        <span className="text-xs font-bold px-1.5">{item.quantity}</span>
+                        <span className="text-xs font-bold px-1.5">{item.quantity || 1}</span>
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.itemKey || item.id, (item.quantity || 1) + 1)}
                           className="text-gray-600 hover:text-black font-bold text-xs cursor-pointer"
                         >
                           <Plus className="w-3 h-3" />
@@ -138,7 +153,7 @@ export default function CartPage() {
 
                   {/* Remove Button (X icon - Screen 7) */}
                   <button
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => removeFromCart(item.itemKey || item.id)}
                     className="absolute top-3 right-3 text-gray-300 hover:text-red-500 transition-colors p-1 cursor-pointer"
                     title="Remove item"
                   >
@@ -156,29 +171,47 @@ export default function CartPage() {
               >
                 <div className="flex items-center gap-2">
                   <Tag className="w-4 h-4 text-[#B38029]" />
-                  <span>{appliedCoupon ? `Applied: ${appliedCoupon}` : 'Have a Coupon Code?'}</span>
+                  <span>{appliedCoupon ? `Applied: ${appliedCoupon.code || appliedCoupon}` : 'Have a Coupon Code?'}</span>
                 </div>
                 <ChevronRight className={`w-4 h-4 text-gray-400 transition-transform ${couponOpen ? 'rotate-90' : ''}`} />
               </button>
 
               {couponOpen && (
-                <form onSubmit={handleApplyCoupon} className="p-3.5 pt-0 border-t border-gray-100 flex gap-2">
-                  <input
-                    type="text"
-                    value={couponInput}
-                    onChange={(e) => setCouponInput(e.target.value)}
-                    placeholder="Enter code (e.g. INFINITY10)"
-                    className="flex-1 p-2 rounded-xl border border-gray-200 text-xs uppercase font-mono outline-none focus:border-[#B38029]"
-                  />
-                  <button
-                    type="submit"
-                    className="bg-[#B38029] text-white text-xs font-bold px-4 py-2 rounded-xl cursor-pointer"
-                  >
-                    Apply
-                  </button>
-                </form>
+                <div className="p-3.5 pt-0 border-t border-gray-100 space-y-2">
+                  <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value)}
+                      placeholder="Enter code (e.g. INFINITY10)"
+                      className="flex-1 p-2 rounded-xl border border-gray-200 text-xs uppercase font-mono outline-none focus:border-[#B38029]"
+                    />
+                    <button
+                      type="submit"
+                      className="bg-[#B38029] text-white text-xs font-bold px-4 py-2 rounded-xl cursor-pointer hover:bg-[#8C5E16]"
+                    >
+                      Apply
+                    </button>
+                  </form>
+                  {couponMsg && (
+                    <p className="text-[11px] font-bold text-[#B38029]">{couponMsg}</p>
+                  )}
+                  {appliedCoupon && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        removeCoupon();
+                        setCouponMsg('Coupon removed');
+                      }}
+                      className="text-[11px] text-red-500 hover:underline font-bold"
+                    >
+                      Remove Coupon
+                    </button>
+                  )}
+                </div>
               )}
             </div>
+
 
             {/* 4. Order Summary Card (Screen 7) */}
             <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-2xs space-y-2.5 text-xs">

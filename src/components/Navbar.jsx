@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Heart } from 'lucide-react';
+import { Search, Heart, ShoppingBag } from 'lucide-react';
 import { useWishlist } from '../context/WishlistContext';
+import { useCart } from '../context/CartContext';
 import { useUI } from '../context/UIContext';
 import { BRAND } from '../config/brand';
 
@@ -18,6 +19,7 @@ const navLinks = [
 
 export default function Navbar() {
   const { wishlistCount } = useWishlist();
+  const { cartCount, openCart } = useCart();
   const { setIsSearchOpen } = useUI();
   const navigate = useNavigate();
   const location = useLocation();
@@ -94,6 +96,20 @@ export default function Navbar() {
               {wishlistCount > 0 && (
                 <span className="absolute top-1 right-1 bg-[#C89B3C] text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
                   {wishlistCount}
+                </span>
+              )}
+            </button>
+
+            {/* Cart Icon */}
+            <button
+              onClick={openCart}
+              className="relative p-2 text-gray-700 hover:text-[#B38029] transition-colors rounded-full hover:bg-gray-100 cursor-pointer"
+              title="Shopping Cart"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute top-1 right-1 bg-[#B38029] text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-xs animate-scaleUp">
+                  {cartCount}
                 </span>
               )}
             </button>

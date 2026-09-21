@@ -124,7 +124,7 @@ export default function CartDrawer() {
             ) : (
               cartItems.map((item) => (
                 <div
-                  key={item.id}
+                  key={item.itemKey || item.id}
                   className="flex gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-200 relative group"
                 >
                   <div className="w-20 h-20 bg-gray-100 rounded-xl overflow-hidden shrink-0 relative">
@@ -147,8 +147,9 @@ export default function CartDrawer() {
                           {item.name}
                         </h4>
                         <button
-                          onClick={() => removeFromCart(item.id)}
-                          className="text-gray-400 hover:text-rose-600 transition-colors p-1"
+                          onClick={() => removeFromCart(item.itemKey || item.id)}
+                          className="text-gray-400 hover:text-rose-600 transition-colors p-1 cursor-pointer"
+                          title="Remove item"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -159,10 +160,10 @@ export default function CartDrawer() {
                         {item.selectedColor && <span>• Style: {item.selectedColor}</span>}
                       </div>
 
-                      {item.customText && (
+                      {(item.customName || item.customText) && (
                         <div className="inline-flex items-center gap-1 text-[10px] text-[#B38029] bg-[#FAF5EB] px-2 py-0.5 rounded-md mt-1 border border-[#D4AF37]/30">
                           <Sparkles className="w-2.5 h-2.5" />
-                          <span className="truncate max-w-[160px]">"{item.customText}"</span>
+                          <span className="truncate max-w-[160px]">"{item.customName || item.customText}"</span>
                         </div>
                       )}
 
@@ -174,8 +175,8 @@ export default function CartDrawer() {
                     <div className="flex items-center gap-2 mt-2">
                       <div className="flex items-center border border-gray-300 rounded-lg bg-white overflow-hidden">
                         <button
-                          onClick={() => updateQuantity(item.id, (item.quantity || 1) - 1)}
-                          className="px-2 py-0.5 text-gray-500 hover:bg-gray-100"
+                          onClick={() => updateQuantity(item.itemKey || item.id, (item.quantity || 1) - 1)}
+                          className="px-2 py-0.5 text-gray-500 hover:bg-gray-100 cursor-pointer"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
@@ -183,8 +184,8 @@ export default function CartDrawer() {
                           {item.quantity || 1}
                         </span>
                         <button
-                          onClick={() => updateQuantity(item.id, (item.quantity || 1) + 1)}
-                          className="px-2 py-0.5 text-gray-500 hover:bg-gray-100"
+                          onClick={() => updateQuantity(item.itemKey || item.id, (item.quantity || 1) + 1)}
+                          className="px-2 py-0.5 text-gray-500 hover:bg-gray-100 cursor-pointer"
                         >
                           <Plus className="w-3 h-3" />
                         </button>

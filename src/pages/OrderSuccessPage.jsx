@@ -10,7 +10,7 @@ export default function OrderSuccessPage() {
 
   const defaultOrderId = `IFN-${Math.floor(100000 + Math.random() * 900000)}`;
 
-  const orderId = orderData?.orderId || defaultOrderId;
+  const orderId = orderData?.id || orderData?.orderId || defaultOrderId;
   const items = orderData?.items || [];
   const customer = orderData?.customer || {};
   const totalAmount = orderData?.totalAmount || 0;

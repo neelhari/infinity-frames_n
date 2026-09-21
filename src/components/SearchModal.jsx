@@ -27,6 +27,18 @@ export default function SearchModal() {
     navigate(`/product/${id}`);
   };
 
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+    closeSearch();
+    navigate(`/shop?search=${encodeURIComponent(query.trim())}`);
+  };
+
+  const handleTagClick = (tag) => {
+    closeSearch();
+    navigate(`/shop?search=${encodeURIComponent(tag)}`);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4">
       {/* Backdrop */}
@@ -37,9 +49,9 @@ export default function SearchModal() {
 
       {/* Modal Card */}
       <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden z-10 border border-gray-200 animate-scaleUp">
-        {/* Search Bar */}
-        <div className="p-4 sm:p-5 border-b border-gray-100 flex items-center gap-3">
-          <Search className="w-5 h-5 text-[#D4AF37]" />
+        {/* Search Bar Form */}
+        <form onSubmit={handleFormSubmit} className="p-4 sm:p-5 border-b border-gray-100 flex items-center gap-3">
+          <Search className="w-5 h-5 text-[#D4AF37] shrink-0" />
           <input
             autoFocus
             type="text"
@@ -50,19 +62,27 @@ export default function SearchModal() {
           />
           {query && (
             <button
+              type="button"
               onClick={() => setQuery('')}
-              className="p-1 rounded-full text-gray-400 hover:text-gray-600"
+              className="p-1 rounded-full text-gray-400 hover:text-gray-600 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           )}
           <button
+            type="submit"
+            className="bg-[#1A1A1A] hover:bg-[#B38029] text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+          >
+            Search
+          </button>
+          <button
+            type="button"
             onClick={closeSearch}
-            className="text-xs font-bold text-gray-500 hover:text-gray-800 px-2 py-1 rounded-lg hover:bg-gray-100"
+            className="text-xs font-bold text-gray-500 hover:text-gray-800 px-2 py-1 rounded-lg hover:bg-gray-100 cursor-pointer"
           >
             ESC
           </button>
-        </div>
+        </form>
 
         {/* Results Area */}
         <div className="max-h-[60vh] overflow-y-auto p-4 sm:p-5">
@@ -85,7 +105,7 @@ export default function SearchModal() {
                 ].map((tag) => (
                   <button
                     key={tag}
-                    onClick={() => setQuery(tag)}
+                    onClick={() => handleTagClick(tag)}
                     className="bg-gray-100 hover:bg-[#FAF5EB] hover:text-[#B38029] text-gray-700 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors cursor-pointer border border-transparent hover:border-[#D4AF37]/30"
                   >
                     {tag}

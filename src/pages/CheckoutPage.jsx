@@ -156,6 +156,7 @@ export default function CheckoutPage() {
     // Prepare order payload for Supabase database
     const orderPayload = {
       id: orderId,
+      orderId: orderId,
       customerName: finalAddress.name,
       customerPhone: finalAddress.phone,
       customerEmail: finalAddress.email || user?.email || '',
@@ -268,13 +269,21 @@ export default function CheckoutPage() {
     }
   };
 
+  const handleBack = () => {
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate('/cart');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-32 font-sans">
       {/* 1. Sticky Header */}
       <div className="sticky top-0 z-30 bg-white border-b border-gray-100 px-4 py-3 shadow-2xs">
         <div className="max-w-xl mx-auto flex items-center gap-3">
           <button
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             className="p-1.5 rounded-full hover:bg-gray-100 text-gray-700 cursor-pointer transition-colors"
             aria-label="Back"
           >
@@ -287,169 +296,104 @@ export default function CheckoutPage() {
       </div>
 
       <div className="max-w-xl mx-auto px-4 py-4 space-y-4">
-        {/* 2. SHIPPING ADDRESS CARD */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-2xs p-4 sm:p-5">
-          <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-amber-50 text-[#B38029] flex items-center justify-center shrink-0">
+        {/* 2. SHIPPING ADDRESS - COMPACT 1-LINE DELIVERY SUMMARY */}
+        {activeAddress ? (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-2xs p-3.5 sm:p-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-full bg-amber-50 text-[#B38029] flex items-center justify-center shrink-0 border border-[#D4AF37]/30">
                 <MapPin className="w-4 h-4" />
               </div>
-              <h2 className="font-bold text-sm text-gray-900">Delivery Address</h2>
-            </div>
-
-            {/* Quick toggle buttons when in selected mode */}
-            {addressMode === 'selected' && activeAddress && (
-              <div className="flex items-center gap-2">
-                {savedAddresses.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => setAddressMode('list')}
-                    className="text-xs font-semibold text-gray-600 hover:text-gray-900 underline cursor-pointer"
-                  >
-                    Change
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFormData({
-                      name: user?.name || '',
-                      phone: user?.phone || '',
-                      pincode: '',
-                      addressLine: '',
-                      city: '',
-                      email: user?.email || '',
-                    });
-                    setAddressMode('add');
-                  }}
-                  className="text-xs font-bold text-[#B38029] hover:underline flex items-center gap-0.5 cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Add New</span>
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* STATE A: Display Selected Address */}
-          {addressMode === 'selected' && activeAddress && (
-            <div className="bg-amber-50/40 rounded-xl p-3.5 border border-amber-200/60">
-              <div className="flex items-start justify-between gap-2">
-                <div className="space-y-1 text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-gray-900 text-sm">{activeAddress.name}</span>
-                    <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
-                      <Check className="w-3 h-3" /> Delivering Here
-                    </span>
-                  </div>
-                  <p className="text-gray-700 font-medium">{activeAddress.phone}</p>
-                  <p className="text-gray-600 leading-relaxed">
-                    {activeAddress.addressLine}
-                    {activeAddress.city ? `, ${activeAddress.city}` : ''} - <span className="font-bold">{activeAddress.pincode}</span>
-                  </p>
-                  {activeAddress.email && (
-                    <p className="text-gray-400 text-[11px]">{activeAddress.email}</p>
-                  )}
+              <div className="min-w-0 text-xs">
+                <div className="flex items-center gap-1.5 truncate">
+                  <span className="text-gray-500 font-medium">Deliver to:</span>
+                  <span className="font-bold text-gray-900 truncate">
+                    {activeAddress.name}, {activeAddress.pincode}
+                  </span>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFormData({
-                      name: activeAddress.name,
-                      phone: activeAddress.phone,
-                      pincode: activeAddress.pincode,
-                      addressLine: activeAddress.addressLine,
-                      city: activeAddress.city || '',
-                      email: activeAddress.email || user?.email || '',
-                    });
-                    setAddressMode('add');
-                  }}
-                  className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-white rounded-lg transition-colors cursor-pointer"
-                  title="Edit this address"
-                >
-                  <Edit3 className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Action buttons below selected address */}
-              <div className="mt-3 pt-2.5 border-t border-amber-200/40 flex items-center justify-between text-xs">
-                {savedAddresses.length > 1 ? (
-                  <button
-                    type="button"
-                    onClick={() => setAddressMode('list')}
-                    className="font-bold text-[#B38029] hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>View All Saved Addresses ({savedAddresses.length})</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                ) : <span />}
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFormData({
-                      name: user?.name || '',
-                      phone: user?.phone || '',
-                      pincode: '',
-                      addressLine: '',
-                      city: '',
-                      email: user?.email || '',
-                    });
-                    setAddressMode('add');
-                  }}
-                  className="font-bold text-gray-700 hover:text-black flex items-center gap-1 cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>+ Add Another Address</span>
-                </button>
+                <p className="text-gray-500 truncate text-[11px] mt-0.5">
+                  {activeAddress.addressLine}{activeAddress.city ? `, ${activeAddress.city}` : ''} • {activeAddress.phone}
+                </p>
               </div>
             </div>
-          )}
 
-          {/* STATE B: Pick from Saved Addresses list */}
-          {addressMode === 'list' && (
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-bold text-gray-700">Choose a saved address:</span>
+            <button
+              type="button"
+              onClick={() => setAddressMode('list')}
+              className="bg-[#FAF5EB] hover:bg-amber-100 text-[#B38029] border border-[#D4AF37]/40 px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 cursor-pointer transition-colors"
+            >
+              Change
+            </button>
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-2xs p-3.5 sm:p-4">
+            <button
+              type="button"
+              onClick={() => setAddressMode('add')}
+              className="w-full flex items-center justify-between gap-2.5 p-3 rounded-xl border-2 border-dashed border-[#D4AF37]/50 hover:border-[#D4AF37] text-xs font-bold text-gray-800 transition-colors cursor-pointer group"
+            >
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-amber-50 text-[#B38029] flex items-center justify-center shrink-0 border border-amber-200">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <span>Add Delivery Address to Proceed</span>
+              </div>
+              <span className="text-xs font-bold text-[#B38029] flex items-center gap-1 group-hover:underline">
+                <Plus className="w-3.5 h-3.5" /> Add Address
+              </span>
+            </button>
+          </div>
+        )}
+
+        {/* MODAL / DRAWER: Choose from Saved Addresses */}
+        {addressMode === 'list' && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
+            <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl p-5 space-y-4 max-h-[85vh] overflow-y-auto">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                <h3 className="font-serif text-base font-bold text-gray-900">Select Delivery Address</h3>
                 <button
                   type="button"
                   onClick={() => setAddressMode('selected')}
-                  className="text-gray-500 hover:text-gray-800 flex items-center gap-1 cursor-pointer"
+                  className="p-1 text-gray-400 hover:text-gray-700 rounded-full cursor-pointer"
                 >
-                  <X className="w-3.5 h-3.5" /> Cancel
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {savedAddresses.map((addr) => (
-                <div
-                  key={addr.id}
-                  onClick={() => {
-                    setSelectedAddressId(addr.id);
-                    setAddressMode('selected');
-                  }}
-                  className={`p-3 rounded-xl border text-xs cursor-pointer transition-all flex items-start gap-2.5 ${
-                    selectedAddressId === addr.id
-                      ? 'border-[#B38029] bg-amber-50/40'
-                      : 'border-gray-200 hover:bg-gray-50'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="selectedAddress"
-                    checked={selectedAddressId === addr.id}
-                    onChange={() => {
+              <div className="space-y-2.5">
+                {savedAddresses.map((addr) => (
+                  <div
+                    key={addr.id}
+                    onClick={() => {
                       setSelectedAddressId(addr.id);
                       setAddressMode('selected');
                     }}
-                    className="accent-[#B38029] mt-0.5"
-                  />
-                  <div className="flex-1">
-                    <p className="font-bold text-gray-900">{addr.name} • <span className="font-normal text-gray-600">{addr.phone}</span></p>
-                    <p className="text-gray-600 mt-0.5">{addr.addressLine}, {addr.city} - {addr.pincode}</p>
+                    className={`p-3.5 rounded-2xl border text-xs cursor-pointer transition-all flex items-start gap-3 ${
+                      selectedAddressId === addr.id
+                        ? 'border-[#B38029] bg-amber-50/40 ring-2 ring-[#B38029]/20'
+                        : 'border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="selectedAddress"
+                      checked={selectedAddressId === addr.id}
+                      onChange={() => {
+                        setSelectedAddressId(addr.id);
+                        setAddressMode('selected');
+                      }}
+                      className="accent-[#B38029] mt-0.5"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-gray-900">
+                        {addr.name} • <span className="font-normal text-gray-600">{addr.phone}</span>
+                      </p>
+                      <p className="text-gray-600 mt-0.5 leading-relaxed">
+                        {addr.addressLine}{addr.city ? `, ${addr.city}` : ''} - <span className="font-bold">{addr.pincode}</span>
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
 
               <button
                 type="button"
@@ -464,28 +408,30 @@ export default function CheckoutPage() {
                   });
                   setAddressMode('add');
                 }}
-                className="w-full py-2.5 mt-2 border-2 border-dashed border-gray-300 hover:border-[#B38029] rounded-xl text-xs font-bold text-gray-700 hover:text-[#B38029] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                className="w-full py-3 border-2 border-dashed border-[#D4AF37]/60 hover:border-[#D4AF37] rounded-2xl text-xs font-bold text-[#B38029] flex items-center justify-center gap-1.5 transition-colors cursor-pointer bg-amber-50/20"
               >
                 <Plus className="w-4 h-4" />
-                <span>Add New Address</span>
+                <span>+ Add New Address</span>
               </button>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* STATE C: Add / Edit Address Form with Clear Required Fields & Star Marks */}
-          {addressMode === 'add' && (
-            <form onSubmit={handleSaveAddress} className="space-y-3 pt-1">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <p className="font-bold text-gray-800">
+        {/* MODAL / DRAWER: Add / Edit Address Form */}
+        {addressMode === 'add' && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
+            <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                <h3 className="font-serif text-base font-bold text-gray-900">
                   {savedAddresses.length > 0 ? 'Add New Delivery Address' : 'Enter Delivery Address'}
-                </p>
+                </h3>
                 {savedAddresses.length > 0 && (
                   <button
                     type="button"
                     onClick={() => setAddressMode('selected')}
-                    className="text-gray-500 hover:text-gray-800 flex items-center gap-1 cursor-pointer"
+                    className="p-1 text-gray-400 hover:text-gray-700 rounded-full cursor-pointer"
                   >
-                    <X className="w-3.5 h-3.5" /> Cancel
+                    <X className="w-5 h-5" />
                   </button>
                 )}
               </div>
@@ -496,107 +442,120 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              {/* 1. Full Name * */}
-              <div>
-                <label className="block text-xs font-bold text-gray-800 mb-1">
-                  Full Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Receiver's full name"
-                  className="w-full p-2.5 rounded-xl border border-gray-300 focus:border-[#B38029] focus:ring-1 focus:ring-[#B38029] bg-white text-xs text-gray-900 outline-none"
-                />
-              </div>
-
-              {/* 2. Mobile Number * & 3. PIN Code * */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <form onSubmit={handleSaveAddress} className="space-y-3">
+                {/* 1. Full Name * */}
                 <div>
                   <label className="block text-xs font-bold text-gray-800 mb-1">
-                    Mobile Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    maxLength={10}
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
-                    placeholder="10-digit mobile number"
-                    className="w-full p-2.5 rounded-xl border border-gray-300 focus:border-[#B38029] focus:ring-1 focus:ring-[#B38029] bg-white text-xs text-gray-900 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-800 mb-1">
-                    PIN Code <span className="text-red-500">*</span>
+                    Full Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     required
-                    maxLength={6}
-                    value={formData.pincode}
-                    onChange={(e) => setFormData({ ...formData, pincode: e.target.value.replace(/\D/g, '') })}
-                    placeholder="6-digit postal PIN"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Receiver's full name"
                     className="w-full p-2.5 rounded-xl border border-gray-300 focus:border-[#B38029] focus:ring-1 focus:ring-[#B38029] bg-white text-xs text-gray-900 outline-none"
                   />
                 </div>
-              </div>
 
-              {/* 4. Delivery Address * */}
-              <div>
-                <label className="block text-xs font-bold text-gray-800 mb-1">
-                  Delivery Address <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  required
-                  rows={2}
-                  value={formData.addressLine}
-                  onChange={(e) => setFormData({ ...formData, addressLine: e.target.value })}
-                  placeholder="House / Flat No., Building, Street, Area, Landmark"
-                  className="w-full p-2.5 rounded-xl border border-gray-300 focus:border-[#B38029] focus:ring-1 focus:ring-[#B38029] bg-white text-xs text-gray-900 outline-none resize-none"
-                />
-              </div>
+                {/* 2. Mobile Number * & 3. PIN Code * */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-800 mb-1">
+                      Mobile Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      maxLength={10}
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
+                      placeholder="10-digit mobile"
+                      className="w-full p-2.5 rounded-xl border border-gray-300 focus:border-[#B38029] focus:ring-1 focus:ring-[#B38029] bg-white text-xs text-gray-900 outline-none"
+                    />
+                  </div>
 
-              {/* City & Email (Optional) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-800 mb-1">
+                      PIN Code <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={6}
+                      value={formData.pincode}
+                      onChange={(e) => setFormData({ ...formData, pincode: e.target.value.replace(/\D/g, '') })}
+                      placeholder="6-digit PIN"
+                      className="w-full p-2.5 rounded-xl border border-gray-300 focus:border-[#B38029] focus:ring-1 focus:ring-[#B38029] bg-white text-xs text-gray-900 outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* 4. Delivery Address * */}
                 <div>
                   <label className="block text-xs font-bold text-gray-800 mb-1">
-                    City / Town <span className="text-gray-400 font-normal">(Optional)</span>
+                    Delivery Address <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    placeholder="City or Town"
-                    className="w-full p-2.5 rounded-xl border border-gray-300 focus:border-[#B38029] focus:ring-1 focus:ring-[#B38029] bg-white text-xs text-gray-900 outline-none"
+                  <textarea
+                    required
+                    rows={2}
+                    value={formData.addressLine}
+                    onChange={(e) => setFormData({ ...formData, addressLine: e.target.value })}
+                    placeholder="House / Flat No., Street, Area, Landmark"
+                    className="w-full p-2.5 rounded-xl border border-gray-300 focus:border-[#B38029] focus:ring-1 focus:ring-[#B38029] bg-white text-xs text-gray-900 outline-none resize-none"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-gray-800 mb-1">
-                    Email Address <span className="text-gray-400 font-normal">(Optional)</span>
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="For order invoice"
-                    className="w-full p-2.5 rounded-xl border border-gray-300 focus:border-[#B38029] focus:ring-1 focus:ring-[#B38029] bg-white text-xs text-gray-900 outline-none"
-                  />
-                </div>
-              </div>
+                {/* City & Email (Optional) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-800 mb-1">
+                      City / Town <span className="text-gray-400 font-normal">(Optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      placeholder="City or Town"
+                      className="w-full p-2.5 rounded-xl border border-gray-300 focus:border-[#B38029] focus:ring-1 focus:ring-[#B38029] bg-white text-xs text-gray-900 outline-none"
+                    />
+                  </div>
 
-              <button
-                type="submit"
-                className="w-full bg-[#B38029] hover:bg-[#8C5E16] text-white py-3 rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm transition-colors cursor-pointer mt-1"
-              >
-                Save Delivery Address
-              </button>
-            </form>
-          )}
-        </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-800 mb-1">
+                      Email Address <span className="text-gray-400 font-normal">(Optional)</span>
+                    </label>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="For order invoice"
+                      className="w-full p-2.5 rounded-xl border border-gray-300 focus:border-[#B38029] focus:ring-1 focus:ring-[#B38029] bg-white text-xs text-gray-900 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2 flex items-center gap-3">
+                  {savedAddresses.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setAddressMode('selected')}
+                      className="flex-1 py-3 border border-gray-300 rounded-xl font-bold text-xs text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className="flex-1 bg-[#B38029] hover:bg-[#8C5E16] text-white py-3 rounded-xl font-bold text-xs uppercase tracking-wider shadow-md transition-colors cursor-pointer"
+                  >
+                    Save & Deliver Here
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* 3. PAYMENT METHOD CARD (Credit / Debit Card removed as requested) */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-2xs p-4 sm:p-5 space-y-3">

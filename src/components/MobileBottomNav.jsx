@@ -1,10 +1,12 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Grid, Heart, User } from 'lucide-react';
+import { Home, Grid, Heart, ShoppingBag, User } from 'lucide-react';
 import { useWishlist } from '../context/WishlistContext';
+import { useCart } from '../context/CartContext';
 
 export default function MobileBottomNav() {
   const { wishlistCount } = useWishlist();
+  const { cartCount, openCart } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -36,6 +38,14 @@ export default function MobileBottomNav() {
       icon: Grid,
       isActive: location.pathname === '/categories',
       onClick: () => goTo('/categories'),
+    },
+    {
+      id: 'cart',
+      label: 'Cart',
+      icon: ShoppingBag,
+      isActive: location.pathname === '/cart',
+      badge: cartCount > 0 ? cartCount : null,
+      onClick: () => openCart(),
     },
     {
       id: 'wishlist',

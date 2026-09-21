@@ -204,17 +204,17 @@ export function StoreDataProvider({ children }) {
     if (res.success) {
       setOrders((prev) => [res.data, ...prev]);
 
-      // Best-effort stock decrement per ordered item. Not transactional —
-      // fine at this store's scale, but two simultaneous orders for the last
-      // unit of an item could both succeed. A Postgres function with row
-      // locking would be needed to close that race completely.
-      for (const item of orderData.items || []) {
-        const product = products.find((p) => p.id === item.id);
-        if (product) {
-          const newStock = Math.max(0, product.stock - (item.quantity || 1));
-          updateProduct(item.id, { stock: newStock });
-        }
-      }
+      // Decrement in-memory stock for customer UI without invoking updateProductInDb -> ensureAdminAuthSession()
+      // which would hijack customer auth sessions.
+      setProducts((prev) =>
+        prev.map((p) => {
+          const orderedItem = (orderData.items || []).find((it) => it.id === p.id);
+          if (orderedItem) {
+            return { ...p, stock: Math.max(0, (p.stock || 0) - (orderedItem.quantity || 1)) };
+          }
+          return p;
+        })
+      );
     }
     return res;
   };

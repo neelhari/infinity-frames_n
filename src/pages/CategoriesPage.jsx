@@ -133,7 +133,7 @@ export default function CategoriesPage() {
             Showing <strong className="text-gray-900">{filteredProducts.length}</strong> items
             {selectedCategory !== 'all' && (
               <span className="ml-1 text-[#B38029] font-medium">
-                in "{quickCategories.find((c) => c.id === selectedCategory)?.label || selectedCategory}"
+                in "{dynamicCategories.find((c) => c.id === selectedCategory)?.label || selectedCategory}"
               </span>
             )}
           </span>

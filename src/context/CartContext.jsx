@@ -43,10 +43,32 @@ export const CartProvider = ({ children }) => {
     }
   }, [cartItems]);
 
-  const addToCart = (product, quantity = 1, selectedColor = null, selectedSize = null) => {
-    setCartItems(prev => {
-      const itemKey = `${product.id}-${selectedColor || 'default'}-${selectedSize || 'default'}`;
-      const existingIndex = prev.findIndex(item => item.itemKey === itemKey);
+  const openCart = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
+
+  const addToCart = (product, quantity = 1, arg3 = null, arg4 = null) => {
+    let selectedColor = null;
+    let selectedSize = null;
+    let customName = product.customName || null;
+    let customPhoto = product.customPhoto || null;
+
+    if (arg3 && typeof arg3 === 'object') {
+      selectedColor = arg3.color || arg3.selectedColor || null;
+      selectedSize = arg3.size || arg3.selectedSize || null;
+      if (arg3.customName) customName = arg3.customName;
+      if (arg3.customPhoto) customPhoto = arg3.customPhoto;
+    } else {
+      selectedColor = arg3 || product.selectedColor || null;
+      selectedSize = arg4 || product.selectedSize || null;
+    }
+
+    setCartItems((prev) => {
+      // Create a specific key including variants and customizations so distinct gifts don't collide
+      const customSnippet = (customName || '').trim().toLowerCase().slice(0, 20);
+      const photoSnippet = customPhoto ? 'hasphoto' : 'nophoto';
+      const itemKey = `${product.id}-${selectedColor || 'default'}-${selectedSize || 'default'}-${customSnippet}-${photoSnippet}`;
+
+      const existingIndex = prev.findIndex((item) => item.itemKey === itemKey || (item.id === product.id && item.itemKey === itemKey));
 
       if (existingIndex > -1) {
         const updated = [...prev];
@@ -60,8 +82,10 @@ export const CartProvider = ({ children }) => {
             itemKey,
             quantity,
             selectedColor,
-            selectedSize
-          }
+            selectedSize,
+            customName,
+            customPhoto,
+          },
         ];
       }
     });
@@ -69,16 +93,22 @@ export const CartProvider = ({ children }) => {
     showToast(`Added "${product.name}" to your cart!`);
   };
 
-  const removeFromCart = (itemKey) => {
-    setCartItems(prev => prev.filter(item => item.itemKey !== itemKey));
+  const removeFromCart = (keyOrId) => {
+    setCartItems((prev) => prev.filter((item) => item.itemKey !== keyOrId && item.id !== keyOrId));
   };
 
-  const updateQuantity = (itemKey, newQuantity) => {
+  const updateQuantity = (keyOrId, newQuantity) => {
     if (newQuantity <= 0) {
-      removeFromCart(itemKey);
+      removeFromCart(keyOrId);
       return;
     }
-    setCartItems(prev => prev.map(item => item.itemKey === itemKey ? { ...item, quantity: newQuantity } : item));
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.itemKey === keyOrId || item.id === keyOrId
+          ? { ...item, quantity: newQuantity }
+          : item
+      )
+    );
   };
 
   const clearCart = () => {
@@ -136,11 +166,14 @@ export const CartProvider = ({ children }) => {
       cartItems,
       isCartOpen,
       setIsCartOpen,
+      openCart,
+      closeCart,
       addToCart,
       removeFromCart,
       updateQuantity,
       clearCart,
       totalItemsCount,
+      cartCount: totalItemsCount,
       subtotal,
       freeShippingThreshold,
       shippingCost,
@@ -150,6 +183,7 @@ export const CartProvider = ({ children }) => {
       showToast,
       appliedCoupon: appliedCoupon && couponMinOrderMet ? appliedCoupon : null,
       discountAmount,
+      discount: discountAmount,
       applyCoupon,
       removeCoupon,
     }}>

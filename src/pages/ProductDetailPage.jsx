@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Heart, Share2, Star, ShieldCheck, Plus, Minus,
-  Camera, Upload, Check, ShoppingBag, Zap, Loader2, MessageCircle, X
+  Camera, Upload, Check, ShoppingBag, Zap, Loader2, MessageCircle, X,
+  Maximize2, ZoomIn, ZoomOut
 } from 'lucide-react';
 import { useStoreData } from '../context/StoreDataContext';
 import { uploadToCloudinary } from '../lib/cloudinary';
@@ -29,6 +30,40 @@ export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
+  // Variant selections
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(null);
+
+  // Touch swipe & Zoom modal states (Myntra-style)
+  const [isZoomOpen, setIsZoomOpen] = useState(false);
+  const [zoomScale, setZoomScale] = useState(1.5);
+  const galleryTouchStartX = useRef(0);
+  const galleryTouchEndX = useRef(0);
+
+  const images = useMemo(() => {
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+      return product.images;
+    }
+    return [product.image || '/placeholder.png'];
+  }, [product]);
+
+  // Synchronize variants when product changes
+  useEffect(() => {
+    if (product.sizes && product.sizes.length > 0) {
+      setSelectedSize(product.sizes[0]);
+    } else {
+      setSelectedSize(null);
+    }
+
+    if (product.colors && product.colors.length > 0) {
+      setSelectedColor(product.colors[0]);
+    } else if (product.frameColors && product.frameColors.length > 0) {
+      setSelectedColor(product.frameColors[0]);
+    } else {
+      setSelectedColor(null);
+    }
+  }, [product]);
+
   // Clean Customer Personalization State
   const [customName, setCustomName] = useState('');
   const [customPhotoFile, setCustomPhotoFile] = useState(null);
@@ -40,6 +75,34 @@ export default function ProductDetailPage() {
   const inWishlist = isInWishlist(product.id);
   const isCustomizable = product.customizable !== false;
   const customType = product.customType || 'photo-text';
+
+  // Gallery Touch Swipe Handlers
+  const handleGalleryTouchStart = (e) => {
+    galleryTouchStartX.current = e.targetTouches[0].clientX;
+    galleryTouchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleGalleryTouchMove = (e) => {
+    galleryTouchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleGalleryTouchEnd = () => {
+    const delta = galleryTouchStartX.current - galleryTouchEndX.current;
+    if (delta > 40 && images.length > 1) {
+      setSelectedImage((prev) => (prev + 1) % images.length);
+    } else if (delta < -40 && images.length > 1) {
+      setSelectedImage((prev) => (prev - 1 + images.length) % images.length);
+    }
+  };
+
+  // Safe Back Navigation
+  const handleBack = () => {
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate('/shop');
+    }
+  };
 
   // Handle customer image upload
   const handlePhotoUpload = async (e) => {
@@ -73,11 +136,13 @@ export default function ProductDetailPage() {
     ...product,
     customName: customName.trim() || null,
     customPhoto: customPhotoUrl || (customPhotoPreview && customPhotoPreview.startsWith('http') ? customPhotoPreview : null),
+    selectedSize: selectedSize || null,
+    selectedColor: selectedColor || null,
   });
 
   const handleAddToCart = () => {
     if (uploadingPhoto) return;
-    addToCart(getCustomizedItem(), quantity);
+    addToCart(getCustomizedItem(), quantity, selectedColor, selectedSize);
     setAddedToast(true);
     setTimeout(() => {
       setAddedToast(false);
@@ -86,7 +151,7 @@ export default function ProductDetailPage() {
 
   const handleBuyNow = () => {
     if (uploadingPhoto) return;
-    addToCart(getCustomizedItem(), quantity);
+    addToCart(getCustomizedItem(), quantity, selectedColor, selectedSize);
     if (!isAuthenticated) {
       navigate('/login?redirect=/checkout');
     } else {
@@ -102,28 +167,43 @@ export default function ProductDetailPage() {
     );
   }
 
+  const currentImageSrc = images[selectedImage] || product.image || '/placeholder.png';
+
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-28 font-sans">
       <div className="max-w-xl mx-auto">
-        {/* 1. Main Photo Gallery */}
-        <div className="relative w-full aspect-square bg-gray-100 overflow-hidden shadow-xs">
+        {/* 1. Main Photo Gallery with Touch Swipe & Zoom Button */}
+        <div
+          onTouchStart={handleGalleryTouchStart}
+          onTouchMove={handleGalleryTouchMove}
+          onTouchEnd={handleGalleryTouchEnd}
+          className="relative w-full aspect-square bg-gray-100 overflow-hidden shadow-xs select-none"
+        >
           <img
-            src={(product.images && product.images[selectedImage]) || product.image || '/placeholder.png'}
+            src={currentImageSrc}
             alt={product.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover cursor-zoom-in"
+            onClick={() => setIsZoomOpen(true)}
           />
 
-          {/* Floating Back Button */}
+          {/* Floating Back Button with Smart Fallback */}
           <button
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             className="absolute top-3 left-3 z-10 w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-gray-800 hover:bg-white transition-all cursor-pointer"
             title="Go Back"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
 
-          {/* Floating Wishlist & Share buttons */}
+          {/* Floating Action Buttons: Zoom, Wishlist & Share */}
           <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+            <button
+              onClick={() => setIsZoomOpen(true)}
+              className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-gray-800 hover:bg-white transition-all cursor-pointer"
+              title="Tap to Zoom (Inspect 3D Details)"
+            >
+              <Maximize2 className="w-4 h-4 text-gray-700" />
+            </button>
             <button
               onClick={() => toggleWishlist(product)}
               className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-gray-800 hover:bg-white transition-all cursor-pointer"
@@ -226,6 +306,59 @@ export default function ProductDetailPage() {
             </p>
           )}
         </div>
+
+        {/* Variant Selectors (Sizes & Styles) */}
+        {((product.sizes && product.sizes.length > 0) || (product.colors && product.colors.length > 0) || (product.frameColors && product.frameColors.length > 0)) && (
+          <div className="p-4 sm:p-5 bg-white border-b border-gray-100 space-y-3.5">
+            {product.sizes && product.sizes.length > 0 && (
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                  Select Size
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map((s) => (
+                    <button
+                      type="button"
+                      key={s}
+                      onClick={() => setSelectedSize(s)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        selectedSize === s
+                          ? 'bg-[#B38029] text-white shadow-xs'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {((product.colors && product.colors.length > 0) || (product.frameColors && product.frameColors.length > 0)) && (
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                  Select Style / Light Glow
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {(product.colors && product.colors.length > 0 ? product.colors : product.frameColors).map((c) => (
+                    <button
+                      type="button"
+                      key={c}
+                      onClick={() => setSelectedColor(c)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        selectedColor === c
+                          ? 'bg-[#B38029] text-white shadow-xs'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* 3. Clean Personalization Section (If enabled on this product) */}
         {isCustomizable && (
@@ -367,6 +500,79 @@ export default function ProductDetailPage() {
             <Check className="w-4 h-4 text-emerald-400" />
             <span>Added to Cart!</span>
           </div>
+        </div>
+      )}
+
+      {/* Full-Screen Myntra-Style Zoom Modal */}
+      {isZoomOpen && (
+        <div className="fixed inset-0 z-50 bg-black/95 flex flex-col justify-between p-4 backdrop-blur-md animate-fadeIn">
+          {/* Top Bar */}
+          <div className="flex items-center justify-between text-white max-w-4xl mx-auto w-full">
+            <span className="text-xs font-bold truncate max-w-[200px] sm:max-w-none">
+              {product.name} ({selectedImage + 1}/{images.length})
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setZoomScale((prev) => Math.min(3, prev + 0.4))}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white cursor-pointer"
+                title="Zoom In"
+              >
+                <ZoomIn className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setZoomScale((prev) => Math.max(1, prev - 0.4))}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white cursor-pointer"
+                title="Zoom Out"
+              >
+                <ZoomOut className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsZoomOpen(false);
+                  setZoomScale(1.5);
+                }}
+                className="p-2 rounded-full bg-white/20 hover:bg-white/30 text-white cursor-pointer"
+                title="Close Zoom View"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Interactive Zoomable View with Touch Swipe */}
+          <div
+            onTouchStart={handleGalleryTouchStart}
+            onTouchMove={handleGalleryTouchMove}
+            onTouchEnd={handleGalleryTouchEnd}
+            className="flex-1 flex items-center justify-center overflow-hidden my-3 select-none"
+          >
+            <img
+              src={currentImageSrc}
+              alt="3D Print Layer Detail"
+              style={{ transform: `scale(${zoomScale})` }}
+              className="max-h-[72vh] max-w-full object-contain transition-transform duration-200 cursor-grab"
+            />
+          </div>
+
+          {/* Bottom Thumbnails */}
+          {images.length > 1 && (
+            <div className="flex items-center justify-center gap-2 overflow-x-auto py-2 max-w-xl mx-auto w-full">
+              {images.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedImage(idx)}
+                  className={`w-12 h-12 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
+                    selectedImage === idx ? 'border-[#D4AF37]' : 'border-transparent opacity-60'
+                  }`}
+                >
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
