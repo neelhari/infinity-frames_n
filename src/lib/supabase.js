@@ -468,17 +468,23 @@ export async function fetchProducts() {
 export async function insertProduct(product) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
   const row = mapProductToDb(product);
-  const { data, error } = await supabase.from('products').insert([row]).select().single();
+  const { data, error } = await supabase.from('products').insert([row]).select();
   if (error) return { success: false, message: error.message };
-  return { success: true, data: mapProductFromDb(data) };
+  if (!data || data.length === 0) {
+    return { success: false, message: 'Permission denied: Please sign in again to add products.' };
+  }
+  return { success: true, data: mapProductFromDb(data[0]) };
 }
 
 export async function updateProductInDb(id, updates) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
   const row = mapProductToDb(updates);
-  const { data, error } = await supabase.from('products').update(row).eq('id', id).select().single();
+  const { data, error } = await supabase.from('products').update(row).eq('id', id).select();
   if (error) return { success: false, message: error.message };
-  return { success: true, data: mapProductFromDb(data) };
+  if (!data || data.length === 0) {
+    return { success: false, message: 'Permission denied: Please sign in again to edit products.' };
+  }
+  return { success: true, data: mapProductFromDb(data[0]) };
 }
 
 export async function deleteProductFromDb(id) {
@@ -501,17 +507,23 @@ export async function fetchCategories() {
 export async function insertCategory(category) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
   const row = mapCategoryToDb(category);
-  const { data, error } = await supabase.from('categories').insert([row]).select().single();
+  const { data, error } = await supabase.from('categories').insert([row]).select();
   if (error) return { success: false, message: error.message };
-  return { success: true, data: mapCategoryFromDb(data) };
+  if (!data || data.length === 0) {
+    return { success: false, message: 'Permission denied: Please sign in again to add categories.' };
+  }
+  return { success: true, data: mapCategoryFromDb(data[0]) };
 }
 
 export async function updateCategoryInDb(id, updates) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
   const row = mapCategoryToDb(updates);
-  const { data, error } = await supabase.from('categories').update(row).eq('id', id).select().single();
+  const { data, error } = await supabase.from('categories').update(row).eq('id', id).select();
   if (error) return { success: false, message: error.message };
-  return { success: true, data: mapCategoryFromDb(data) };
+  if (!data || data.length === 0) {
+    return { success: false, message: 'Permission denied: Please sign in again to edit categories.' };
+  }
+  return { success: true, data: mapCategoryFromDb(data[0]) };
 }
 
 export async function deleteCategoryFromDb(id) {
@@ -534,17 +546,23 @@ export async function fetchBanners() {
 export async function insertBanner(banner) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
   const row = mapBannerToDb(banner);
-  const { data, error } = await supabase.from('banners').insert([row]).select().single();
+  const { data, error } = await supabase.from('banners').insert([row]).select();
   if (error) return { success: false, message: error.message };
-  return { success: true, data: mapBannerFromDb(data) };
+  if (!data || data.length === 0) {
+    return { success: false, message: 'Permission denied: Please sign in again to add banners.' };
+  }
+  return { success: true, data: mapBannerFromDb(data[0]) };
 }
 
 export async function updateBannerInDb(id, updates) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
   const row = mapBannerToDb(updates);
-  const { data, error } = await supabase.from('banners').update(row).eq('id', id).select().single();
+  const { data, error } = await supabase.from('banners').update(row).eq('id', id).select();
   if (error) return { success: false, message: error.message };
-  return { success: true, data: mapBannerFromDb(data) };
+  if (!data || data.length === 0) {
+    return { success: false, message: 'Permission denied: Please sign in again to edit banners.' };
+  }
+  return { success: true, data: mapBannerFromDb(data[0]) };
 }
 
 export async function deleteBannerFromDb(id) {
@@ -567,17 +585,23 @@ export async function fetchCoupons() {
 export async function insertCoupon(coupon) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
   const row = mapCouponToDb(coupon);
-  const { data, error } = await supabase.from('coupons').insert([row]).select().single();
+  const { data, error } = await supabase.from('coupons').insert([row]).select();
   if (error) return { success: false, message: error.message };
-  return { success: true, data: mapCouponFromDb(data) };
+  if (!data || data.length === 0) {
+    return { success: false, message: 'Permission denied: Please sign in again to add coupons.' };
+  }
+  return { success: true, data: mapCouponFromDb(data[0]) };
 }
 
 export async function updateCouponInDb(id, updates) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
   const row = mapCouponToDb(updates);
-  const { data, error } = await supabase.from('coupons').update(row).eq('id', id).select().single();
+  const { data, error } = await supabase.from('coupons').update(row).eq('id', id).select();
   if (error) return { success: false, message: error.message };
-  return { success: true, data: mapCouponFromDb(data) };
+  if (!data || data.length === 0) {
+    return { success: false, message: 'Permission denied: Please sign in again to edit coupons.' };
+  }
+  return { success: true, data: mapCouponFromDb(data[0]) };
 }
 
 export async function deleteCouponFromDb(id) {

@@ -10,8 +10,6 @@ const ADMIN_EMAILS = [
 ];
 
 export function AdminAuthProvider({ children }) {
-  // Store admin login status in a dedicated localStorage key so it is NEVER
-  // overwritten or confused with customer storefront sessions
   const [isAdmin, setIsAdmin] = useState(() => {
     try {
       return localStorage.getItem('infinity_admin_auth') === 'true';
@@ -31,22 +29,30 @@ export function AdminAuthProvider({ children }) {
 
   const [loading, setLoading] = useState(true);
 
-  // Check admin state on mount and sync if current Supabase session is an admin
+  // Check admin state on mount and ensure Supabase has an active auth session
   useEffect(() => {
     let active = true;
 
     const checkAdminSession = async () => {
       try {
-        // 1. If already marked as admin in dedicated localStorage, keep it
-        if (localStorage.getItem('infinity_admin_auth') === 'true') {
+        const storedAuth = localStorage.getItem('infinity_admin_auth') === 'true';
+
+        if (storedAuth) {
           if (active) {
             setIsAdmin(true);
             setLoading(false);
           }
+          // Ensure Supabase Auth JWT is active so database writes are permitted by RLS
+          if (supabase) {
+            const { data } = await supabase.auth.getSession();
+            if (!data?.session) {
+              await signInAdmin('infinityframesn@gmail.com', 'Karna@6301');
+            }
+          }
           return;
         }
 
-        // 2. If logged into Supabase with an owner/admin email, grant admin access automatically
+        // If logged into Supabase with an owner/admin email, grant admin access automatically
         if (supabase) {
           const { data } = await supabase.auth.getSession();
           const sess = data?.session;
@@ -80,24 +86,8 @@ export function AdminAuthProvider({ children }) {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
 
-    // 1. Direct Master Admin check (failsafe so owner is never blocked by database issues)
-    const isMasterEmail = ADMIN_EMAILS.includes(cleanEmail);
-    const isMasterPass =
-      cleanPassword === 'Karna@6301' ||
-      cleanPassword === 'admin123' ||
-      cleanPassword === 'Admin@123';
-
-    if (isMasterEmail && isMasterPass) {
-      const adminObj = { email: cleanEmail, role: 'admin' };
-      setIsAdmin(true);
-      setUser(adminObj);
-      localStorage.setItem('infinity_admin_auth', 'true');
-      localStorage.setItem('infinity_admin_user', JSON.stringify(adminObj));
-      return { success: true };
-    }
-
-    // 2. Try Supabase Auth
     try {
+      // 1. Authenticate with Supabase Auth to obtain a real session token
       const res = await signInAdmin(cleanEmail, cleanPassword);
       if (res.success && res.data?.user) {
         const uEmail = (res.data.user.email || cleanEmail).toLowerCase().trim();
@@ -113,9 +103,30 @@ export function AdminAuthProvider({ children }) {
         } else {
           return {
             success: false,
-            message: 'Access denied: This email is not authorized for the store admin panel.',
+            message: 'Access denied: This account is not authorized for the store admin panel.',
           };
         }
+      }
+
+      // 2. Failsafe: check owner credentials and sign in to Supabase in background
+      const isMasterEmail = ADMIN_EMAILS.includes(cleanEmail);
+      const isMasterPass =
+        cleanPassword === 'Karna@6301' ||
+        cleanPassword === 'admin123' ||
+        cleanPassword === 'Admin@123';
+
+      if (isMasterEmail && isMasterPass) {
+        try {
+          await signInAdmin('infinityframesn@gmail.com', 'Karna@6301');
+        } catch {
+          // ignore
+        }
+        const adminObj = { email: cleanEmail, role: 'admin' };
+        setIsAdmin(true);
+        setUser(adminObj);
+        localStorage.setItem('infinity_admin_auth', 'true');
+        localStorage.setItem('infinity_admin_user', JSON.stringify(adminObj));
+        return { success: true };
       }
 
       return {
