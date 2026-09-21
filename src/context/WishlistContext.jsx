@@ -37,13 +37,23 @@ export const WishlistProvider = ({ children }) => {
     return wishlistItems.some(item => item.id === productId);
   };
 
+  const openWishlist = () => setIsWishlistOpen(true);
+  const closeWishlist = () => setIsWishlistOpen(false);
+
+  const removeFromWishlist = (productId) => {
+    setWishlistItems((prev) => prev.filter((item) => item.id !== productId));
+  };
+
   return (
     <WishlistContext.Provider value={{
       wishlistItems,
       toggleWishlist,
+      removeFromWishlist,
       isInWishlist,
       isWishlistOpen,
       setIsWishlistOpen,
+      openWishlist,
+      closeWishlist,
       wishlistCount: wishlistItems.length
     }}>
       {children}

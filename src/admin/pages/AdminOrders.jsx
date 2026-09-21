@@ -90,7 +90,9 @@ export default function AdminOrders() {
                     <div className="font-bold text-gray-900">{ord.customerName}</div>
                     <div className="text-[10px] text-gray-500">{ord.customerPhone} • {ord.address}</div>
                   </td>
-                  <td className="p-4 text-gray-500">{ord.date}</td>
+                  <td className="p-4 text-gray-500 font-medium">
+                    {ord.createdDate || (ord.createdAt ? ord.createdAt.split('T')[0] : 'Recent')}
+                  </td>
                   <td className="p-4 font-extrabold text-gray-900 text-sm">₹{ord.totalAmount.toLocaleString('en-IN')}</td>
                   <td className="p-4">
                     <div className="flex flex-col gap-1 items-start">
@@ -157,7 +159,9 @@ export default function AdminOrders() {
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div>
                 <h3 className="font-serif text-lg font-bold text-[#1A1A1A]">Order Details ({selectedOrder.id})</h3>
-                <p className="text-[11px] text-gray-500">Placed on {selectedOrder.date}</p>
+                <p className="text-[11px] text-gray-500">
+                  Placed on {selectedOrder.createdDate || (selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleDateString('en-IN') : 'Recent')}
+                </p>
               </div>
               <button onClick={() => setSelectedOrder(null)} className="font-bold text-gray-400 hover:text-gray-700 text-sm cursor-pointer">✕</button>
             </div>

@@ -135,7 +135,7 @@ export default function ProductDetailPage() {
   const getCustomizedItem = () => ({
     ...product,
     customName: customName.trim() || null,
-    customPhoto: customPhotoUrl || (customPhotoPreview && customPhotoPreview.startsWith('http') ? customPhotoPreview : null),
+    customPhoto: customPhotoUrl || customPhotoPreview || null,
     selectedSize: selectedSize || null,
     selectedColor: selectedColor || null,
   });

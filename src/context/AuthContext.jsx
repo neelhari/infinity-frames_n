@@ -41,12 +41,25 @@ export function AuthProvider({ children }) {
             .eq('id', session.user.id)
             .maybeSingle();
 
+          let existingAddresses = [];
+          try {
+            const saved = localStorage.getItem('infinity_user');
+            const parsed = saved ? JSON.parse(saved) : null;
+            if (parsed?.addresses && Array.isArray(parsed.addresses)) {
+              existingAddresses = parsed.addresses;
+            }
+          } catch {}
+
+          if (profile?.addresses && Array.isArray(profile.addresses) && profile.addresses.length > 0) {
+            existingAddresses = profile.addresses;
+          }
+
           const hydrated = {
             id: session.user.id,
             name: profile?.full_name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
             email: session.user.email,
             phone: profile?.phone || session.user.user_metadata?.phone || '',
-            addresses: [],
+            addresses: existingAddresses,
           };
           setUser(hydrated);
         } catch (e) {
@@ -113,13 +126,22 @@ export function AuthProvider({ children }) {
       return { success: false, error: msg || 'Login failed. Please check your credentials.' };
     }
 
+    let existingAddresses = [];
+    try {
+      const saved = localStorage.getItem('infinity_user');
+      const parsed = saved ? JSON.parse(saved) : null;
+      if (parsed?.addresses && Array.isArray(parsed.addresses)) {
+        existingAddresses = parsed.addresses;
+      }
+    } catch {}
+
     const u = supaRes.data.user;
     const loggedUser = {
       id: u.id,
       name: u.user_metadata?.full_name || cleanEmail.split('@')[0],
       email: u.email,
       phone: u.user_metadata?.phone || '',
-      addresses: [],
+      addresses: existingAddresses,
     };
     setUser(loggedUser);
     return { success: true, user: loggedUser };
@@ -209,7 +231,22 @@ export function AuthProvider({ children }) {
     return createdAddr;
   };
 
-  // 7. Logout
+  // 7. Remove Address
+  const removeAddress = (addressId) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const updatedAddresses = (prev.addresses || []).filter((a) => a.id !== addressId);
+      const updated = { ...prev, addresses: updatedAddresses };
+      try {
+        localStorage.setItem('infinity_user', JSON.stringify(updated));
+      } catch (e) {
+        console.warn('LocalStorage save error:', e);
+      }
+      return updated;
+    });
+  };
+
+  // 8. Logout
   const logout = async () => {
     setUser(null);
     localStorage.removeItem('infinity_user');
@@ -233,6 +270,7 @@ export function AuthProvider({ children }) {
         updatePassword,
         updateProfile,
         addAddress,
+        removeAddress,
         logout,
       }}
     >

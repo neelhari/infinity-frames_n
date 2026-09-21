@@ -28,7 +28,7 @@ import { BRAND, waLink } from '../config/brand';
 
 export default function AccountPage() {
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout, openLoginModal, addAddress } = useAuth();
+  const { user, isAuthenticated, logout, openLoginModal, addAddress, removeAddress } = useAuth();
   const { wishlistItems } = useWishlist();
   const { cartItems } = useCart();
 
@@ -281,41 +281,57 @@ export default function AccountPage() {
             ) : (
               /* Real Orders List (when present in DB) */
               <div className="space-y-3">
-                {dbOrders.map((order, idx) => (
-                  <div
-                    key={order.id || idx}
-                    className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3 shadow-xs"
-                  >
-                    <div className="flex items-center justify-between border-b border-gray-100 pb-2.5">
-                      <span className="font-mono text-xs font-bold text-gray-900">#{order.id}</span>
-                      <span className="font-serif font-bold text-sm text-gray-900">
-                        ₹{(order.total_amount || 0).toLocaleString('en-IN')}
-                      </span>
-                    </div>
+                {dbOrders.map((order, idx) => {
+                  const orderTotal = order.totalAmount ?? order.total_amount ?? 0;
+                  const firstItem = order.items?.[0] || {};
+                  const itemName = firstItem.name || firstItem.product_name || 'Custom 3D Product';
+                  const extraCount = (order.items?.length || 1) - 1;
+                  const orderDate = order.createdAt || order.createdDate || order.created_at;
 
-                    <div className="text-xs text-gray-600 space-y-1">
-                      <p className="font-semibold text-gray-800">{order.items?.[0]?.product_name || 'Custom 3D Product'}</p>
-                      <p className="text-gray-400 text-[11px]">
-                        Placed on {new Date(order.created_at || Date.now()).toLocaleDateString('en-IN')}
-                      </p>
-                    </div>
+                  return (
+                    <div
+                      key={order.id || idx}
+                      className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3 shadow-xs"
+                    >
+                      <div className="flex items-center justify-between border-b border-gray-100 pb-2.5">
+                        <span className="font-mono text-xs font-bold text-gray-900">#{order.id}</span>
+                        <span className="font-serif font-bold text-sm text-gray-900">
+                          ₹{orderTotal.toLocaleString('en-IN')}
+                        </span>
+                      </div>
 
-                    <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
-                      <span className="text-xs font-bold uppercase text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full">
-                        {order.status || 'Received'}
-                      </span>
-                      <a
-                        href={waLink(`Hi Naresh, regarding my order #${order.id}. Could you share an update?`)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs font-bold text-[#25D366] flex items-center gap-1"
-                      >
-                        <MessageCircle className="w-3.5 h-3.5" />
-                        <span>WhatsApp Update</span>
-                      </a>
+                      <div className="text-xs text-gray-600 space-y-1">
+                        <p className="font-semibold text-gray-800">
+                          {itemName}
+                          {extraCount > 0 && <span className="text-gray-500 font-normal"> + {extraCount} more</span>}
+                          {firstItem.customName && <span className="text-[#B38029] font-medium block text-[11px] mt-0.5">&ldquo;{firstItem.customName}&rdquo;</span>}
+                        </p>
+                        <p className="text-gray-400 text-[11px]">
+                          Placed on {new Date(orderDate || Date.now()).toLocaleDateString('en-IN', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                          })}
+                        </p>
+                      </div>
+
+                      <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full">
+                          {order.status || 'Received'}
+                        </span>
+                        <a
+                          href={waLink(`Hi Naresh, regarding my order #${order.id}. Could you share an update?`)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs font-bold text-[#25D366] flex items-center gap-1"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          <span>WhatsApp Update</span>
+                        </a>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -341,10 +357,24 @@ export default function AccountPage() {
             {user?.addresses && user.addresses.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {user.addresses.map((addr, idx) => (
-                  <div key={idx} className="bg-white rounded-2xl p-4 border border-gray-200 shadow-xs space-y-1 text-xs">
-                    <span className="text-[10px] font-bold text-[#B38029] uppercase bg-[#FAF5EB] px-2 py-0.5 rounded">
-                      {addr.type || 'Home'}
-                    </span>
+                  <div key={addr.id || idx} className="bg-white rounded-2xl p-4 border border-gray-200 shadow-xs space-y-1 text-xs relative group">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-[#B38029] uppercase bg-[#FAF5EB] px-2 py-0.5 rounded">
+                        {addr.type || 'Home'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm(`Delete address for ${addr.name}?`)) {
+                            removeAddress(addr.id);
+                          }
+                        }}
+                        className="p-1 text-gray-300 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+                        title="Delete Address"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                     <h4 className="font-bold text-gray-900 pt-1">{addr.name}</h4>
                     <p className="text-gray-600 leading-relaxed">
                       {addr.addressLine}, {addr.city} - {addr.pincode}
