@@ -30,8 +30,13 @@ export default function CheckoutPage() {
     }
   }, [cartItems, navigate]);
 
-  // Saved addresses list from user profile
-  const savedAddresses = user?.addresses || [];
+  // Saved addresses list from user profile (filtering out old legacy dummy hardcoded address)
+  const savedAddresses = (user?.addresses || []).filter(
+    (addr) => !(
+      (addr.addressLine === 'Main Road' || addr.street === 'Main Road') &&
+      (addr.city === 'Drakshramam' || addr.pincode === '533262')
+    )
+  );
 
   // Address View Mode: 'selected' (viewing chosen), 'list' (picking from saved), 'add' (adding new)
   const [addressMode, setAddressMode] = useState(() => (savedAddresses.length > 0 ? 'selected' : 'add'));

@@ -41,8 +41,8 @@ export default function AccountPage() {
     name: user?.name || '',
     phone: user?.phone || '',
     addressLine: '',
-    city: 'Drakshramam',
-    state: 'Andhra Pradesh',
+    city: '',
+    state: '',
     pincode: '',
     type: 'Home',
   });
