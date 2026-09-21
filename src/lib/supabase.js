@@ -41,8 +41,47 @@ export async function isUserAdmin(userId) {
   return !!data;
 }
 
+function sanitizeAuthError(error, context = 'auth') {
+  if (!error) return 'An unexpected error occurred. Please try again.';
+  
+  // Log full raw technical details to browser console for developers
+  console.error(`[Supabase Auth ${context} error]:`, error);
+
+  const msg = (error.message || '').toLowerCase();
+
+  if (msg.includes('already') || msg.includes('registered') || msg.includes('exists')) {
+    return 'An account with this email address already exists. Please Log In.';
+  }
+
+  if (msg.includes('rate limit') || error.code === 'over_email_send_rate_limit' || error.status === 429) {
+    return 'Too many attempts. Please wait a moment and try again.';
+  }
+
+  if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
+    return 'Invalid email or password. Please verify your credentials or create an account.';
+  }
+
+  if (msg.includes('email not confirmed')) {
+    return 'Please check your email inbox to confirm your email, or reset your password.';
+  }
+
+  if (msg.includes('password') && (msg.includes('short') || msg.includes('least 6') || msg.includes('weak'))) {
+    return 'Password must be at least 6 characters long.';
+  }
+
+  if (msg.includes('api key') || msg.includes('jwt') || msg.includes('unauthorized') || msg.includes('not initialized')) {
+    return 'Unable to connect to account service. Please refresh the page and try again.';
+  }
+
+  if (msg.includes('network') || msg.includes('fetch') || msg.includes('failed to fetch')) {
+    return 'Network connection issue. Please check your internet connection.';
+  }
+
+  return 'Unable to complete your request. Please try again in a moment.';
+}
+
 export async function signUpCustomer({ email, password, name, phone }) {
-  if (!supabase) return { success: false, message: 'Supabase client not initialized' };
+  if (!supabase) return { success: false, message: 'Account service unavailable. Please refresh the page.' };
   try {
     const cleanEmail = email.trim().toLowerCase();
     const { data, error } = await supabase.auth.signUp({
@@ -56,18 +95,7 @@ export async function signUpCustomer({ email, password, name, phone }) {
       },
     });
     if (error) {
-      if (
-        error.message &&
-        (error.message.toLowerCase().includes('already') ||
-         error.message.toLowerCase().includes('registered') ||
-         error.message.toLowerCase().includes('exists'))
-      ) {
-        return {
-          success: false,
-          message: 'An account with this email address already exists. Please Log In.',
-        };
-      }
-      return { success: false, message: error.message };
+      return { success: false, message: sanitizeAuthError(error, 'signUp') };
     }
 
     // Safely upsert profile row if table exists
@@ -89,31 +117,21 @@ export async function signUpCustomer({ email, password, name, phone }) {
 
     return { success: true, data };
   } catch (err) {
-    return { success: false, message: err.message };
+    return { success: false, message: sanitizeAuthError(err, 'signUp') };
   }
 }
 
 export async function signInCustomer({ email, password }) {
-  if (!supabase) return { success: false, message: 'Supabase client not initialized' };
+  if (!supabase) return { success: false, message: 'Account service unavailable. Please refresh the page.' };
   try {
     const cleanEmail = email.trim().toLowerCase();
     const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
     if (error) {
-      if (
-        error.message &&
-        (error.message.toLowerCase().includes('invalid login credentials') ||
-         error.message.toLowerCase().includes('invalid credentials'))
-      ) {
-        return {
-          success: false,
-          message: 'Invalid email or password. Please verify your credentials or create an account.',
-        };
-      }
-      return { success: false, message: error.message };
+      return { success: false, message: sanitizeAuthError(error, 'signIn') };
     }
     return { success: true, data };
   } catch (err) {
-    return { success: false, message: err.message };
+    return { success: false, message: sanitizeAuthError(err, 'signIn') };
   }
 }
 

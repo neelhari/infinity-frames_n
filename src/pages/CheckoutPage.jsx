@@ -150,9 +150,9 @@ export default function CheckoutPage() {
 
       clearCart();
       setPlacingOrder(false);
-      // Open WhatsApp directly for fulfillment & redirect to success
+      // Open WhatsApp directly for fulfillment & redirect to success with order details
       window.open(waLink(whatsappMessage), '_blank');
-      navigate('/order-success');
+      navigate('/order-success', { state: { orderData: finalPayload } });
     };
 
     // If online payment (UPI, Cards, NetBanking), invoke Razorpay Checkout

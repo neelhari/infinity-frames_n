@@ -70,7 +70,7 @@ function AppContent() {
   const [showSplash, setShowSplash] = useState(true);
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
-  const isFooterRoute = location.pathname === '/' || location.pathname.startsWith('/account');
+  const showFooter = !isAdminRoute && location.pathname !== '/checkout';
 
   useEffect(() => {
     AOS.init({
@@ -159,7 +159,7 @@ function AppContent() {
           <WishlistDrawer />
           <SearchModal />
           <WhatsAppFloatingButton />
-          {isFooterRoute && <Footer />}
+          {showFooter && <Footer />}
           <MobileBottomNav />
         </>
       )}

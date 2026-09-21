@@ -41,21 +41,6 @@ export default function AdminLogin() {
     navigate(location.state?.from?.pathname || '/admin', { replace: true });
   };
 
-  const handleQuickFill = async () => {
-    setEmail('infinityframesn@gmail.com');
-    setPassword('Karna@6301');
-    setError('');
-    setSubmitting(true);
-    const result = await signIn('infinityframesn@gmail.com', 'Karna@6301');
-    setSubmitting(false);
-
-    if (result.success) {
-      navigate('/admin', { replace: true });
-    } else {
-      setError(result.message || 'Sign in failed.');
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center p-4">
       <div className="w-full max-w-sm bg-white rounded-3xl border border-gray-100 shadow-xl p-7 sm:p-8 space-y-6">
@@ -128,7 +113,7 @@ export default function AdminLogin() {
         </form>
 
         <p className="text-[10px] text-gray-400 text-center leading-relaxed">
-          Master login: <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold text-gray-700">admin@infinityframesn.com</code> / <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold text-gray-700">admin123</code>
+          Authorized personnel only. Sessions are 256-bit encrypted and monitored.
         </p>
       </div>
     </div>

@@ -48,9 +48,23 @@ export default function OrderSuccessPage() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <div className="inline-flex items-center gap-3 bg-[#FAF5EB] border border-[#D4AF37]/30 px-5 py-2.5 rounded-2xl text-xs sm:text-sm">
-              <span className="text-gray-500 font-medium">Order Reference ID:</span>
-              <span className="font-mono font-black text-[#B38029] text-base sm:text-lg">{orderId}</span>
+            <div className="inline-flex items-center gap-2 bg-[#FAF5EB] border border-[#D4AF37]/30 px-4 py-2 rounded-2xl text-xs sm:text-sm">
+              <span className="text-gray-500 font-medium">Order ID:</span>
+              <span className="font-mono font-black text-[#B38029] text-sm sm:text-base">{orderId}</span>
+            </div>
+
+            {totalAmount > 0 && (
+              <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-2xl text-xs sm:text-sm">
+                <span className="text-emerald-700 font-medium">Total:</span>
+                <span className="font-serif font-black text-emerald-900 text-sm sm:text-base">₹{totalAmount.toLocaleString('en-IN')}</span>
+              </div>
+            )}
+
+            <div className="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 px-4 py-2 rounded-2xl text-xs sm:text-sm">
+              <span className="text-gray-500 font-medium">Payment:</span>
+              <span className={`font-bold ${paymentStatus === 'Paid' ? 'text-emerald-700' : 'text-amber-700'}`}>
+                {paymentStatus === 'Paid' ? `Paid (${paymentId ? paymentId.slice(-8) : 'Razorpay'})` : 'COD / Pending'}
+              </span>
             </div>
           </div>
 

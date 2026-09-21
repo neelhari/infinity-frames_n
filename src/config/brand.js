@@ -11,6 +11,8 @@ export const BRAND = {
   phone: "9494066914",
   whatsappNumber: "919494066914",
   email: "infinityframesn@gmail.com",
+  domain: "infinityframesn.com",
+  websiteUrl: "https://infinityframesn.com",
 
   address: {
     line1: "Near Bheemeswara Swami Temple",

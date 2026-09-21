@@ -1,0 +1,10 @@
+# Robots.txt for Infinity Frames N (https://infinityframesn.com)
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /checkout
+Disallow: /account
+Disallow: /order-success
+
+Sitemap: https://infinityframesn.com/sitemap.xml

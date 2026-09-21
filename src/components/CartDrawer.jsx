@@ -3,11 +3,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Tag, Plus, Minus, Sparkles } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useStoreData } from '../context/StoreDataContext';
 import { BRAND } from '../config/brand';
 
 export default function CartDrawer() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const { settings } = useStoreData();
   const {
     isCartOpen,
     closeCart,
@@ -27,7 +29,8 @@ export default function CartDrawer() {
 
   if (!isCartOpen) return null;
 
-  const freeShippingThreshold = BRAND.freeShippingThreshold || 999;
+  const freeShippingThreshold = Number(settings?.freeShippingThreshold) || 1499;
+  const shippingCost = Number(settings?.shippingCost) || 50;
   const isFreeShipping = subtotal >= freeShippingThreshold;
   const missingAmount = freeShippingThreshold - subtotal;
   const finalTotal = subtotal - discount;
@@ -230,15 +233,15 @@ export default function CartDrawer() {
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span>Express Shipping</span>
+                  <span>Shipping</span>
                   <span className="font-bold text-gray-900">
-                    {isFreeShipping ? <span className="text-emerald-700">FREE</span> : '₹99'}
+                    {isFreeShipping ? <span className="text-emerald-700">FREE</span> : `₹${shippingCost}`}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm font-bold text-gray-900 pt-2 border-t border-gray-100">
                   <span>Total Amount:</span>
                   <span className="text-base text-gray-950 font-serif font-black">
-                    ₹{(finalTotal + (isFreeShipping ? 0 : 99)).toLocaleString('en-IN')}
+                    ₹{(finalTotal + (isFreeShipping ? 0 : shippingCost)).toLocaleString('en-IN')}
                   </span>
                 </div>
               </div>
