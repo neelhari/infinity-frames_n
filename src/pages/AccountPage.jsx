@@ -75,7 +75,7 @@ export default function AccountPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-24 pt-4 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
 
         {/* 1. PROFILE CARD - STARTS IMMEDIATELY UNDER HEADER (NO BACK TO STORE, NO BADGE, REAL AUTH) */}
         <div className="bg-gradient-to-r from-[#1A1A1A] via-[#2A2418] to-[#1A1A1A] rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-[#D4AF37]/20">

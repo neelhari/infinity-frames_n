@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Search, ShoppingBag, Star, Heart, SlidersHorizontal } from 'lucide-react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { ArrowLeft, Search, ShoppingBag, Star, Heart, SlidersHorizontal, Sparkles, ChevronRight } from 'lucide-react';
 import { useStoreData } from '../context/StoreDataContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { ProductCardSkeleton } from '../components/Shimmer';
+import ProductCard from '../components/ProductCard';
 
 export default function ProductsPage() {
   const navigate = useNavigate();
@@ -19,12 +20,13 @@ export default function ProductsPage() {
     : ['All'];
 
   const [activeChip, setActiveChip] = useState('All');
-  const { addToCart, totalItemsCount, openCart } = useCart();
-  const { toggleWishlist, isInWishlist } = useWishlist();
+  const [sortBy, setSortBy] = useState('featured'); // 'featured' | 'price-low' | 'price-high' | 'rating'
+  const { totalItemsCount, openCart } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
 
-  // Filter products by category, search query, and active chip
+  // Filter & sort products
   const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
+    let result = products.filter((p) => {
       const matchCat = categoryParam ? p.category === categoryParam : true;
       if (!matchCat) return false;
 
@@ -43,7 +45,17 @@ export default function ProductsPage() {
       if (activeChip === 'All') return true;
       return p.subcategory?.toLowerCase().includes(activeChip.toLowerCase());
     });
-  }, [products, categoryParam, searchParam, activeChip]);
+
+    if (sortBy === 'price-low') {
+      result.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+    } else if (sortBy === 'price-high') {
+      result.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
+    } else if (sortBy === 'rating') {
+      result.sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0));
+    }
+
+    return result;
+  }, [products, categoryParam, searchParam, activeChip, sortBy]);
 
   const clearSearch = () => {
     const newParams = new URLSearchParams(searchParams);
@@ -61,15 +73,16 @@ export default function ProductsPage() {
   };
 
   const headerTitle = searchParam
-    ? `Results for "${searchParam}"`
+    ? `Search: "${searchParam}"`
     : currentCategory?.name || 'All Products';
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-24 font-sans">
-      {/* 1. TOP HEADER (Screen 4: Back, Title, Search, Cart with badge) */}
-      <div className="sticky top-0 z-30 bg-white border-b border-gray-100 px-4 py-3 shadow-2xs">
-        <div className="max-w-3xl mx-auto flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
+      
+      {/* 1. MOBILE ONLY TOP HEADER (< md) */}
+      <div className="md:hidden sticky top-0 z-30 bg-white border-b border-gray-100 px-4 py-3 shadow-2xs">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
             <button
               onClick={handleBack}
               className="p-1 rounded-full hover:bg-gray-100 text-gray-700 transition-colors cursor-pointer"
@@ -77,18 +90,18 @@ export default function ProductsPage() {
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <h1 className="font-serif text-base sm:text-lg font-bold text-gray-900 tracking-wide truncate">
+            <h1 className="font-serif text-base font-bold text-gray-900 tracking-wide truncate">
               {headerTitle}
             </h1>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {searchParam && (
               <button
                 onClick={clearSearch}
-                className="text-[11px] font-bold text-[#B38029] bg-[#FAF5EB] px-2.5 py-1 rounded-lg border border-[#D4AF37]/30 hover:bg-amber-100 transition-colors cursor-pointer"
+                className="text-[11px] font-bold text-[#B38029] bg-[#FAF5EB] px-2 py-1 rounded-lg border border-[#D4AF37]/30 hover:bg-amber-100 transition-colors cursor-pointer"
               >
-                Clear Search
+                Clear
               </button>
             )}
             <button
@@ -114,121 +127,105 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      {/* 2. SUB-FILTER CHIPS ROW (Screen 4: All, Wooden, Acrylic, LED Frames) */}
-      <div className="bg-white border-b border-gray-100 px-4 py-2.5 shadow-2xs sticky top-[50px] z-20 overflow-x-auto hide-scroll">
-        <div className="max-w-3xl mx-auto flex items-center gap-2">
-          {availableChips.map((chip) => {
-            const isActive = activeChip === chip;
-            return (
+      {/* 2. DESKTOP BREADCRUMBS & PAGE HEADER (hidden on mobile, shown on md+) */}
+      <div className="hidden md:block bg-white border-b border-gray-100 py-4 px-6 lg:px-8 shadow-2xs">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
+              <Link to="/" className="hover:text-[#B38029] transition-colors">Home</Link>
+              <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
+              <Link to="/categories" className="hover:text-[#B38029] transition-colors">Categories</Link>
+              <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
+              <span className="text-gray-900 font-bold">{headerTitle}</span>
+            </div>
+            <h1 className="font-serif text-2xl lg:text-3xl font-bold text-gray-950">
+              {headerTitle}
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {searchParam && (
               <button
-                key={chip}
-                onClick={() => setActiveChip(chip)}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
-                  isActive
-                    ? 'bg-[#B38029] text-white shadow-xs'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                onClick={clearSearch}
+                className="text-xs font-bold text-[#B38029] bg-[#FAF5EB] px-3 py-1.5 rounded-xl border border-[#D4AF37]/40 hover:bg-amber-100 transition-colors cursor-pointer"
               >
-                {chip}
+                Clear Search Filter
               </button>
-            );
-          })}
+            )}
+
+            {/* Desktop Sort Dropdown */}
+            <div className="flex items-center gap-2 text-xs bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-xl">
+              <span className="text-gray-500 font-medium">Sort by:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-transparent font-bold text-gray-900 outline-none cursor-pointer"
+              >
+                <option value="featured">Featured</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="rating">Top Rated</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* 3. PRODUCT GRID (Screen 4: 2-Column Clean Cards) */}
-      <div className="max-w-3xl mx-auto px-4 py-4">
+      {/* 3. SUB-FILTER CHIPS ROW */}
+      <div className="bg-white border-b border-gray-100 px-4 py-2.5 shadow-2xs sticky top-[50px] md:top-[60px] z-20 overflow-x-auto hide-scroll">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 overflow-x-auto hide-scroll">
+            {availableChips.map((chip) => {
+              const isActive = activeChip === chip;
+              return (
+                <button
+                  key={chip}
+                  onClick={() => setActiveChip(chip)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                    isActive
+                      ? 'bg-[#B38029] text-white shadow-xs'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {chip}
+                </button>
+              );
+            })}
+          </div>
+
+          <span className="text-xs text-gray-400 font-medium hidden sm:inline-block shrink-0">
+            {filteredProducts.length} {filteredProducts.length === 1 ? 'Product' : 'Products'} Found
+          </span>
+        </div>
+      </div>
+
+      {/* 4. PRODUCT GRID (Desktop 4-Columns / Tablet 3-Columns / Mobile 2-Columns) */}
+      <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-6">
         {loading && products.length === 0 ? (
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
               <ProductCardSkeleton key={i} />
             ))}
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-16 text-gray-500">
-            <p className="font-serif text-base font-bold text-gray-800 mb-1">No products found in this filter</p>
-            <p className="text-xs text-gray-400 mb-4">Try selecting another filter chip or view all products</p>
+          <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-2xs max-w-lg mx-auto p-8 space-y-3">
+            <div className="w-16 h-16 rounded-full bg-amber-50 text-[#B38029] flex items-center justify-center mx-auto">
+              <Sparkles className="w-8 h-8" />
+            </div>
+            <h2 className="font-serif text-lg font-bold text-gray-900">No products found</h2>
+            <p className="text-xs text-gray-500">Try selecting another filter chip or view all customized gifts</p>
             <button
               onClick={() => setActiveChip('All')}
-              className="bg-[#B38029] text-white text-xs font-bold px-4 py-2 rounded-xl cursor-pointer"
+              className="mt-2 inline-flex bg-[#B38029] hover:bg-[#8C5E16] text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-xs transition-colors cursor-pointer"
             >
               Show All Products
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            {filteredProducts.map((p) => {
-              const inWishlist = isInWishlist(p.id);
-              return (
-                <div
-                  key={p.id}
-                  onClick={() => navigate(`/product/${p.id}`)}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-2xs overflow-hidden flex flex-col justify-between group hover:shadow-md transition-all cursor-pointer"
-                >
-                  {/* Image, Discount Badge & Wishlist */}
-                  <div className="relative aspect-square bg-gray-50 overflow-hidden">
-                    <img
-                      src={p.image}
-                      alt={p.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    {p.discount && (
-                      <span className="absolute top-2 left-2 bg-[#D4AF37] text-[#1A1A1A] font-black text-[9px] px-2 py-0.5 rounded-full shadow-xs">
-                        {p.discount}
-                      </span>
-                    )}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleWishlist(p);
-                      }}
-                      className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/85 hover:bg-white flex items-center justify-center shadow-xs text-gray-600 transition-colors cursor-pointer"
-                      title="Wishlist"
-                    >
-                      <Heart
-                        className={`w-3.5 h-3.5 ${inWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
-                      />
-                    </button>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-3 flex flex-col flex-1 justify-between">
-                    <div>
-                      <h3 className="font-serif text-xs sm:text-sm font-bold text-gray-900 line-clamp-2 leading-snug">
-                        {p.name}
-                      </h3>
-
-                      {/* Price row */}
-                      <div className="flex items-baseline gap-1.5 mt-1.5">
-                        <span className="font-bold text-sm text-gray-900">₹{p.price}</span>
-                        {p.oldPrice && (
-                          <span className="text-[11px] text-gray-400 line-through">₹{p.oldPrice}</span>
-                        )}
-                      </div>
-
-                      {/* Ratings */}
-                      <div className="flex items-center gap-1 mt-1 text-[10px] text-gray-500">
-                        <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                        <span className="font-bold text-gray-700">{p.rating}</span>
-                        <span>({p.reviewsCount})</span>
-                      </div>
-                    </div>
-
-                    {/* Action Button: Add to Cart / Customize */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/product/${p.id}`);
-                      }}
-                      className="mt-3 w-full bg-[#B38029] hover:bg-[#8C5E16] text-white text-[11px] font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
-                    >
-                      <ShoppingBag className="w-3.5 h-3.5" />
-                      <span>{p.customizable ? 'Customize' : 'Add to Cart'}</span>
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
           </div>
         )}
       </div>
