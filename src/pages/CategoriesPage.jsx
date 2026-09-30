@@ -28,7 +28,7 @@ export default function CategoriesPage() {
     ...categories.map((c) => ({
       id: c.id,
       label: c.name,
-      image: categoryThumbnails[c.id] || c.image || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&auto=format&fit=crop&q=80',
+      image: c.image || categoryThumbnails[c.id] || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&auto=format&fit=crop&q=80',
     }))
   ];
 

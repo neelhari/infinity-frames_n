@@ -227,7 +227,7 @@ export default function HomePage() {
                 >
                   <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden shadow-xs group-hover:shadow-md group-hover:scale-108 transition-all duration-200 bg-white">
                     <img
-                      src={categoryThumbnails[cat.id] || cat.image || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&auto=format&fit=crop&q=80'}
+                      src={cat.image || categoryThumbnails[cat.id] || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&auto=format&fit=crop&q=80'}
                       alt={cat.name}
                       className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-300"
                     />

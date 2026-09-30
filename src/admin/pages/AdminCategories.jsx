@@ -61,7 +61,7 @@ export default function AdminCategories() {
     if (!name.trim() || saving || uploadingImage) return;
 
     setSaving(true);
-    const categoryImage = image || editingCat?.image || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop&q=80';
+    const categoryImage = image.trim();
 
     const result = editingCat
       ? await updateCategory(editingCat.id, {

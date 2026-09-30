@@ -540,7 +540,14 @@ export async function updateCategoryInDb(id, updates) {
   const { data, error } = await supabase.from('categories').update(row).eq('id', id).select();
   if (error) return { success: false, message: error.message };
   if (!data || data.length === 0) {
-    return { success: false, message: 'Permission denied: Please sign in again to edit categories.' };
+    // If not found for direct update, perform upsert
+    const upsertRow = { id, ...row };
+    const { data: upData, error: upError } = await supabase.from('categories').upsert([upsertRow]).select();
+    if (upError) return { success: false, message: upError.message };
+    if (!upData || upData.length === 0) {
+      return { success: false, message: 'Permission denied: Please sign in again to edit categories.' };
+    }
+    return { success: true, data: mapCategoryFromDb(upData[0]) };
   }
   return { success: true, data: mapCategoryFromDb(data[0]) };
 }
