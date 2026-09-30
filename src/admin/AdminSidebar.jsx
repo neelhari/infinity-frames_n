@@ -56,10 +56,10 @@ export default function AdminSidebar({ onClose }) {
   return (
     <aside className="w-64 bg-[#1A1A1A] text-white flex flex-col h-full shadow-2xl border-r border-[#831A1D]">
       {/* Brand Header */}
-      <div className="p-5 border-b border-[#831A1D] flex items-center justify-between">
+      <div className="p-5 border-b border-[#831A1D] flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#FAF5EE] ring-2 ring-[#D4AF37]/60 flex items-center justify-center overflow-hidden p-0.5 shadow-sm shrink-0">
-            <img src="/logo-icon.png" alt={BRAND.name} className="w-full h-full object-contain" />
+          <div className="w-10 h-10 rounded-full bg-[#FAF5EE] ring-2 ring-[#D4AF37]/60 flex items-center justify-center overflow-hidden p-1 shadow-sm shrink-0">
+            <img src="/logo-symbol.png" alt={BRAND.name} className="w-full h-full object-contain" />
           </div>
           <div>
             <h2 className="font-serif text-lg font-bold tracking-wide text-white leading-tight">

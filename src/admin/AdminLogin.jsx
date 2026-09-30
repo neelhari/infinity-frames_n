@@ -46,8 +46,8 @@ export default function AdminLogin() {
     <div className="min-h-screen bg-[#FDFBF7] flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-sm bg-white rounded-3xl border border-gray-100 shadow-xl p-7 sm:p-8 space-y-6">
         <div className="text-center space-y-2">
-          <div className="w-14 h-14 rounded-full bg-[#1A1A1A] text-[#D4AF37] font-serif font-bold text-lg flex items-center justify-center mx-auto shadow-sm">
-            {BRAND.name?.slice(0, 2)?.toUpperCase() || 'IF'}
+          <div className="w-14 h-14 rounded-2xl bg-[#1A1A1A] ring-2 ring-[#D4AF37]/50 flex items-center justify-center mx-auto shadow-md p-2">
+            <img src="/logo-symbol.png" alt={BRAND.name} className="w-full h-full object-contain" />
           </div>
           <h1 className="font-serif text-xl sm:text-2xl font-bold text-[#1A1A1A]">Admin Sign In</h1>
           <p className="text-[11px] text-gray-500">{BRAND.name} Store CMS — Authorized Access Only</p>

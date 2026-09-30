@@ -36,9 +36,9 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] flex text-gray-900 font-sans antialiased">
-      {/* Desktop Persistent Sidebar */}
-      <div className="hidden lg:block shrink-0">
+    <div className="h-screen bg-[#FDFBF7] flex text-gray-900 font-sans antialiased overflow-hidden">
+      {/* Desktop Persistent Fixed Sidebar */}
+      <div className="hidden lg:block shrink-0 h-screen sticky top-0 z-30">
         <AdminSidebar />
       </div>
 
@@ -52,10 +52,10 @@ export default function AdminLayout() {
         </div>
       )}
 
-      {/* Main Right Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* Main Right Content Area - Independent Scroll */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Top Navigation Header Bar */}
-        <header className="bg-white border-b border-gray-200/80 sticky top-0 z-30 px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-2xs">
+        <header className="bg-white border-b border-gray-200/80 shrink-0 sticky top-0 z-20 px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-2xs">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileOpen(true)}
