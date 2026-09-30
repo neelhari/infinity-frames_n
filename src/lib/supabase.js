@@ -498,7 +498,13 @@ export async function updateProductInDb(id, updates) {
   const { data, error } = await supabase.from('products').update(row).eq('id', id).select();
   if (error) return { success: false, message: error.message };
   if (!data || data.length === 0) {
-    return { success: false, message: 'Permission denied: Please sign in again to edit products.' };
+    const upsertRow = { id, ...row };
+    const { data: upData, error: upError } = await supabase.from('products').upsert([upsertRow]).select();
+    if (upError) return { success: false, message: upError.message };
+    if (!upData || upData.length === 0) {
+      return { success: false, message: 'Permission denied: Please sign in again to edit products.' };
+    }
+    return { success: true, data: mapProductFromDb(upData[0]) };
   }
   return { success: true, data: mapProductFromDb(data[0]) };
 }
@@ -589,7 +595,13 @@ export async function updateBannerInDb(id, updates) {
   const { data, error } = await supabase.from('banners').update(row).eq('id', id).select();
   if (error) return { success: false, message: error.message };
   if (!data || data.length === 0) {
-    return { success: false, message: 'Permission denied: Please sign in again to edit banners.' };
+    const upsertRow = { id, ...row };
+    const { data: upData, error: upError } = await supabase.from('banners').upsert([upsertRow]).select();
+    if (upError) return { success: false, message: upError.message };
+    if (!upData || upData.length === 0) {
+      return { success: false, message: 'Permission denied: Please sign in again to edit banners.' };
+    }
+    return { success: true, data: mapBannerFromDb(upData[0]) };
   }
   return { success: true, data: mapBannerFromDb(data[0]) };
 }
@@ -631,7 +643,13 @@ export async function updateCouponInDb(id, updates) {
   const { data, error } = await supabase.from('coupons').update(row).eq('id', id).select();
   if (error) return { success: false, message: error.message };
   if (!data || data.length === 0) {
-    return { success: false, message: 'Permission denied: Please sign in again to edit coupons.' };
+    const upsertRow = { id, ...row };
+    const { data: upData, error: upError } = await supabase.from('coupons').upsert([upsertRow]).select();
+    if (upError) return { success: false, message: upError.message };
+    if (!upData || upData.length === 0) {
+      return { success: false, message: 'Permission denied: Please sign in again to edit coupons.' };
+    }
+    return { success: true, data: mapCouponFromDb(upData[0]) };
   }
   return { success: true, data: mapCouponFromDb(data[0]) };
 }
