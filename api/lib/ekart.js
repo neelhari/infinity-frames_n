@@ -109,13 +109,13 @@ export async function createEkartShipment({
   const pickupAlias = process.env.EKART_PICKUP_ALIAS || 'infinity frames n';
   const pickupPincode = process.env.EKART_PICKUP_PINCODE || '533262';
 
-  // Extract / sanitize customer contact & address
-  const consigneeName = (order.customerName || order.customer_name || 'Customer').trim();
-  const consigneePhone = String(order.customerPhone || order.customer_phone || '').replace(/\D/g, '').slice(-10);
-  const deliveryAddress = (order.address || '').trim();
-  const destinationPincode = String(order.pincode || '').replace(/\D/g, '').slice(0, 6);
-  const destinationCity = (order.city || 'India').trim();
-  const destinationState = (order.state || 'India').trim();
+  // Extract / sanitize customer contact & address (allow packageDetails overrides from admin dialog)
+  const consigneeName = (packageDetails.consigneeName || order.customerName || order.customer_name || 'Customer').trim();
+  const consigneePhone = String(packageDetails.consigneePhone || order.customerPhone || order.customer_phone || '').replace(/\D/g, '').slice(-10);
+  const deliveryAddress = (packageDetails.deliveryAddress || order.address || '').trim();
+  const destinationPincode = String(packageDetails.destinationPincode || order.pincode || '').replace(/\D/g, '').slice(0, 6);
+  const destinationCity = (packageDetails.destinationCity || order.city || '').trim() || 'City';
+  const destinationState = (packageDetails.destinationState || order.state || '').trim() || 'Andhra Pradesh';
 
   const isCod = Boolean(
     order.paymentMethod?.toLowerCase().includes('cod') ||
@@ -195,7 +195,28 @@ export async function createEkartShipment({
 
   const data = await res.json();
   if (!res.ok) {
-    throw new Error(data.message || data.description || `Shipment creation failed with status ${res.status}`);
+    let detailedMsg = '';
+    if (data.errors) {
+      if (Array.isArray(data.errors)) {
+        detailedMsg = data.errors.map(e => (typeof e === 'object' ? (e.message || e.field || JSON.stringify(e)) : e)).join('; ');
+      } else if (typeof data.errors === 'object') {
+        detailedMsg = Object.entries(data.errors).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`).join('; ');
+      } else {
+        detailedMsg = String(data.errors);
+      }
+    } else if (data.details) {
+      detailedMsg = typeof data.details === 'string' ? data.details : JSON.stringify(data.details);
+    } else if (data.description) {
+      detailedMsg = data.description;
+    } else if (data.message && data.message !== 'VALIDATOR_SCHEMA') {
+      detailedMsg = data.message;
+    }
+
+    const finalMsg = detailedMsg
+      ? `Ekart: ${detailedMsg}`
+      : 'Ekart Schema Validation Failed: Please verify destination Pincode (must be valid 6-digit Indian PIN), Address length, and City/State.';
+
+    throw new Error(finalMsg);
   }
 
   // Ekart returns tracking_id (or trackingId or id or waybill)

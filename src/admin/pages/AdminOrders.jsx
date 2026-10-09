@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   ShoppingCart, Eye, CheckCircle2, Clock, Truck, XCircle, Search, Filter, Loader2,
-  Printer, ExternalLink, AlertCircle, Copy, Check, Box
+  Printer, ExternalLink, AlertCircle, Copy, Check, Box, Download, ZoomIn, ZoomOut,
+  RotateCw, Image as ImageIcon, Edit2, Sparkles, MessageCircle
 } from 'lucide-react';
 import { useStoreData } from '../../context/StoreDataContext';
 import { TableSkeleton } from '../../components/Shimmer';
@@ -13,7 +14,7 @@ export default function AdminOrders() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Ekart Shipping State
+  // Ekart Shipping State & Editable Destination Address
   const [shippingModalOrder, setShippingModalOrder] = useState(null);
   const [packageWeight, setPackageWeight] = useState(500); // grams
   const [packageLength, setPackageLength] = useState(30); // cm
@@ -23,6 +24,21 @@ export default function AdminOrders() {
   const [shipmentError, setShipmentError] = useState('');
   const [labelLoadingId, setLabelLoadingId] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+
+  // Destination Address Fields (Editable by Admin before booking)
+  const [destName, setDestName] = useState('');
+  const [destPhone, setDestPhone] = useState('');
+  const [destAddress, setDestAddress] = useState('');
+  const [destCity, setDestCity] = useState('');
+  const [destState, setDestState] = useState('Andhra Pradesh');
+  const [destPincode, setDestPincode] = useState('');
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+
+  // Customer Photo Inspection & Download State
+  const [previewPhoto, setPreviewPhoto] = useState(null); // { url, filename, title, orderId, customName }
+  const [photoZoom, setPhotoZoom] = useState(1);
+  const [photoRotation, setPhotoRotation] = useState(0);
+  const [downloadingPhoto, setDownloadingPhoto] = useState(false);
 
   useEffect(() => {
     refreshOrders().finally(() => setLoading(false));
@@ -42,7 +58,26 @@ export default function AdminOrders() {
     setShippingModalOrder(order);
     setShipmentError('');
 
-    // Standard E-Commerce: calculate total parcel weight & packaging proportions from order items
+    // Pre-populate destination address for editing / fixing before API call
+    setDestName(order.customerName || order.customer_name || '');
+    setDestPhone(order.customerPhone || order.customer_phone ? String(order.customerPhone || order.customer_phone).replace(/\D/g, '').slice(-10) : '');
+    setDestAddress(order.address || '');
+    setDestCity(order.city && order.city.toLowerCase() !== 'india' ? order.city : '');
+    setDestState(order.state && order.state.toLowerCase() !== 'india' ? order.state : 'Andhra Pradesh');
+
+    // Extract 6-digit pincode if order.pincode is empty
+    let pin = order.pincode || '';
+    if (!pin && order.address) {
+      const match = order.address.match(/\b\d{6}\b/);
+      if (match) pin = match[0];
+    }
+    setDestPincode(pin);
+
+    // If city is empty or pincode is missing, auto-expand address editor
+    const needsCorrection = !order.city || order.city.toLowerCase() === 'india' || !pin || pin.length !== 6;
+    setIsEditingAddress(needsCorrection);
+
+    // Calculate total parcel weight & packaging proportions from order items
     let calculatedWeight = 0;
     let maxLength = 30;
     let maxWidth = 20;
@@ -77,6 +112,25 @@ export default function AdminOrders() {
   const handleBookShipment = async (e) => {
     e.preventDefault();
     if (!shippingModalOrder) return;
+
+    // Validate inputs before calling Ekart API
+    const cleanPin = String(destPincode || '').replace(/\D/g, '').slice(0, 6);
+    if (cleanPin.length !== 6) {
+      setShipmentError('Please enter a valid 6-digit Indian Postal PIN code.');
+      setIsEditingAddress(true);
+      return;
+    }
+    if (!destCity.trim() || destCity.trim().toLowerCase() === 'india') {
+      setShipmentError('Please enter a valid destination city name.');
+      setIsEditingAddress(true);
+      return;
+    }
+    if (!destAddress.trim() || destAddress.trim().length < 8) {
+      setShipmentError('Please enter a complete delivery address (at least 8-10 characters).');
+      setIsEditingAddress(true);
+      return;
+    }
+
     setIsBookingShipment(true);
     setShipmentError('');
 
@@ -92,6 +146,12 @@ export default function AdminOrders() {
             length: Number(packageLength) || 30,
             width: Number(packageWidth) || 20,
             height: Number(packageHeight) || 5,
+            consigneeName: destName.trim(),
+            consigneePhone: destPhone.trim(),
+            deliveryAddress: destAddress.trim(),
+            destinationCity: destCity.trim(),
+            destinationState: destState.trim() || 'Andhra Pradesh',
+            destinationPincode: cleanPin,
           },
         }),
       });
@@ -119,6 +179,9 @@ export default function AdminOrders() {
           trackingId: bookedTrackingId,
           courier: 'Ekart Logistics',
           status: 'Shipped',
+          address: destAddress.trim(),
+          city: destCity.trim(),
+          pincode: cleanPin,
         }));
       }
 
@@ -181,10 +244,14 @@ export default function AdminOrders() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleOpenCustomerPhoto = (photoUrl, fileName = 'customer-photo.jpg') => {
+  const handleDownloadCustomerPhoto = async (photoUrl, fileName = 'customer-photo.jpg') => {
     if (!photoUrl) return;
-    if (photoUrl.startsWith('data:')) {
-      try {
+    setDownloadingPhoto(true);
+
+    const cleanFileName = (fileName || 'customer-photo.jpg').replace(/[/\\?%*:|"<>]/g, '-');
+
+    try {
+      if (photoUrl.startsWith('data:')) {
         const parts = photoUrl.split(';base64,');
         const contentType = parts[0].split(':')[1] || 'image/jpeg';
         const raw = window.atob(parts[1]);
@@ -196,16 +263,38 @@ export default function AdminOrders() {
         const blobUrl = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = blobUrl;
-        a.download = fileName;
+        a.download = cleanFileName;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-      } catch (e) {
-        window.open(photoUrl, '_blank');
+      } else {
+        // Remote image (Cloudinary) - fetch as blob to force browser download dialog
+        const res = await fetch(photoUrl, { mode: 'cors' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = cleanFileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
       }
-    } else {
-      window.open(photoUrl, '_blank');
+    } catch (err) {
+      console.warn('Direct blob download failed, falling back to window open/anchor:', err);
+      // Fallback: direct window open or anchor
+      const a = document.createElement('a');
+      a.href = photoUrl;
+      a.target = '_blank';
+      a.rel = 'noreferrer';
+      a.download = cleanFileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } finally {
+      setDownloadingPhoto(false);
     }
   };
 
@@ -276,6 +365,38 @@ export default function AdminOrders() {
                         {ord.items && (
                           <div className="text-[10px] text-gray-400 mt-0.5">
                             {ord.items.length} {ord.items.length === 1 ? 'item' : 'items'}
+                          </div>
+                        )}
+                        {/* Custom Photo Badge & Quick Preview Avatar */}
+                        {ord.items?.some((it) => it.customPhoto) && (
+                          <div className="pt-1.5 flex items-center gap-1.5 flex-wrap">
+                            {ord.items
+                              .filter((it) => it.customPhoto)
+                              .slice(0, 2)
+                              .map((it, pIdx) => (
+                                <button
+                                  key={pIdx}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPreviewPhoto({
+                                      url: it.customPhoto,
+                                      title: it.name,
+                                      orderId: ord.id,
+                                      customerName: ord.customerName,
+                                      customName: it.customName,
+                                      filename: `Order-${ord.id}-${(ord.customerName || 'customer').replace(/\s+/g, '_')}-photo.jpg`,
+                                    });
+                                  }}
+                                  className="relative w-7 h-7 rounded-lg overflow-hidden border border-[#D4AF37] shadow-2xs cursor-pointer hover:ring-2 hover:ring-[#D4AF37] transition-all shrink-0"
+                                  title="Click to view & inspect customer photo"
+                                >
+                                  <img src={it.customPhoto} alt="" className="w-full h-full object-cover" />
+                                </button>
+                              ))}
+                            <span className="text-[9.5px] font-bold text-amber-900 bg-amber-50 border border-amber-200/80 px-1.5 py-0.5 rounded-md">
+                              📷 Custom Photo
+                            </span>
                           </div>
                         )}
                       </td>
@@ -375,13 +496,33 @@ export default function AdminOrders() {
                         </div>
                       </td>
                       <td className="p-4 text-center">
-                        <button
-                          onClick={() => setSelectedOrder(ord)}
-                          className="p-2 rounded-xl text-[#1A1A1A] hover:bg-[#F8F0F0] font-bold cursor-pointer transition-colors"
-                          title="View Details"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center justify-center gap-1">
+                          {/* Quick 1-Click Customer Photo Download Icon */}
+                          {ord.items?.some((it) => it.customPhoto) && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const firstPhotoItem = ord.items.find((it) => it.customPhoto);
+                                handleDownloadCustomerPhoto(
+                                  firstPhotoItem.customPhoto,
+                                  `Order-${ord.id}-${(ord.customerName || 'customer').replace(/\s+/g, '_')}-photo.jpg`
+                                );
+                              }}
+                              className="p-2 rounded-xl text-amber-800 hover:bg-amber-50 font-bold cursor-pointer transition-colors"
+                              title="1-Click Download Customer Photo (for 3D CAD/Lithophane)"
+                            >
+                              <Download className="w-4 h-4 text-[#B38029]" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setSelectedOrder(ord)}
+                            className="p-2 rounded-xl text-[#1A1A1A] hover:bg-[#F8F0F0] font-bold cursor-pointer transition-colors"
+                            title="View Full Order Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -422,13 +563,112 @@ export default function AdminOrders() {
               </div>
             )}
 
-            <div className="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 space-y-1.5 text-[11px]">
-              <div className="text-gray-500 font-medium">Customer Destination:</div>
-              <div className="font-bold text-gray-900">{shippingModalOrder.customerName} ({shippingModalOrder.customerPhone})</div>
-              <div className="text-gray-600 leading-relaxed">{shippingModalOrder.address}</div>
-              <div className="font-mono text-gray-700 font-semibold pt-1">
-                PIN: {shippingModalOrder.pincode || 'Not specified'}
+            {/* Customer Destination Card with Quick Edit */}
+            <div className="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 space-y-2 text-[11px]">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-gray-900 uppercase tracking-wider text-[10px] flex items-center gap-1.5">
+                  <Truck className="w-3.5 h-3.5 text-[#B38029]" />
+                  <span>Customer Destination</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingAddress(!isEditingAddress)}
+                  className="text-[#B38029] hover:underline font-bold text-[10.5px] flex items-center gap-1 cursor-pointer"
+                >
+                  <Edit2 className="w-3 h-3" />
+                  <span>{isEditingAddress ? 'Done Editing' : 'Edit / Correct Address'}</span>
+                </button>
               </div>
+
+              {!isEditingAddress ? (
+                <div className="space-y-1 text-gray-700">
+                  <div className="font-bold text-gray-900">
+                    {destName || shippingModalOrder.customerName} ({destPhone || shippingModalOrder.customerPhone})
+                  </div>
+                  <div className="text-gray-600 leading-relaxed">
+                    {destAddress || shippingModalOrder.address}
+                  </div>
+                  <div className="flex items-center gap-2 pt-1 font-mono text-[10.5px]">
+                    <span className={`px-2 py-0.5 rounded border font-bold ${
+                      destPincode && destPincode.length === 6 ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200'
+                    }`}>
+                      PIN: {destPincode || 'MISSING'}
+                    </span>
+                    <span className="text-gray-600 font-sans font-medium">
+                      {destCity ? `${destCity}, ` : ''}{destState}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2 pt-1 border-t border-gray-200/70">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[9.5px] font-bold text-gray-600 mb-0.5">Customer Name</label>
+                      <input
+                        type="text"
+                        value={destName}
+                        onChange={(e) => setDestName(e.target.value)}
+                        className="w-full p-2 bg-white rounded-xl border border-gray-200 text-xs font-bold text-gray-900 outline-none focus:border-[#B38029]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9.5px] font-bold text-gray-600 mb-0.5">Phone (10 Digits)</label>
+                      <input
+                        type="tel"
+                        maxLength="10"
+                        value={destPhone}
+                        onChange={(e) => setDestPhone(e.target.value.replace(/\D/g, ''))}
+                        className="w-full p-2 bg-white rounded-xl border border-gray-200 text-xs font-mono font-bold text-gray-900 outline-none focus:border-[#B38029]"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[9.5px] font-bold text-gray-600 mb-0.5">Street Address Line</label>
+                    <textarea
+                      rows="2"
+                      value={destAddress}
+                      onChange={(e) => setDestAddress(e.target.value)}
+                      placeholder="Door no, Street, Landmark, Area"
+                      className="w-full p-2 bg-white rounded-xl border border-gray-200 text-xs text-gray-900 outline-none focus:border-[#B38029]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="block text-[9.5px] font-bold text-gray-600 mb-0.5">City</label>
+                      <input
+                        type="text"
+                        value={destCity}
+                        onChange={(e) => setDestCity(e.target.value)}
+                        placeholder="e.g. Draksharamam"
+                        className="w-full p-2 bg-white rounded-xl border border-gray-200 text-xs font-bold text-gray-900 outline-none focus:border-[#B38029]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9.5px] font-bold text-gray-600 mb-0.5">State</label>
+                      <input
+                        type="text"
+                        value={destState}
+                        onChange={(e) => setDestState(e.target.value)}
+                        placeholder="e.g. Andhra Pradesh"
+                        className="w-full p-2 bg-white rounded-xl border border-gray-200 text-xs text-gray-900 outline-none focus:border-[#B38029]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9.5px] font-bold text-gray-600 mb-0.5">PIN Code (6 digits)</label>
+                      <input
+                        type="text"
+                        maxLength="6"
+                        value={destPincode}
+                        onChange={(e) => setDestPincode(e.target.value.replace(/\D/g, ''))}
+                        placeholder="6 Digits"
+                        className="w-full p-2 bg-white rounded-xl border border-gray-200 text-xs font-mono font-bold text-gray-900 outline-none focus:border-[#B38029]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <form onSubmit={handleBookShipment} className="space-y-3">
@@ -670,17 +910,86 @@ export default function AdminOrders() {
                         <span>✨ Custom Personalization:</span>
                       </div>
 
-                      {item.customPhoto && (
-                        <div className="flex items-center gap-2">
-                          <img src={item.customPhoto} alt="Customer Upload" className="w-10 h-10 object-cover rounded border border-gray-300" />
-                          <button
-                            type="button"
-                            onClick={() => handleOpenCustomerPhoto(item.customPhoto, `order-${selectedOrder.id}-item-${idx + 1}-photo.jpg`)}
-                            className="text-blue-600 hover:text-blue-800 hover:underline font-bold text-[10px] flex items-center gap-1 cursor-pointer"
+                      {item.customPhoto ? (
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-50/60 border border-amber-200/80 p-3 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <div
+                              onClick={() => {
+                                setPreviewPhoto({
+                                  url: item.customPhoto,
+                                  title: item.name,
+                                  orderId: selectedOrder.id,
+                                  customerName: selectedOrder.customerName,
+                                  customName: item.customName,
+                                  filename: `Order-${selectedOrder.id}-Item-${idx + 1}-${(selectedOrder.customerName || 'customer').replace(/\s+/g, '_')}-photo.jpg`,
+                                });
+                              }}
+                              className="relative w-14 h-14 rounded-xl overflow-hidden border-2 border-[#D4AF37] cursor-pointer group shrink-0 shadow-xs"
+                              title="Click to Inspect Fullscreen"
+                            >
+                              <img src={item.customPhoto} alt="Customer Upload" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 flex items-center justify-center text-white text-[10px]">
+                                <ZoomIn className="w-4 h-4 drop-shadow" />
+                              </div>
+                            </div>
+                            <div>
+                              <div className="font-bold text-gray-900 text-xs flex items-center gap-1.5">
+                                <span>📷 Customer Photo Uploaded</span>
+                                <span className="bg-emerald-100 text-emerald-800 text-[9px] px-1.5 py-0.2 rounded font-extrabold">Ready</span>
+                              </div>
+                              <div className="text-[10px] text-gray-500">Source file for 3D Lithophane / Frame CAD</div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPreviewPhoto({
+                                  url: item.customPhoto,
+                                  title: item.name,
+                                  orderId: selectedOrder.id,
+                                  customerName: selectedOrder.customerName,
+                                  customName: item.customName,
+                                  filename: `Order-${selectedOrder.id}-Item-${idx + 1}-${(selectedOrder.customerName || 'customer').replace(/\s+/g, '_')}-photo.jpg`,
+                                });
+                              }}
+                              className="px-3 py-1.5 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 font-bold text-[10.5px] flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                            >
+                              <ZoomIn className="w-3.5 h-3.5 text-gray-600" />
+                              <span>Inspect</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              disabled={downloadingPhoto}
+                              onClick={() =>
+                                handleDownloadCustomerPhoto(
+                                  item.customPhoto,
+                                  `Order-${selectedOrder.id}-Item-${idx + 1}-${(selectedOrder.customerName || 'customer').replace(/\s+/g, '_')}-photo.jpg`
+                                )
+                              }
+                              className="px-3.5 py-1.5 rounded-xl bg-[#1A1A1A] hover:bg-black text-[#D4AF37] font-bold text-[10.5px] flex items-center gap-1.5 cursor-pointer shadow-xs transition-all"
+                            >
+                              <Download className="w-3.5 h-3.5 text-[#D4AF37]" />
+                              <span>Download Original</span>
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between gap-2 bg-gray-100 p-2.5 rounded-xl text-[10.5px]">
+                          <span className="text-gray-500">No photo uploaded for this item.</span>
+                          <a
+                            href={`https://wa.me/91${(selectedOrder.customerPhone || '').replace(/\D/g, '')}?text=${encodeURIComponent(
+                              `Hi ${selectedOrder.customerName}, regarding your order #${selectedOrder.id} (${item.name}) on Infinity Frames N: Please send your photo here on WhatsApp so we can begin 3D customization.`
+                            )}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-emerald-700 hover:underline font-bold flex items-center gap-1"
                           >
-                            <ExternalLink className="w-3 h-3" />
-                            <span>📷 View / Download Customer Photo</span>
-                          </button>
+                            <MessageCircle className="w-3 h-3 text-[#25D366]" />
+                            <span>Ask for Photo on WhatsApp</span>
+                          </a>
                         </div>
                       )}
 
@@ -727,6 +1036,133 @@ export default function AdminOrders() {
                 className="bg-[#1A1A1A] text-white font-bold px-5 py-2.5 rounded-xl cursor-pointer hover:bg-black transition-colors"
               >
                 Close View
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fullscreen Customer Photo Lightbox Modal */}
+      {previewPhoto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-[#1A1A1A] text-white rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden border border-white/10 flex flex-col max-h-[92vh]">
+            {/* Header */}
+            <div className="p-4 sm:px-6 border-b border-white/10 flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-[#D4AF37] text-xs uppercase tracking-wider">
+                    Customer Photo Inspection
+                  </span>
+                  {previewPhoto.orderId && (
+                    <span className="bg-white/10 text-gray-300 text-[10px] font-mono px-2 py-0.5 rounded-md">
+                      Order #{previewPhoto.orderId}
+                    </span>
+                  )}
+                </div>
+                <h3 className="font-serif text-sm sm:text-base font-bold text-white mt-0.5">
+                  {previewPhoto.title || previewPhoto.customerName || 'High-Resolution 3D Relief Source'}
+                </h3>
+                {previewPhoto.customName && (
+                  <p className="text-[11px] text-amber-300 mt-0.5 font-medium">
+                    ✍️ Engraved Text: "{previewPhoto.customName}"
+                  </p>
+                )}
+              </div>
+
+              {/* Close */}
+              <button
+                type="button"
+                onClick={() => {
+                  setPreviewPhoto(null);
+                  setPhotoZoom(1);
+                  setPhotoRotation(0);
+                }}
+                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm font-bold cursor-pointer transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Image Canvas with Zoom & Rotate */}
+            <div className="flex-1 overflow-auto p-4 sm:p-6 flex items-center justify-center bg-black/50 min-h-[300px] select-none">
+              <div
+                className="transition-transform duration-200 ease-out origin-center"
+                style={{
+                  transform: `scale(${photoZoom}) rotate(${photoRotation}deg)`,
+                }}
+              >
+                <img
+                  src={previewPhoto.url}
+                  alt="Customer Upload High-Res"
+                  className="max-h-[60vh] max-w-full object-contain rounded-xl shadow-2xl border border-white/20"
+                />
+              </div>
+            </div>
+
+            {/* Bottom Controls Bar */}
+            <div className="p-4 sm:px-6 border-t border-white/10 bg-[#141414] flex flex-wrap items-center justify-between gap-3 text-xs">
+              {/* Zoom & Rotate Controls */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPhotoZoom((z) => Math.max(0.5, Number((z - 0.25).toFixed(2))))}
+                  className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                  title="Zoom Out"
+                >
+                  <ZoomOut className="w-3.5 h-3.5" />
+                  <span>Zoom Out</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPhotoZoom(1)}
+                  className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-gray-300 font-mono text-[11px] cursor-pointer"
+                  title="Reset Zoom"
+                >
+                  {Math.round(photoZoom * 100)}%
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPhotoZoom((z) => Math.min(3, Number((z + 0.25).toFixed(2))))}
+                  className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                  title="Zoom In"
+                >
+                  <ZoomIn className="w-3.5 h-3.5" />
+                  <span>Zoom In</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPhotoRotation((r) => (r + 90) % 360)}
+                  className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold flex items-center gap-1 cursor-pointer transition-colors ml-1"
+                  title="Rotate 90°"
+                >
+                  <RotateCw className="w-3.5 h-3.5" />
+                  <span>Rotate</span>
+                </button>
+              </div>
+
+              {/* Direct Download Action */}
+              <button
+                type="button"
+                disabled={downloadingPhoto}
+                onClick={() =>
+                  handleDownloadCustomerPhoto(
+                    previewPhoto.url,
+                    previewPhoto.filename || `order-${previewPhoto.orderId || 'photo'}-customer-design.jpg`
+                  )
+                }
+                className="bg-gradient-to-r from-[#B38029] to-[#D4AF37] hover:brightness-110 disabled:opacity-50 text-gray-950 font-black px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg transition-all cursor-pointer text-xs"
+              >
+                {downloadingPhoto ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-gray-950" />
+                ) : (
+                  <Download className="w-4 h-4 text-gray-950" />
+                )}
+                <span>
+                  {downloadingPhoto ? 'Downloading...' : '⬇️ Download High-Res File (.jpg)'}
+                </span>
               </button>
             </div>
           </div>
