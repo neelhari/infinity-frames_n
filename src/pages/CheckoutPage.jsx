@@ -235,7 +235,6 @@ export default function CheckoutPage() {
 
       clearCart();
       setPlacingOrder(false);
-      window.open(waLink(whatsappMessage), '_blank');
       navigate('/order-success', { state: { orderData: finalPayload } });
     };
 

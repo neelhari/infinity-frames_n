@@ -281,86 +281,170 @@ export default function AccountPage() {
               </div>
             ) : (
               /* Real Orders List (when present in DB) */
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {dbOrders.map((order, idx) => {
                   const orderTotal = order.totalAmount ?? order.total_amount ?? 0;
-                  const firstItem = order.items?.[0] || {};
-                  const itemName = firstItem.name || firstItem.product_name || 'Custom 3D Product';
-                  const extraCount = (order.items?.length || 1) - 1;
                   const orderDate = order.createdAt || order.createdDate || order.created_at;
+                  const items = order.items && order.items.length > 0 ? order.items : [];
+                  const isCOD = (order.paymentMethod || '').toLowerCase().includes('cod');
+                  const isPaid = order.paymentStatus === 'Paid' || (!isCOD && (order.paymentMethod || '').toLowerCase().includes('paid'));
 
                   return (
                     <div
                       key={order.id || idx}
-                      className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3 shadow-xs"
+                      className="bg-white rounded-3xl border border-gray-200 p-5 sm:p-6 shadow-sm hover:shadow-md transition-shadow space-y-4"
                     >
-                      <div className="flex items-center justify-between border-b border-gray-100 pb-2.5">
-                        <span className="font-mono text-xs font-bold text-gray-900">#{order.id}</span>
-                        <span className="font-serif font-bold text-sm text-gray-900">
-                          ₹{orderTotal.toLocaleString('en-IN')}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        {(firstItem.customPhoto || firstItem.image) && (
-                          <img
-                            src={firstItem.customPhoto || firstItem.image}
-                            alt={itemName}
-                            className="w-12 h-12 object-cover rounded-xl border border-gray-200 shrink-0"
-                          />
-                        )}
-                        <div className="text-xs text-gray-600 space-y-0.5 min-w-0">
-                          <p className="font-semibold text-gray-800 truncate">
-                            {itemName}
-                            {extraCount > 0 && <span className="text-gray-500 font-normal"> + {extraCount} more</span>}
-                          </p>
-                          {firstItem.customName && <span className="text-[#B38029] font-medium block text-[11px] truncate">&ldquo;{firstItem.customName}&rdquo;</span>}
-                          {firstItem.customPhoto && <span className="text-emerald-700 text-[10px] font-bold block">✓ Custom Photo Attached</span>}
-                          <p className="text-gray-400 text-[10px]">
+                      {/* 1. Order Header Bar */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-3">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-sm font-black text-gray-950">#{order.id}</span>
+                            <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
+                              order.status === 'Delivered'
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                : order.status === 'Shipped'
+                                ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                                : 'bg-amber-100 text-amber-900 border border-amber-200'
+                            }`}>
+                              {order.status === 'Delivered' ? '✓ Delivered' : order.status === 'Shipped' ? '🚚 Shipped via Ekart' : '⏳ Order Received'}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-gray-400">
                             Placed on {new Date(orderDate || Date.now()).toLocaleDateString('en-IN', {
                               day: 'numeric',
                               month: 'short',
-                              year: 'numeric'
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
                             })}
                           </p>
                         </div>
+
+                        <div className="text-right">
+                          <span className="font-serif font-black text-lg text-gray-900 block">
+                            ₹{orderTotal.toLocaleString('en-IN')}
+                          </span>
+                          <span className={`text-[10.5px] font-bold inline-flex items-center gap-1 ${
+                            isPaid ? 'text-emerald-700' : 'text-amber-800'
+                          }`}>
+                            {isCOD ? '💵 Cash on Delivery (COD)' : isPaid ? '💳 Paid Online' : '💳 Online Payment'}
+                          </span>
+                        </div>
                       </div>
 
+                      {/* 2. All Ordered Items List */}
+                      <div className="divide-y divide-gray-100">
+                        {items.map((item, itemIdx) => {
+                          const itemPhoto = item.customPhoto || item.image;
+                          return (
+                            <div key={itemIdx} className="py-3 first:pt-0 last:pb-0 flex items-start gap-3.5">
+                              {itemPhoto && (
+                                <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shrink-0">
+                                  <img
+                                    src={itemPhoto}
+                                    alt={item.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                  {item.quantity > 1 && (
+                                    <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[9.5px] font-bold px-1.5 py-0.2 rounded-md">
+                                      x{item.quantity}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+
+                              <div className="flex-1 min-w-0 space-y-1">
+                                <div className="flex items-start justify-between gap-2">
+                                  <h4 className="font-bold text-xs sm:text-sm text-gray-900 leading-snug line-clamp-1">
+                                    {item.name}
+                                  </h4>
+                                  <span className="font-bold text-xs sm:text-sm text-gray-900 shrink-0">
+                                    ₹{((item.price || 0) * (item.quantity || 1)).toLocaleString('en-IN')}
+                                  </span>
+                                </div>
+
+                                <div className="text-[11px] text-gray-500">
+                                  Qty: {item.quantity || 1} • Unit Price: ₹{item.price}
+                                </div>
+
+                                {/* Customization Details Badges */}
+                                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                                  {item.customName && (
+                                    <span className="inline-flex items-center text-[10px] bg-amber-50 text-[#B38029] border border-[#D4AF37]/40 px-2 py-0.5 rounded-md font-bold">
+                                      ✍️ Text: "{item.customName}"
+                                    </span>
+                                  )}
+                                  {item.customPhoto && (
+                                    <span className="inline-flex items-center text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-md font-bold">
+                                      📷 Custom Photo Attached
+                                    </span>
+                                  )}
+                                  {item.selectedSize && (
+                                    <span className="inline-flex items-center text-[10px] bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md font-medium">
+                                      Size: {item.selectedSize}
+                                    </span>
+                                  )}
+                                  {item.selectedColor && (
+                                    <span className="inline-flex items-center text-[10px] bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md font-medium">
+                                      Style: {item.selectedColor}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* 3. Delivery Address Preview */}
+                      {order.address && (
+                        <div className="p-3 bg-gray-50/80 rounded-2xl border border-gray-100 text-[11px] flex items-start gap-2 text-gray-600">
+                          <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" />
+                          <div>
+                            <span className="font-bold text-gray-800">Delivering to: </span>
+                            <span>{order.customerName || user?.name} {order.customerPhone ? `(${order.customerPhone})` : ''} — </span>
+                            <span className="text-gray-600">{order.address}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 4. Ekart Logistics Live Tracking (If Waybill Booked) */}
                       {order.trackingId && (
-                        <div className="bg-blue-50/80 border border-blue-200/80 rounded-xl p-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 bg-blue-100 rounded-lg text-blue-700">
+                        <div className="bg-blue-50/90 border border-blue-200 rounded-2xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-2 bg-blue-100 rounded-xl text-blue-700 shrink-0">
                               <Truck className="w-4 h-4" />
                             </div>
                             <div>
-                              <p className="font-bold text-blue-900 text-[11px]">Dispatched via Ekart</p>
-                              <p className="font-mono text-gray-600 text-[10px]">AWB: {order.trackingId}</p>
+                              <p className="font-bold text-blue-900 text-xs">Dispatched via Ekart Logistics</p>
+                              <p className="font-mono text-gray-600 text-[11px]">AWB Tracking ID: <strong>{order.trackingId}</strong></p>
                             </div>
                           </div>
                           <a
                             href={`https://app.elite.ekartlogistics.in/track/${order.trackingId}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-[11px] font-bold text-white bg-blue-700 hover:bg-blue-800 px-3 py-1.5 rounded-lg shadow-2xs transition-colors shrink-0"
+                            className="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-white bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-xl shadow-xs transition-colors shrink-0"
                           >
-                            <span>Live Track</span>
-                            <ExternalLink className="w-3 h-3" />
+                            <span>Live Track Shipment</span>
+                            <ExternalLink className="w-3.5 h-3.5" />
                           </a>
                         </div>
                       )}
 
-                      <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full">
-                          {order.status || 'Received'}
+                      {/* 5. Footer Actions */}
+                      <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-xs">
+                        <span className="text-gray-500 font-medium text-[11px]">
+                          {items.length} {items.length === 1 ? 'item' : 'items'} in this order
                         </span>
                         <a
-                          href={waLink(`Hi Naresh, regarding my order #${order.id}. Could you share an update?`)}
+                          href={waLink(`Hi Naresh, I am checking on my order #${order.id} on Infinity Frames N.`)}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-xs font-bold text-[#25D366] flex items-center gap-1"
+                          className="font-bold text-[#25D366] hover:text-emerald-700 flex items-center gap-1.5 bg-emerald-50/60 px-3 py-1.5 rounded-xl border border-emerald-200/60 transition-colors"
                         >
-                          <MessageCircle className="w-3.5 h-3.5" />
-                          <span>WhatsApp Update</span>
+                          <MessageCircle className="w-4 h-4" />
+                          <span>WhatsApp Support</span>
                         </a>
                       </div>
                     </div>
