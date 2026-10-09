@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D_Nikhil_Resume - UI/UX & Front-End Developer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-dark: #0f172a;
+      --accent: #2563eb;
+      --text: #1f2937;
+      --text-muted: #4b5563;
+      --text-light: #6b7280;
+      --border: #e5e7eb;
+      --border-dark: #cbd5e1;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      background-color: var(--bg);
+      line-height: 1.45;
+      font-size: 13px;
+      -webkit-font-smoothing: antialiased;
+      padding: 24px;
+    }
+
+    .resume-container {
+      max-width: 860px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 36px 42px;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      border: 1px solid var(--border);
+    }
+
+    /* HEADER */
+    header {
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+    }
+
+    .name {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--primary-dark);
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+    }
+
+    .title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .contact-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      align-items: center;
+    }
+
+    .contact-bar a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+
+    .contact-bar a:hover {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .contact-bar span.bullet {
+      color: var(--border-dark);
+      font-size: 10px;
+    }
+
+    /* SECTION STYLES */
+    section {
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-bottom: 1px solid var(--border-dark);
+      padding-bottom: 3px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    p.summary {
+      color: var(--text);
+      font-size: 12.5px;
+      text-align: justify;
+      line-height: 1.5;
+    }
+
+    /* WORK EXPERIENCE & PROJECTS */
+    .item-block {
+      margin-bottom: 10px;
+    }
+
+    .item-block:last-child {
+      margin-bottom: 0;
+    }
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 2px;
+    }
+
+    .item-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .item-company {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .item-date {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-light);
+      white-space: nowrap;
+    }
+
+    .item-tech {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 3px;
+      font-style: italic;
+    }
+
+    .item-link {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #0284c7;
+      text-decoration: none;
+      margin-left: 8px;
+      background: #f0f9ff;
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid #bae6fd;
+    }
+
+    .item-link:hover {
+      text-decoration: underline;
+      background: #e0f2fe;
+    }
+
+    ul.bullets {
+      list-style-type: disc;
+      padding-left: 18px;
+      margin-top: 3px;
+    }
+
+    ul.bullets li {
+      font-size: 12px;
+      color: var(--text);
+      margin-bottom: 2.5px;
+      line-height: 1.45;
+    }
+
+    ul.bullets li strong {
+      font-weight: 600;
+      color: var(--primary-dark);
+    }
+
+    /* SKILLS GRID */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 5px 12px;
+      font-size: 12px;
+    }
+
+    .skill-category {
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .skill-list {
+      color: var(--text);
+    }
+
+    /* EDUCATION */
+    .education-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 12.5px;
+    }
+
+    .degree {
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .school {
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .year {
+      font-weight: 600;
+      color: var(--text-light);
+      font-size: 11.5px;
+    }
+
+    /* PRINT BUTTON & MEDIA PRINT */
+    .no-print {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .btn-print {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(30, 58, 138, 0.25);
+      transition: background 0.2s;
+    }
+
+    .btn-print:hover {
+      background: var(--accent);
+    }
+
+    @page {
+      size: A4;
+      margin: 10mm 12mm;
+    }
+
+    @media print {
+      body {
+        background-color: #fff;
+        padding: 0;
+        margin: 0;
+        font-size: 12px;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .resume-container {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        max-width: 100%;
+        margin: 0;
+      }
+      section {
+        margin-bottom: 12px;
+      }
+      .section-title {
+        break-after: avoid;
+      }
+      .item-block {
+        break-inside: avoid;
+        margin-bottom: 8px;
+      }
+      a {
+        color: inherit !important;
+        text-decoration: none !important;
+      }
+      .item-link {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        color: #0284c7 !important;
+        text-decoration: underline !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="no-print">
+    <button class="btn-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
+  </div>
+
+  <div class="resume-container">
+    <!-- HEADER -->
+    <header>
+      <h1 class="name">D. Nikhil</h1>
+      <div class="title">UI/UX &amp; Front-End Developer</div>
+      <div class="contact-bar">
+        <span>Hyderabad, India</span>
+        <span class="bullet">•</span>
+        <a href="tel:+916301646462">+91 63016 46462</a>
+        <span class="bullet">•</span>
+        <a href="mailto:dachepallynikhil6301@gmail.com">dachepallynikhil6301@gmail.com</a>
+        <span class="bullet">•</span>
+        <a href="https://github.com/dacnikhil21" target="_blank" rel="noreferrer">github.com/dacnikhil21</a>
+        <span class="bullet">•</span>
+        <a href="https://linkedin.com/in/nikhil-dachepally" target="_blank" rel="noreferrer">linkedin.com/in/nikhil-dachepally</a>
+      </div>
+    </header>
+
+    <!-- PROFILE -->
+    <section>
+      <div class="section-title">Professional Summary</div>
+      <p class="summary">
+        Creative and user-centric <strong>UI/UX &amp; Front-End Developer</strong> with extensive hands-on experience architecting high-performance web applications and dynamic e-commerce platforms. Demonstrated expertise in translating complex wireframes and Figma designs into pixel-perfect, responsive React.js and Next.js interfaces with modular design systems, micro-interactions, and frictionless checkout flows. Proven track record delivering <strong>45+ commercial web projects</strong> across diverse industry verticals with a relentless focus on core web vitals, accessibility, and modern aesthetics.
+      </p>
+    </section>
+
+    <!-- WORK EXPERIENCE -->
+    <section>
+      <div class="section-title">Work Experience</div>
+      <div class="item-block">
+        <div class="item-header">
+          <div>
+            <span class="item-title">UI/UX &amp; Front-End Developer</span>
+            <span class="item-company"> | CODTECH IT SOLUTIONS</span>
+          </div>
+          <span class="item-date">July 2024 – Present</span>
+        </div>
+        <ul class="bullets">
+          <li><strong>Delivered 15+ full-featured E-commerce platforms, 10+ multi-dynamic web applications, and 20+ responsive corporate/static websites</strong> with tailored UI/UX architectures, smooth page transitions, and cross-browser resilience.</li>
+          <li>Architected reusable, modular UI component libraries using <strong>React.js, Tailwind CSS, and Next.js</strong>, boosting developer productivity and standardizing typography, color palettes, and interactive states.</li>
+          <li>Engineered end-to-end e-commerce workflows: dynamic multi-variant catalogs, product customization engines, interactive shopping bags, coupon validation, and <strong>live Razorpay/UPI payment gateway integrations</strong>.</li>
+          <li>Spearheaded mobile-first UX optimization, touch gesture interactions, dynamic media rendering (Cloudinary), and lazy-loading techniques, achieving sub-second UI transitions and 95+ Google Lighthouse scores.</li>
+          <li>Collaborated directly with stakeholders to conduct user journey mapping, design reviews, and rapid prototyping, translating business requirements into engaging digital experiences.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- FEATURED PROJECTS -->
+    <section>
+      <div class="section-title">Featured Projects</div>
+
+      <!-- PROJECT 1: Infinity Frames N -->
+      <div class="item-block">
+        <div class="item-header">
+          <div>
+            <span class="item-title">Infinity Frames N — Custom 3D E-Commerce Platform</span>
+            <a class="item-link" href="https://www.infinityframesn.com" target="_blank" rel="noreferrer">Live: infinityframesn.com</a>
+          </div>
+          <span class="item-date">React.js, Vite, Tailwind CSS, Supabase, Cloudinary, Razorpay</span>
+        </div>
+        <ul class="bullets">
+          <li>Architected a full-stack personalized gifting storefront featuring real-time photo uploads, interactive 3D product previews, dynamic wishlist, and customizable lithophane lamps.</li>
+          <li>Integrated production <strong>Razorpay Live payment gateway</strong> with automated signature verification, dynamic discount coupon engine, and real-time order lifecycle tracking.</li>
+        </ul>
+      </div>
+
+      <!-- PROJECT 2: RONAV Technologies -->
+      <div class="item-block">
+        <div class="item-header">
+          <div>
+            <span class="item-title">RONAV Technologies — Enterprise FinTech Management Platform</span>
+          </div>
+          <span class="item-date">React.js, Vite, Supabase, Tailwind CSS, Node.js API</span>
+        </div>
+        <ul class="bullets">
+          <li>Architected an enterprise-grade financial management portal supporting dual Merchant and Administrator workspaces with instant dual swipe machine switching (Pine Labs &amp; Payswiff).</li>
+          <li>Implemented real-time merchant virtual wallet tracking, automated transaction ledgers, BBPS utility bill payments, and personal/business loan application workflows with live database synchronization.</li>
+        </ul>
+      </div>
+
+      <!-- PROJECT 3: Vrinda Real Estate -->
+      <div class="item-block">
+        <div class="item-header">
+          <div>
+            <span class="item-title">Vrinda Real Estate — Luxury Property &amp; Commercial Portal</span>
+            <a class="item-link" href="https://vrinda-realestate.vercel.app/" target="_blank" rel="noreferrer">Live Demo</a>
+          </div>
+          <span class="item-date">React.js, Tailwind CSS, Lucide Icons, Responsive UI</span>
+        </div>
+        <ul class="bullets">
+          <li>Designed a modern, conversion-focused real estate portal with multi-attribute filtering (budget, location, property type), high-resolution interactive galleries, and instant lead-capture forms.</li>
+        </ul>
+      </div>
+
+      <!-- PROJECT 4: Sri Vaikunta -->
+      <div class="item-block">
+        <div class="item-header">
+          <div>
+            <span class="item-title">Sri Vaikunta — Traditional Sarees E-Commerce Platform</span>
+            <span class="item-link">Live Demo</span>
+          </div>
+          <span class="item-date">React.js, JavaScript (ES6+), CSS3, REST APIs</span>
+        </div>
+        <ul class="bullets">
+          <li>Developed a high-performance ethnic wear e-commerce store with rich product categorization, high-resolution zoom galleries, and an intuitive, mobile-optimized shopping cart experience.</li>
+        </ul>
+      </div>
+
+      <!-- PROJECT 5: Sri Avighna Collections -->
+      <div class="item-block">
+        <div class="item-header">
+          <div>
+            <span class="item-title">Sri Avighna Collections — Jewellery E-Commerce Store</span>
+            <span class="item-link">Live Demo</span>
+          </div>
+          <span class="item-date">React.js, Tailwind CSS, JavaScript</span>
+        </div>
+        <ul class="bullets">
+          <li>Built an e-commerce platform for 1 Gram Gold Jewellery with real-time price calculation, product filtering, customer wishlists, dynamic cart summary, and custom checkout validation.</li>
+        </ul>
+      </div>
+
+      <!-- PROJECT 6: Eternal Nutrient -->
+      <div class="item-block">
+        <div class="item-header">
+          <div>
+            <span class="item-title">Eternal Nutrient — Health &amp; Wellness E-Commerce Store</span>
+            <a class="item-link" href="https://eternal-nutrient.vercel.app/" target="_blank" rel="noreferrer">Live Demo</a>
+          </div>
+          <span class="item-date">React.js, Tailwind CSS, REST APIs</span>
+        </div>
+        <ul class="bullets">
+          <li>Crafted an aesthetic, nutrition-focused e-commerce storefront with supplement ingredient breakdowns, smart search filtering, and an animated quick-buy cart drawer.</li>
+        </ul>
+      </div>
+
+      <!-- PROJECT 7: Madhuri Fresh In -->
+      <div class="item-block">
+        <div class="item-header">
+          <div>
+            <span class="item-title">Madhuri Fresh In — Quick-Commerce Fresh Produce Platform</span>
+            <a class="item-link" href="https://madhuri-in.vercel.app" target="_blank" rel="noreferrer">Live Demo</a>
+          </div>
+          <span class="item-date">React.js, Tailwind CSS, Mobile-First UX</span>
+        </div>
+        <ul class="bullets">
+          <li>Engineered a lightning-fast grocery delivery interface tailored for mobile users with instant category navigation, real-time quantity steppers, and rapid checkout.</li>
+        </ul>
+      </div>
+
+      <!-- PROJECT 8: EduMe -->
+      <div class="item-block">
+        <div class="item-header">
+          <div>
+            <span class="item-title">EduMe — Institutional School &amp; Learning Portal</span>
+            <a class="item-link" href="https://surender-five.vercel.app/" target="_blank" rel="noreferrer">Live Demo</a>
+          </div>
+          <span class="item-date">React.js, Tailwind CSS, Modern UI Architecture</span>
+        </div>
+        <ul class="bullets">
+          <li>Developed a responsive educational web portal featuring interactive curriculum catalogs, faculty directories, virtual tour sections, and student inquiry submission modules.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- TECHNICAL & UI/UX SKILLS -->
+    <section>
+      <div class="section-title">Technical &amp; UI/UX Skills</div>
+      <div class="skills-grid">
+        <div class="skill-category">UI/UX &amp; Design:</div>
+        <div class="skill-list">Figma, Wireframing, Rapid Prototyping, Design Systems, Mobile-First UI, Micro-Animations, User Journey Mapping, Accessibility (a11y)</div>
+
+        <div class="skill-category">Frontend &amp; Core:</div>
+        <div class="skill-list">React.js, Next.js, JavaScript (ES6+), HTML5, CSS3, Tailwind CSS, Bootstrap, Responsive Web Design, Component Architecture</div>
+
+        <div class="skill-category">Backend &amp; Tools:</div>
+        <div class="skill-list">Supabase, REST APIs, Cloudinary, Razorpay Payment Gateway, Git, GitHub, VS Code, Vercel, Vite, NPM</div>
+
+        <div class="skill-category">Core Strengths:</div>
+        <div class="skill-list">Design-to-Code Implementation, High-Conversion Checkout Flows, Performance Optimization, Cross-Browser Compatibility, State Management</div>
+      </div>
+    </section>
+
+    <!-- EDUCATION -->
+    <section>
+      <div class="section-title">Education</div>
+      <div class="education-item">
+        <div>
+          <span class="degree">Bachelor of Technology (B.Tech)</span>
+          <span class="school"> — Matrusri Engineering College</span>
+        </div>
+        <span class="year">2020 – 2024</span>
+      </div>
+      <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;">
+        <strong style="color: var(--primary-dark);">Branch:</strong> Electronics &amp; Communication Engineering (ECE)
+      </div>
+    </section>
+  </div>
+
+</body>
+</html>

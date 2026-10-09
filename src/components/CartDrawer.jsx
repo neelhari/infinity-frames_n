@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Tag, Plus, Minus, Sparkles } from 'lucide-react';
+import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Tag, Plus, Minus, Sparkles, Camera } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useStoreData } from '../context/StoreDataContext';
@@ -127,16 +127,16 @@ export default function CartDrawer() {
                   key={item.itemKey || item.id}
                   className="flex gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-200 relative group"
                 >
-                  <div className="w-20 h-20 bg-gray-100 rounded-xl overflow-hidden shrink-0 relative">
+                  <div className="w-20 h-20 bg-gray-100 rounded-xl overflow-hidden shrink-0 relative border border-gray-200">
                     <img
-                      src={item.image || 'https://images.unsplash.com/photo-1532767153582-b1a0e5145009?w=300'}
+                      src={item.customPhoto || item.image || 'https://images.unsplash.com/photo-1532767153582-b1a0e5145009?w=300'}
                       alt={item.name}
                       className="w-full h-full object-cover"
                     />
                     {item.customPhoto && (
-                      <div className="absolute bottom-0 right-0 w-6 h-6 rounded-tl bg-black/70 overflow-hidden border-t border-l border-white/40" title="Custom Photo Uploaded">
-                        <img src={item.customPhoto} alt="Upload" className="w-full h-full object-cover" />
-                      </div>
+                      <span className="absolute top-1 left-1 bg-black/75 text-amber-300 text-[8px] font-bold px-1.5 py-0.5 rounded shadow-xs">
+                        Custom Photo
+                      </span>
                     )}
                   </div>
 
@@ -160,12 +160,20 @@ export default function CartDrawer() {
                         {item.selectedColor && <span>• Style: {item.selectedColor}</span>}
                       </div>
 
-                      {(item.customName || item.customText) && (
-                        <div className="inline-flex items-center gap-1 text-[10px] text-[#B38029] bg-[#FAF5EB] px-2 py-0.5 rounded-md mt-1 border border-[#D4AF37]/30">
-                          <Sparkles className="w-2.5 h-2.5" />
-                          <span className="truncate max-w-[160px]">"{item.customName || item.customText}"</span>
-                        </div>
-                      )}
+                      <div className="flex flex-wrap items-center gap-1 mt-1">
+                        {(item.customName || item.customText) && (
+                          <div className="inline-flex items-center gap-1 text-[10px] text-[#B38029] bg-[#FAF5EB] px-2 py-0.5 rounded-md border border-[#D4AF37]/30">
+                            <Sparkles className="w-2.5 h-2.5" />
+                            <span className="truncate max-w-[140px]">"{item.customName || item.customText}"</span>
+                          </div>
+                        )}
+                        {item.customPhoto && (
+                          <div className="inline-flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                            <Camera className="w-2.5 h-2.5" />
+                            <span>Photo Attached</span>
+                          </div>
+                        )}
+                      </div>
 
                       <div className="text-xs font-bold text-gray-900 mt-1">
                         ₹{(item.price || 0).toLocaleString('en-IN')}

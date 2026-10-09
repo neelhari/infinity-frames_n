@@ -17,7 +17,7 @@ export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { products, loading } = useStoreData();
-  const { addToCart } = useCart();
+  const { addToCart, openCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
 
@@ -119,11 +119,20 @@ export default function ProductDetailPage() {
 
     // Upload to Cloudinary in background for permanent order fulfillment link
     setUploadingPhoto(true);
-    const res = await uploadToCloudinary(file);
-    if (res.success) {
-      setCustomPhotoUrl(res.url);
+    try {
+      const res = await uploadToCloudinary(file);
+      if (res && res.success && res.url) {
+        setCustomPhotoUrl(res.url);
+      }
+    } catch (err) {
+      console.warn('Cloudinary upload error:', err);
+    } finally {
+      setUploadingPhoto(false);
     }
-    setUploadingPhoto(false);
+  };
+
+  const handleCustomNameChange = (e) => {
+    setCustomName(e.target.value);
   };
 
   const removeCustomPhoto = () => {
@@ -141,16 +150,15 @@ export default function ProductDetailPage() {
   });
 
   const handleAddToCart = () => {
-    if (uploadingPhoto) return;
     addToCart(getCustomizedItem(), quantity, selectedColor, selectedSize);
     setAddedToast(true);
+    if (typeof openCart === 'function') openCart();
     setTimeout(() => {
       setAddedToast(false);
     }, 2000);
   };
 
   const handleBuyNow = () => {
-    if (uploadingPhoto) return;
     addToCart(getCustomizedItem(), quantity, selectedColor, selectedSize);
     if (!isAuthenticated) {
       navigate('/login?redirect=/checkout');
@@ -171,7 +179,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-28 md:pb-16 font-sans">
-      <div className="max-w-xl md:max-w-6xl xl:max-w-7xl mx-auto md:px-6 lg:px-8 md:py-6">
+      <div className="max-w-xl md:max-w-5xl lg:max-w-6xl mx-auto md:px-6 lg:px-8 md:py-6">
         {/* Desktop Breadcrumbs Navigation */}
         <div className="hidden md:flex items-center gap-2 text-xs text-gray-500 mb-6 font-medium">
           <button onClick={() => navigate('/')} className="hover:text-[#B38029] cursor-pointer">Home</button>
@@ -190,15 +198,15 @@ export default function ProductDetailPage() {
         </div>
 
         {/* 2-Column Responsive Layout: Mobile (1-Col) | Desktop (2-Col) */}
-        <div className="md:grid md:grid-cols-12 md:gap-8 lg:gap-12 items-start">
-          {/* LEFT COLUMN: Main Gallery & Highlights (col-span-12 md:col-span-7) */}
-          <div className="md:col-span-7 md:sticky md:top-24 space-y-4">
-            {/* 1. Main Photo Gallery with Touch Swipe & Zoom Button */}
+        <div className="md:grid md:grid-cols-12 md:gap-8 lg:gap-10 items-start">
+          {/* LEFT COLUMN: Main Gallery & Highlights (col-span-12 md:col-span-5) */}
+          <div className="md:col-span-5 md:sticky md:top-24 space-y-3">
+            {/* 1. Main Photo Gallery */}
             <div
               onTouchStart={handleGalleryTouchStart}
               onTouchMove={handleGalleryTouchMove}
               onTouchEnd={handleGalleryTouchEnd}
-              className="relative w-full aspect-square bg-gray-100 overflow-hidden shadow-xs md:rounded-3xl md:border md:border-gray-200 select-none group"
+              className="relative w-full max-w-[420px] mx-auto aspect-square bg-gray-50 overflow-hidden shadow-xs rounded-2xl md:rounded-3xl border border-gray-200 select-none group"
             >
               <img
                 src={currentImageSrc}
@@ -269,12 +277,12 @@ export default function ProductDetailPage() {
 
             {/* Thumbnail Strip */}
             {product.images && product.images.length > 1 && (
-              <div className="flex items-center gap-2.5 px-4 md:px-0 py-2.5 overflow-x-auto hide-scroll bg-white md:bg-transparent border-b md:border-b-0 border-gray-100">
+              <div className="flex items-center gap-2.5 max-w-[420px] mx-auto px-4 md:px-0 py-2.5 overflow-x-auto hide-scroll bg-white md:bg-transparent border-b md:border-b-0 border-gray-100">
                 {product.images.map((img, i) => (
                   <button
                     key={i}
                     onClick={() => setSelectedImage(i)}
-                    className={`w-16 h-16 rounded-2xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer shadow-xs ${
+                    className={`w-14 h-14 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer shadow-xs ${
                       selectedImage === i ? 'border-[#B38029] ring-2 ring-[#B38029]/20' : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -285,27 +293,27 @@ export default function ProductDetailPage() {
             )}
 
             {/* Desktop Craftsmanship Badges */}
-            <div className="hidden md:grid grid-cols-3 gap-3 pt-2 text-center text-xs">
-              <div className="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-2xs space-y-1">
+            <div className="hidden md:grid grid-cols-3 gap-2.5 max-w-[420px] mx-auto pt-2 text-center text-xs">
+              <div className="bg-white p-3 rounded-2xl border border-gray-100 shadow-2xs space-y-1">
                 <Sparkles className="w-4 h-4 text-[#D4AF37] mx-auto" />
                 <p className="font-bold text-gray-900 text-[11px]">0.12mm Precision</p>
-                <p className="text-[10px] text-gray-400">Micro-relief 3D slicing</p>
+                <p className="text-[10px] text-gray-400">3D laser relief</p>
               </div>
-              <div className="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-2xs space-y-1">
+              <div className="bg-white p-3 rounded-2xl border border-gray-100 shadow-2xs space-y-1">
                 <ShieldCheck className="w-4 h-4 text-[#D4AF37] mx-auto" />
-                <p className="font-bold text-gray-900 text-[11px]">Drakshramam Studio</p>
-                <p className="text-[10px] text-gray-400">Crafted by Naresh</p>
+                <p className="font-bold text-gray-900 text-[11px]">Drakshramam</p>
+                <p className="text-[10px] text-gray-400">By Naresh</p>
               </div>
-              <div className="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-2xs space-y-1">
+              <div className="bg-white p-3 rounded-2xl border border-gray-100 shadow-2xs space-y-1">
                 <Truck className="w-4 h-4 text-emerald-600 mx-auto" />
-                <p className="font-bold text-gray-900 text-[11px]">Express Delivery</p>
-                <p className="text-[10px] text-gray-400">100% transit safe</p>
+                <p className="font-bold text-gray-900 text-[11px]">Express Ship</p>
+                <p className="text-[10px] text-gray-400">Transit safe</p>
               </div>
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Details, Personalization & Desktop Actions (col-span-12 md:col-span-5) */}
-          <div className="md:col-span-5 space-y-4 md:space-y-5 md:bg-white md:p-6 md:rounded-3xl md:border md:border-gray-100 md:shadow-xs">
+          {/* RIGHT COLUMN: Details, Personalization & Desktop Actions (col-span-12 md:col-span-7) */}
+          <div className="md:col-span-7 space-y-4 md:space-y-5 md:bg-white md:p-6 md:rounded-3xl md:border md:border-gray-100 md:shadow-xs">
             {/* 2. Product Info */}
             <div className="p-4 sm:p-5 md:p-0 space-y-4 bg-white md:bg-transparent border-b md:border-b-0 border-gray-100">
               <div>
@@ -423,10 +431,15 @@ export default function ProductDetailPage() {
                 <input
                   type="text"
                   value={customName}
-                  onChange={(e) => setCustomName(e.target.value)}
+                  onChange={handleCustomNameChange}
                   placeholder="e.g. Rahul & Priya / Happy Anniversary"
-                  className="w-full p-2.5 rounded-xl border border-gray-300 focus:border-[#B38029] focus:ring-1 focus:ring-[#B38029] bg-white text-xs text-gray-900 outline-none"
+                  className="w-full p-2.5 rounded-xl border border-gray-300 focus:border-[#B38029] focus:ring-1 focus:ring-[#B38029] bg-white text-xs text-gray-900 outline-none font-medium"
                 />
+                {customName.trim() && (
+                  <p className="text-[10.5px] text-emerald-600 font-semibold flex items-center gap-1 mt-1">
+                    <Check className="w-3 h-3" /> Custom text saved for order
+                  </p>
+                )}
               </div>
             )}
 

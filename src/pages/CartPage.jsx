@@ -144,10 +144,15 @@ export default function CartPage() {
                     {/* Item Image */}
                     <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shrink-0">
                       <img
-                        src={item.image || item.customPhoto || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=200&q=80'}
+                        src={item.customPhoto || item.image || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=200&q=80'}
                         alt={item.name}
                         className="w-full h-full object-cover"
                       />
+                      {item.customPhoto && (
+                        <span className="absolute top-1 left-1 bg-black/75 text-amber-300 text-[8px] font-bold px-1.5 py-0.5 rounded shadow-xs">
+                          Custom Photo
+                        </span>
+                      )}
                     </div>
 
                     {/* Item Details */}

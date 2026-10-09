@@ -249,6 +249,10 @@ export function mapProductFromDb(row) {
     reviewsCount: row.reviews_count ?? 0,
     isNew: !!row.is_new,
     isFeatured: !!row.is_featured,
+    weight: row.weight !== null && row.weight !== undefined ? Number(row.weight) : 500,
+    length: row.length !== null && row.length !== undefined ? Number(row.length) : 30,
+    width: row.width !== null && row.width !== undefined ? Number(row.width) : 20,
+    height: row.height !== null && row.height !== undefined ? Number(row.height) : 5,
     createdDate: row.created_at ? row.created_at.split('T')[0] : undefined,
   };
 }
@@ -280,6 +284,10 @@ function mapProductToDb(p) {
   if (p.reviewsCount !== undefined) row.reviews_count = p.reviewsCount;
   if (p.isNew !== undefined) row.is_new = p.isNew;
   if (p.isFeatured !== undefined) row.is_featured = p.isFeatured;
+  if (p.weight !== undefined) row.weight = Number(p.weight) || 500;
+  if (p.length !== undefined) row.length = Number(p.length) || 30;
+  if (p.width !== undefined) row.width = Number(p.width) || 20;
+  if (p.height !== undefined) row.height = Number(p.height) || 5;
   return row;
 }
 
@@ -368,6 +376,11 @@ export function mapOrderFromDb(row) {
     extractedPaymentId = paymentMethodStr.split('(ID: ')[1]?.replace(')', '') || null;
   }
 
+  let trackingId = row.tracking_id || null;
+  if (!trackingId && paymentMethodStr.includes('[EKART:')) {
+    trackingId = paymentMethodStr.split('[EKART:')[1]?.split(']')[0] || null;
+  }
+
   return {
     id: row.id,
     customerName: row.customer_name,
@@ -389,6 +402,9 @@ export function mapOrderFromDb(row) {
     couponCode: row.coupon_code || null,
     date: row.created_at ? row.created_at.split('T')[0] : '',
     createdAt: row.created_at,
+    trackingId: trackingId,
+    courier: row.courier || (trackingId ? 'Ekart Logistics' : null),
+    shippingLabel: row.shipping_label || null,
   };
 }
 
@@ -483,7 +499,16 @@ export async function insertProduct(product) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
   await ensureAdminAuthSession();
   const row = mapProductToDb(product);
-  const { data, error } = await supabase.from('products').insert([row]).select();
+  let { data, error } = await supabase.from('products').insert([row]).select();
+
+  // Graceful fallback if dimension columns do not exist yet in Supabase table
+  if (error && (error.message?.includes('column') || error.code === '42703')) {
+    const { weight, length, width, height, ...safeRow } = row;
+    const fallback = await supabase.from('products').insert([safeRow]).select();
+    data = fallback.data;
+    error = fallback.error;
+  }
+
   if (error) return { success: false, message: error.message };
   if (!data || data.length === 0) {
     return { success: false, message: 'Permission denied: Please sign in again to add products.' };
@@ -495,7 +520,16 @@ export async function updateProductInDb(id, updates) {
   if (!supabase) return { success: false, message: 'Supabase not configured' };
   await ensureAdminAuthSession();
   const row = mapProductToDb(updates);
-  const { data, error } = await supabase.from('products').update(row).eq('id', id).select();
+  let { data, error } = await supabase.from('products').update(row).eq('id', id).select();
+
+  // Graceful fallback if dimension columns do not exist yet in Supabase table
+  if (error && (error.message?.includes('column') || error.code === '42703')) {
+    const { weight, length, width, height, ...safeRow } = row;
+    const fallback = await supabase.from('products').update(safeRow).eq('id', id).select();
+    data = fallback.data;
+    error = fallback.error;
+  }
+
   if (error) return { success: false, message: error.message };
   if (!data || data.length === 0) {
     const upsertRow = { id, ...row };
@@ -728,6 +762,40 @@ export async function updateOrderStatusInDb(id, status) {
   if (error) return { success: false, message: error.message };
   if (!data || data.length === 0) return { success: false, message: 'Could not update order status.' };
   return { success: true, data: mapOrderFromDb(data[0]) };
+}
+
+export async function updateOrderShipmentInDb(id, { trackingId, courier = 'Ekart Logistics', shippingLabel, status = 'Shipped' }) {
+  if (!supabase) return { success: false, message: 'Supabase not configured' };
+  await ensureAdminAuthSession();
+
+  // Try updating with dedicated tracking columns first
+  const updatePayload = {
+    status,
+    tracking_id: trackingId,
+    courier: courier,
+  };
+  if (shippingLabel) updatePayload.shipping_label = shippingLabel;
+
+  const { data, error } = await supabase.from('orders').update(updatePayload).eq('id', id).select();
+
+  // Graceful fallback if tracking_id column doesn't exist yet in Supabase
+  if (error && (error.message?.includes('column') || error.message?.includes('tracking_id') || error.code === '42703')) {
+    const { data: currentOrder } = await supabase.from('orders').select('payment_method').eq('id', id).single();
+    let updatedMethod = currentOrder?.payment_method || '';
+    if (!updatedMethod.includes('[EKART:')) {
+      updatedMethod = `${updatedMethod} [EKART:${trackingId}]`;
+    }
+    const fallbackRes = await supabase.from('orders').update({
+      status,
+      payment_method: updatedMethod,
+    }).eq('id', id).select();
+
+    if (fallbackRes.error) return { success: false, message: fallbackRes.error.message };
+    return { success: true, data: fallbackRes.data && fallbackRes.data[0] ? mapOrderFromDb(fallbackRes.data[0]) : null };
+  }
+
+  if (error) return { success: false, message: error.message };
+  return { success: true, data: data && data[0] ? mapOrderFromDb(data[0]) : null };
 }
 
 // ============================================================================

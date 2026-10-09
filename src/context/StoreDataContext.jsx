@@ -4,7 +4,7 @@ import {
   fetchCategories, insertCategory, updateCategoryInDb, deleteCategoryFromDb,
   fetchBanners, insertBanner, updateBannerInDb, deleteBannerFromDb,
   fetchCoupons, insertCoupon, updateCouponInDb, deleteCouponFromDb,
-  fetchOrders, saveOrderToSupabase, updateOrderStatusInDb,
+  fetchOrders, saveOrderToSupabase, updateOrderStatusInDb, updateOrderShipmentInDb,
   fetchContactMessages, updateMessageStatusInDb,
   fetchSettings, updateSettingsInDb,
   supabase,
@@ -225,6 +225,12 @@ export function StoreDataProvider({ children }) {
     return res;
   };
 
+  const updateOrderShipment = async (id, shipmentData) => {
+    const res = await updateOrderShipmentInDb(id, shipmentData);
+    if (res.success) setOrders((prev) => prev.map((o) => (o.id === id ? res.data : o)));
+    return res;
+  };
+
   // ---------------- Contact messages ----------------
   const updateMessageStatus = async (id, status) => {
     const res = await updateMessageStatusInDb(id, status);
@@ -300,6 +306,7 @@ export function StoreDataProvider({ children }) {
         addOrder,
         saveOrder: addOrder,
         updateOrderStatus,
+        updateOrderShipment,
         updateMessageStatus,
         addBanner,
         updateBanner,

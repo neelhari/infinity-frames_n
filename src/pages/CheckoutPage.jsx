@@ -209,9 +209,13 @@ export default function CheckoutPage() {
         .map(
           (it, idx) =>
             `${idx + 1}. *${it.name}* (Qty: ${it.quantity}) - ₹${it.price * it.quantity}` +
-            (it.customName ? `\n   Custom Text: "${it.customName}"` : '') +
-            (it.selectedSize ? `\n   Size: ${it.selectedSize}` : '') +
-            (it.customPhoto ? `\n   Photo: [Uploaded]` : '')
+            (it.customName ? `\n   ✍️ Custom Text: "${it.customName}"` : '') +
+            (it.selectedSize ? `\n   📏 Size: ${it.selectedSize}` : '') +
+            (it.customPhoto
+              ? it.customPhoto.startsWith('http')
+                ? `\n   📷 Custom Photo: ${it.customPhoto}`
+                : `\n   📷 Custom Photo: [Uploaded on Store]`
+              : '')
         )
         .join('\n\n');
 
@@ -356,7 +360,7 @@ export default function CheckoutPage() {
                   <div key={`${item.id}-${index}`} className="pt-3 first:pt-0 flex gap-4 items-start">
                     <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 shrink-0">
                       <img
-                        src={item.image || item.customPhoto || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=200&q=80'}
+                        src={item.customPhoto || item.image || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=200&q=80'}
                         alt={item.name}
                         className="w-full h-full object-cover"
                       />
@@ -668,20 +672,6 @@ export default function CheckoutPage() {
                       <Check className="w-3 h-3" /> {couponSuccess}
                     </p>
                   )}
-
-                  <div className="pt-1 flex flex-wrap items-center gap-2">
-                    <span className="text-[11px] text-gray-400 font-medium">Offers:</span>
-                    {['INFINITY10', 'FIRST10'].map((suggested) => (
-                      <button
-                        key={suggested}
-                        type="button"
-                        onClick={() => handleApplyCoupon(suggested)}
-                        className="text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-[#B38029] border border-[#D4AF37]/40 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
-                      >
-                        {suggested} (10% OFF)
-                      </button>
-                    ))}
-                  </div>
                 </div>
               )}
             </div>
@@ -692,7 +682,34 @@ export default function CheckoutPage() {
                 Price Details ({cartItems.length} {cartItems.length === 1 ? 'Item' : 'Items'})
               </h2>
 
-              <div className="flex items-center justify-between text-gray-600">
+              {/* Itemized Products List */}
+              {cartItems.length > 0 && (
+                <div className="space-y-2 pb-3 border-b border-gray-100">
+                  {cartItems.map((item, index) => {
+                    const itemTotal = (Number(item.price) || 0) * (Number(item.quantity) || 1);
+                    return (
+                      <div
+                        key={item.itemKey || item.id || index}
+                        className="flex items-start justify-between gap-3 text-gray-700"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-gray-900 leading-snug line-clamp-2">
+                            {item.name}
+                          </p>
+                          <p className="text-[11px] text-gray-400 mt-0.5">
+                            Qty: {item.quantity || 1} × ₹{(Number(item.price) || 0).toLocaleString('en-IN')}
+                          </p>
+                        </div>
+                        <span className="font-bold text-gray-900 shrink-0 text-xs">
+                          ₹{itemTotal.toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="flex items-center justify-between text-gray-600 pt-1">
                 <span>Total MRP / Item Subtotal</span>
                 <span className="font-bold text-gray-900">₹{subtotal.toLocaleString('en-IN')}</span>
               </div>

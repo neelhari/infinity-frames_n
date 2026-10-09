@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, Plus, Trash2, Check, Loader2, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { X, Upload, Plus, Trash2, Check, Loader2, Image as ImageIcon, Sparkles, Truck } from 'lucide-react';
 import { uploadToCloudinary } from '../../lib/cloudinary';
 
 export default function ProductModal({ isOpen, onClose, onSave, initialProduct, categories = [], saving = false }) {
@@ -16,6 +16,10 @@ export default function ProductModal({ isOpen, onClose, onSave, initialProduct, 
     customType: 'photo-text',
     isFeatured: false,
     isNew: true,
+    weight: 500,
+    length: 30,
+    width: 20,
+    height: 5,
   });
 
   const [imageUrlInput, setImageUrlInput] = useState('');
@@ -39,6 +43,10 @@ export default function ProductModal({ isOpen, onClose, onSave, initialProduct, 
         customType: initialProduct.customType || 'photo-text',
         isFeatured: !!initialProduct.isFeatured,
         isNew: initialProduct.isNew !== false,
+        weight: initialProduct.weight ?? 500,
+        length: initialProduct.length ?? 30,
+        width: initialProduct.width ?? 20,
+        height: initialProduct.height ?? 5,
       });
     } else {
       const defaultCat = categories[0]?.id || 'photo-frames';
@@ -55,6 +63,10 @@ export default function ProductModal({ isOpen, onClose, onSave, initialProduct, 
         customType: 'photo-text',
         isFeatured: false,
         isNew: true,
+        weight: 500,
+        length: 30,
+        width: 20,
+        height: 5,
       });
     }
     setImageUrlInput('');
@@ -253,6 +265,87 @@ export default function ProductModal({ isOpen, onClose, onSave, initialProduct, 
                 className="w-full p-2.5 rounded-xl border border-gray-300 focus:border-[#B38029] bg-white text-xs text-gray-700 outline-none"
               />
             </div>
+          </div>
+
+          {/* 2B. Shipping Package Dimensions & Weight (Ekart Logistics) */}
+          <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Truck className="w-4 h-4 text-blue-700" />
+                <span className="font-bold text-gray-900 text-xs">
+                  Parcel Proportions & Weight <span className="text-gray-400 font-normal">(Ekart Delivery)</span>
+                </span>
+              </div>
+              <span className="text-[10px] text-blue-700 font-bold bg-blue-100/70 px-2 py-0.5 rounded-full">
+                Volumetric: {((((Number(formData.length) || 30) * (Number(formData.width) || 20) * (Number(formData.height) || 5)) / 5000) * 1000).toFixed(0)}g
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div>
+                <label className="block text-[11px] font-bold text-gray-700 mb-1">
+                  Weight (grams)
+                </label>
+                <input
+                  type="number"
+                  min={50}
+                  step={50}
+                  value={formData.weight}
+                  onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                  placeholder="500"
+                  className="w-full p-2 rounded-xl border border-gray-300 focus:border-blue-600 bg-white text-xs font-mono font-bold text-gray-900 outline-none"
+                />
+                <span className="text-[9.5px] text-gray-400 mt-0.5 block">e.g. 500g</span>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-gray-700 mb-1">
+                  Length (cm)
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={formData.length}
+                  onChange={(e) => setFormData({ ...formData, length: e.target.value })}
+                  placeholder="30"
+                  className="w-full p-2 rounded-xl border border-gray-300 focus:border-blue-600 bg-white text-xs font-mono font-bold text-gray-900 outline-none"
+                />
+                <span className="text-[9.5px] text-gray-400 mt-0.5 block">Box Length</span>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-gray-700 mb-1">
+                  Width (cm)
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={formData.width}
+                  onChange={(e) => setFormData({ ...formData, width: e.target.value })}
+                  placeholder="20"
+                  className="w-full p-2 rounded-xl border border-gray-300 focus:border-blue-600 bg-white text-xs font-mono font-bold text-gray-900 outline-none"
+                />
+                <span className="text-[9.5px] text-gray-400 mt-0.5 block">Box Width</span>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-gray-700 mb-1">
+                  Height (cm)
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={formData.height}
+                  onChange={(e) => setFormData({ ...formData, height: e.target.value })}
+                  placeholder="5"
+                  className="w-full p-2 rounded-xl border border-gray-300 focus:border-blue-600 bg-white text-xs font-mono font-bold text-gray-900 outline-none"
+                />
+                <span className="text-[9.5px] text-gray-400 mt-0.5 block">Thickness</span>
+              </div>
+            </div>
+            <p className="text-[10px] text-gray-500">
+              Used automatically when booking Ekart shipments to calculate accurate shipping charges and prevent courier weight penalties.
+            </p>
           </div>
 
           {/* 3. Product Images Upload */}
