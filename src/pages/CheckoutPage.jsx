@@ -233,6 +233,11 @@ export default function CheckoutPage() {
         (finalPayload.paymentId ? `*Payment ID:* ${finalPayload.paymentId}\n\n` : '\n') +
         `Please confirm my custom order!`;
 
+      try {
+        sessionStorage.setItem('last_order', JSON.stringify(finalPayload));
+        localStorage.setItem('last_order', JSON.stringify(finalPayload));
+      } catch (e) {}
+
       clearCart();
       setPlacingOrder(false);
       navigate('/order-success', { state: { orderData: finalPayload } });
